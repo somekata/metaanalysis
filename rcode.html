@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meta-Analysis R Code and Results</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>R Code for Systematic Review Meta-Analysis</h1>
+
+    <h2>1. Setup and Data Loading</h2>
+    <pre><code>
+# Install necessary packages (only run the first time)
+# install.packages("meta")
+# install.packages("readr")
+# install.packages("dplyr") 
+
+# Load libraries
+library(meta)
+library(readr)
+library(dplyr)
+
+# Load the dataset.csv file into a data frame
+# NOTE: Ensure 'dataset.csv' is in your working directory, or specify the full path.
+data_raw &lt;- read_csv("dataset.csv")
+
+# Display the first few rows and structure of the data for inspection
+print(head(data_raw))
+print(str(data_raw))
+
+# --- ASSUMPTION: The data is for a BINARY OUTCOME (Event counts/Totals). ---
+# --- Column names are assumed for this example. Adjust 'select' as needed. ---
+
+# Prepare data for meta-analysis (Binary Outcome assumed: Risk Ratio)
+data_clean &lt;- data_raw %&gt;%
+  select(
+    study,
+    event_treatment, 
+    total_treatment, 
+    event_control, 
+    total_control
+  ) %&gt;%
+  # Filter out any rows with missing essential data
+  filter(!is.na(event_treatment) & !is.na(total_treatment)) 
+
+print(head(data_clean))
+
+</code></pre>
+
+    <h2>2. Meta-Analysis Model Execution</h2>
+    <pre><code>
+# Execute the meta-analysis model using the 'metabin' function (for binary data)
+# We calculate the Risk Ratio (sm="RR") using the Inverse Variance method.
+# A random-effects model is appropriate for clinical heterogeneity.
+
+meta_result &lt;- metabin(
+  event.e = event_treatment, # Events in the experimental (treatment) group
+  n.e = total_treatment,     # Total participants in the experimental group
+  event.c = event_control,   # Events in the control group
+  n.c = total_control,       # Total participants in the control group
+  studlab = study,           # Study label (name)
+  data = data_clean,
+  sm = "RR",                 # Summary Measure: Risk Ratio (use "OR" for Odds Ratio)
+  method = "Inverse",        # Method for pooling (Inverse Variance)
+  method.tau = "REML",       # Heterogeneity estimator (Restricted Maximum Likelihood)
+  hakn = TRUE,               # Knapp-Hartung adjustment for CIs
+  fixed = FALSE              # Do not calculate fixed-effect model (Focus on random)
+)
+
+# Display the meta-analysis summary results (I-squared, Tau-squared, Pooled Estimate)
+print(summary(meta_result))
+
+</code></pre>
+
+    <h2>3. Forest Plot Generation</h2>
+    <pre><code>
+# Generate the Forest Plot
+forest(
+  meta_result,
+  comb.random = TRUE,           # Display the random effects pooled estimate
+  comb.fixed = FALSE,           # Hide the fixed effects estimate
+  xlab = "Risk Ratio (RR)",     # X-axis label
+  logscale = TRUE,              # Use log-scale for ratio measures (RR, OR, HR)
+  leftcols = c("studlab", "event.e", "n.e", "event.c", "n.c"), # Columns on the left
+  rightcols = c("effect", "ci", "w.random"), # Columns on the right (Effect, CI, Weight)
+  smlab = "Treatment vs. Control", # Subtitle for the effect plot
+  prediction = TRUE,            # Show the prediction interval
+  col.square = "darkgreen",     # Color for individual study boxes
+  col.diamond.random = "navy"   # Color for the pooled diamond
+)
+
+</code></pre>
+
+    <h2>4. Funnel Plot Generation</h2>
+    <pre><code>
+# Generate the Funnel Plot (To visually assess potential publication bias)
+funnel(
+  meta_result,
+  xlab = "Risk Ratio (Log Scale)", # X-axis label
+  level = 0.95,                      # Confidence interval level (dashed lines)
+  contour = c(0.90, 0.95, 0.99),     # Display significance contours
+  col.contour = c("orange", "red", "darkred"), # Colors for the contours
+  pch = 19                           # Plotting point style (solid circle)
+)
+
+# Run Egger's test for a formal statistical assessment of small-study effects/bias
+metabias(meta_result, method.bias = "Egger")
+
+</code></pre>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+Outcome,Study,Event_Intervention,Total_Intervention,Event_Control,Total_Control
+Clinical_Response,study1,10,200,30,200
+Clinical_Response,study2,20,300,40,300
+Clinical_Response,study3,30,400,30,400
+Mortality,study1,20,200,40,200
+Mortality,study2,30,300,20,300

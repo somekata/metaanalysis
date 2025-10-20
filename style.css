@@ -1,0 +1,234 @@
+/*
+ * Styles for the Flowchart of Systematic Review and Meta-analysis
+ * File: styles.css
+ * Author: AI Assistant
+ */
+
+/* === 1. Global Reset and Base Styles === */
+:root {
+    --primary-color: #005A9C; /* A deep, professional blue */
+    --secondary-color: #FFC000; /* A contrasting gold/yellow for accents */
+    --text-color: #333;
+    --background-color: #f4f7f6; /* Light gray-blue background */
+    --card-background: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    padding: 20px;
+}
+
+/* === 2. Typography and Headings === */
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 40px;
+    font-size: 2.5em;
+    border-bottom: 3px solid var(--secondary-color);
+    display: inline-block;
+    padding-bottom: 10px;
+    width: 100%;
+}
+
+h2 {
+    color: var(--primary-color);
+    border-left: 5px solid var(--secondary-color);
+    padding-left: 15px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+/* === 3. Main Content Container === */
+#main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* === 4. Flowchart Steps (Ordered List) === */
+ol {
+    list-style: none; /* Remove default numbering */
+    counter-reset: step-counter; /* Initialize counter */
+    padding: 0;
+}
+
+ol > li {
+    counter-increment: step-counter; /* Increment counter */
+    background: var(--card-background);
+    padding: 20px;
+    margin-bottom: 25px;
+    border-left: 5px solid var(--primary-color);
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: var(--border-radius);
+}
+
+ol > li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom Step Number styling (The "cool" part) */
+ol > li::before {
+    content: counter(step-counter);
+    position: absolute;
+    top: 0;
+    left: -20px; /* Position the number outside the card */
+    width: 40px;
+    height: 40px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color); /* Dark text on bright background */
+    border-radius: 50%; /* Circle shape */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 10;
+    box-shadow: 0 0 0 4px var(--background-color); /* Creates a little ring effect */
+}
+
+ol > li p {
+    margin: 5px 0;
+    padding-left: 10px; /* Indent the description slightly */
+}
+
+/* Styling for the first paragraph which holds the step name */
+ol > li > p:first-child {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+/* Styling for the explanatory paragraphs */
+ol > li > p:not(:first-child) {
+    font-size: 0.9em;
+    color: #666;
+    border-left: 2px solid #ddd;
+    padding-left: 15px;
+    font-style: italic;
+}
+
+/* === 5. Utility Sections (Databases, Tools) === */
+div:not(#main) {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+    gap: 15px;
+}
+
+ul li {
+    flex: 1 1 calc(50% - 15px); /* Allows 2 items per row on wider screens */
+    min-width: 250px; /* Ensures minimum width for small screens */
+    padding: 10px 15px;
+    background-color: #e9eff2;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+ul li:hover {
+    background-color: #d8e4ea;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-weight: 500;
+}
+
+a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* === 6. Footer === */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    border-top: 1px solid #ddd;
+    font-size: 0.8em;
+    color: #777;
+}
+
+/* === 7. Responsiveness (Optional but Recommended) === */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    ol > li {
+        margin-left: 30px; /* Give more space for the absolute number */
+        border-left: none;
+    }
+    
+    ol > li::before {
+        left: -50px; /* Adjust position for smaller screens */
+    }
+
+    ul li {
+        flex: 1 1 100%; /* Stack items on small screens */
+    }
+}
+
+/* === 8. Code Block Styling for Readability === */
+
+/* Target the <pre> tag which holds the code block */
+pre {
+    /* Set a larger font size for the code block */
+    font-size: 1.1em; /* 110% of the body font size */
+    
+    /* Ensure a fixed-width, monospaced font is used for code */
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    
+    /* Add more padding inside the code block for better spacing */
+    padding: 20px;
+    
+    /* Ensure background is distinct for the code section */
+    background-color: #eee;
+    
+    /* Ensure the code fits the container width */
+    overflow-x: auto; 
+}
+
+/* Target the <code> tag inside <pre> if specific formatting is needed */
+pre code {
+    line-height: 1.5; /* Increase line spacing for better vertical readability */
+}

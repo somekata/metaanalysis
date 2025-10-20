@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meta-Analysis R Code Explanation: A Beginner's Guide</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Custom styles for the explanation page */
+      .code-block {
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        border-left: 5px solid #005a9c; /* Primary color border */
+        padding: 15px;
+        margin-bottom: 25px;
+        overflow-x: auto;
+        font-size: 1em; /* Ensure code is readable */
+      }
+      .explanation-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      .explanation-card h3 {
+        color: #ffc000; /* Secondary color for step titles */
+        border-bottom: 2px dashed #eee;
+        padding-bottom: 5px;
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Meta-Analysis R Code Explanation: A Beginner's Guide</h1>
+
+    <div id="main">
+      <h2>1. Choosing Your R Code Execution Environment</h2>
+      <p>
+        There are several ways to run analysis using the R language. Choose the
+        environment that best suits your experience and goals.
+      </p>
+
+      <div class="explanation-card">
+        <h3>🚀 1. EZR (Easy R)</h3>
+        <p>
+          This environment adds intuitive menu operations (mouse clicks) to R's
+          powerful statistical capabilities. It is ideal for R beginners and
+          those who want to start statistical analysis immediately because it
+          allows you to run analyses without writing code. The resulting R code
+          is also displayed, which helps as a stepping stone to code learning.
+        </p>
+      </div>
+
+      <div class="explanation-card">
+        <h3>💻 2. RStudio (Standard Learning & Development Environment)</h3>
+        <p>
+          This is the most common Integrated Development Environment (IDE) for
+          writing, managing, and executing R code. The code editor, console,
+          data viewer, and plots are integrated into a single screen, making it
+          suitable for those who want to seriously learn R and efficiently
+          manage their code.
+        </p>
+      </div>
+
+      <div class="explanation-card">
+        <h3>☁️ 3. Google Colaboratory (Colab) / R Environment</h3>
+        <p>
+          This is a cloud-based notebook environment that runs on Google Drive.
+          No installation on your PC is required; you can run it anywhere with
+          an internet connection. It facilitates easy collaboration and sharing
+          of results with co-researchers.
+        </p>
+      </div>
+
+      <p style="margin-top: 30px; font-weight: bold">
+        ➡️ The following explanation is based on executing the code in RStudio,
+        but the R code itself is consistent across all environments.
+      </p>
+
+      <hr />
+
+      <h2>2. Overview and Structure of the Meta-Analysis R Code</h2>
+      <p>
+        The meta-analysis code is largely divided into the following three
+        steps:
+      </p>
+      <ol>
+        <li>
+          Preparation and Data Processing: Load necessary software (packages)
+          and prepare the CSV data for analysis.
+        </li>
+        <li>
+          Model Execution: Apply the statistical method (meta-analysis) and
+          calculate the pooled results.
+        </li>
+        <li>
+          Result Visualization and Evaluation: Use Forest and Funnel Plots to
+          visualize the results and assess bias.
+        </li>
+      </ol>
+
+      <hr />
+
+      <h2>3. Step 1: Preparation and Data Loading</h2>
+      <div class="explanation-card">
+        <h3>📌 Loading Packages</h3>
+        <div class="code-block">
+          library(meta)<br />
+          library(readr)<br />
+          library(dplyr)
+        </div>
+        <p>
+          <strong>Explanation:</strong> R's functionality is extended by
+          additional software called packages. Here, we enable the use of three
+          packages: `meta` for performing the meta-analysis, `readr` for loading
+          data, and `dplyr` for efficiently processing data.
+        </p>
+      </div>
+
+      <div class="explanation-card">
+        <h3>📌 Creating and Cleaning the Data Frame</h3>
+        <div class="code-block">
+          data_raw &lt;- read_csv("dataset.csv")<br />
+          <br />
+          data_clean &lt;- data_raw %&gt;%<br />
+          &nbsp;&nbsp;select(<span style="color: #c9211d">study</span>,
+          <span style="color: #c9211d">event_treatment</span>, ...)<br />
+          &nbsp;&nbsp;%&gt;% filter(!is.na(<span style="color: #c9211d"
+            >event_treatment</span
+          >))
+        </div>
+        <p>
+          <strong>Explanation:</strong><br />
+          1. `data_raw &lt;- read_csv(...)`: This command reads the
+          `dataset.csv` file and saves (assigns: `&lt;-`) it as a data frame
+          (table-format data) named `data_raw`.<br />
+          2. Pipe Operator (`%&gt;%`): This passes (pipes) the result from the
+          left (the data frame) to the function on the right. This makes the
+          data processing flow visually clear.<br />
+          3. `select()` / `filter()`: We create `data_clean` by selecting only
+          the necessary columns (`select`) and excluding rows that contain
+          missing values or irrelevant data (`filter`).
+        </p>
+      </div>
+
+      <hr />
+
+      <h2>4. Step 2: Executing the Meta-Analysis Model</h2>
+      <div class="explanation-card">
+        <h3>📌 Running the Meta-Analysis (Pooling)</h3>
+        <div class="code-block">
+          meta_result &lt;- metabin(<br />
+          &nbsp;&nbsp;event.e = event_treatment, # Number of events in the
+          intervention group<br />
+          &nbsp;&nbsp;n.e = total_treatment, # Total participants in the
+          intervention group<br />
+          &nbsp;&nbsp;...,<br />
+          &nbsp;&nbsp;sm = "RR", # Effect measure: Risk Ratio<br />
+          &nbsp;&nbsp;method = "Inverse", # Pooling method: Inverse Variance<br />
+          &nbsp;&nbsp;hakn = TRUE # Knapp-Hartung adjustment<br />
+          )
+        </div>
+        <p>
+          <strong>Explanation:</strong><br />
+          1. `metabin()`: This is the dedicated meta-analysis function for
+          binary data (occurrence of an event).<br />
+          2. Events and Totals: Arguments like `event.e` and `n.e` specify the
+          number of events and sample size for each study in the intervention
+          and control groups.<br />
+          3. `sm = "RR"`: We select the Risk Ratio (RR) as the statistical
+          effect measure. A result greater than 1.0 indicates a higher risk in
+          the intervention group; less than 1.0 indicates a lower risk.<br />
+          4. `method = "Inverse"`: This uses the Inverse Variance Method, a
+          common technique that weights data based on the precision of each
+          study (sample size and event count).<br />
+          5. `hakn = TRUE`: This applies the Knapp-Hartung adjustment when
+          calculating the result's confidence interval (CI), which is a
+          refinement used to obtain a more reliable (conservative) estimate.
+        </p>
+      </div>
+
+      <hr />
+
+      <h2>5. Step 3: Result Visualization and Evaluation</h2>
+      <div class="explanation-card">
+        <h3>📌 Generating the Forest Plot</h3>
+        <div class="code-block">
+          forest(meta_result,<br />
+          &nbsp;&nbsp;comb.random = TRUE, # Display the random effects result<br />
+          &nbsp;&nbsp;logscale = TRUE, # Use logarithmic scale<br />
+          &nbsp;&nbsp;col.diamond.random = "navy" # Color of the pooled
+          diamond<br />
+          )
+        </div>
+        <p>
+          <strong>Explanation:</strong><br />
+          1. `forest()`: This is the most crucial plot, illustrating all
+          meta-analysis results. It shows the confidence interval for each
+          individual study and the final pooled result (the large diamond) in a
+          single view.<br />
+          2. `logscale = TRUE`: Ratio measures like the Risk Ratio are
+          standardly displayed on a logarithmic scale to ensure the distribution
+          of results is symmetrical.<br />
+          3. The Diamond: The "diamond" (colored by `col.diamond.random`)
+          represents the final effect size pooled from all studies (the
+          conclusion of the review).
+        </p>
+      </div>
+
+      <div class="explanation-card">
+        <h3>📌 Generating the Funnel Plot and Bias Test</h3>
+        <div class="code-block">
+          funnel(meta_result, ...)<br />
+          <br />
+          metabias(meta_result, method.bias = "Egger")
+        </div>
+        <p>
+          <strong>Explanation:</strong><br />
+          1. `funnel()`: This plot visually assesses the possibility of
+          publication bias (the tendency for small, positive studies to be
+          reported preferentially). Bias is typically judged to be low if the
+          studies form a symmetrical funnel shape around the central effect.<br />
+          2. `metabias()`: This performs a statistical test for bias, not just a
+          visual one. Egger's test is a commonly used method for this
+          assessment. The resulting p-value helps determine if the asymmetry
+          observed in the plot is likely due to chance.
+        </p>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        This explanation was created to help R beginners understand the process.
+      </p>
+    </footer>
+  </body>
+</html>
