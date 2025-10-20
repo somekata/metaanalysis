@@ -233,3 +233,46 @@ pre {
 pre code {
     line-height: 1.5; /* Increase line spacing for better vertical readability */
 }
+
+/* === 9. Table Styling for Search Queries === */
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* セルの境界線を結合 */
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden; /* 角丸を適用するために必要 */
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; /* セルの下線 */
+}
+
+th {
+    background-color: var(--primary-color); /* ヘッダーの背景色 */
+    color: white; /* ヘッダーの文字色 */
+    font-weight: bold;
+    text-transform: uppercase; /* 大文字にする */
+}
+
+/* 奇数行にわずかな背景色を適用して視認性を向上 */
+tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* ホバー時のスタイル */
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* 最初の列（#番号）を中央揃えに */
+td:first-child {
+    font-weight: bold;
+    width: 50px; /* 幅を固定 */
+    text-align: center;
+    background-color: #eee;
+}

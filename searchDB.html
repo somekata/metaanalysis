@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8" />
+  <title>Search Strategy Example</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <body>
+    <h1>Search Strategy Example</h1>
+    <div id="main">
+        <p>
+            Below is an example of search strategies used in databases like PubMed, Scopus, and Cochrane Library for a systematic review on treatments for carbapenem-resistant Pseudomonas aeruginosa infections.
+        </p>
+        <p style="font-style: italic; color: #cc0000;">
+            *Note: This is an example and not an exhaustive or perfect search strategy.
+        </p>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Search Query</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>"Pseudomonas aeruginosa"</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>"Carbapenem-resistant"</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>"Cefiderocol"</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>"Ceftazidime-Avibactum"</td>    
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>"Imipenem-Cilastatin-Relebactam"</td >
+            </tr> 
+            <tr>
+                <td>6</td>
+                <td>#1 AND #2</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>#4 OR #5</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>#6 AND #3 AND #7</td>
+            </tr>
+        </table>
+
+        <div>
+            <h2>PubMed (MEDLINE)</h2>
+            <p>
+                <ol>
+                    <li>Go to: https://pubmed.ncbi.nlm.nih.gov/</li>
+                    <li>Select "Advanced Search."</li>
+                    <li>Enter #1 into the Query box and click "Add to History."</li>
+                    <li>Repeat the process for search terms #2 through #8, adding them all to History.</li>
+                    <li>Combine the history numbers (e.g., #8 AND #9) using Boolean operators as needed.</li>
+                    <li>Click on the total number of results and review the displayed citations.</li>
+                    <li>
+                        Click the "Save" button.<br>
+                        Select "All results" and choose "PubMed" format.<br>
+                        Click "Create File".
+                    </li>
+                </ol>
+            </p>
+            <p style="border-left: 3px solid #ffc000; padding-left: 10px; margin-top: 20px;">
+                To increase the specificity of your search, consider limiting your keywords to the Title and Abstract fields.<br />
+                <br />
+                Example: <code>"Pseudomonas aeruginosa"[Title/Abstract]</code>
+                <br />
+                Alternatively, when using the Advanced Search Builder, you can select the desired field (e.g., Title/Abstract) before adding the term to the Query box and history.
+            </p>
+        </div>
+        
+        <div>
+            <h2>Scopus</h2>
+            <p>
+                <ol>
+                    <li>Go to: https://www.scopus.com/</li>
+                    <li>Select the "Advanced" search mode.</li>
+                    <li>Enter the combined search query (e.g., the full string for #8: `("Pseudomonas aeruginosa" AND "Carbapenem-resistant") AND "Cefiderocol" AND ("Ceftazidime-Avibactum" OR "Imipenem-Cilastatin-Relebactam")`) directly into the search box.</li>
+                    <li>Ensure the search fields include "Article title, Abstract, Keywords" for comprehensive results.</li>
+                    <li>Run the search and review the results.</li>
+                    <li>Refine results using side filters (e.g., "Article," "Clinical Trial").</li>
+                    <li>Select the desired citations and click "Export."</li>
+                    <li>Select "RIS format" for import into citation management software (e.g., EndNote, Zotero).
+                        <br>
+                        In the Export window, ensure the following fields are selected for a complete systematic review record:
+                        <br>
+                        - Citation Information (書誌情報)
+                        <br>
+                        - Bibliographical information (目録情報), ensuring PubMed ID is selected.
+                        <br>
+                        - Abstract & Keywords (抄録とキーワード)
+                        </li>
+                </ol>
+            </p>
+            <p style="border-left: 3px solid #ffc000; padding-left: 10px; margin-top: 20px;">
+                *Note: When constructing advanced queries in Scopus, you can use field codes and specific operators in the query box.
+                <br>
+                Example: To limit a search to the title and abstract fields, you can use <code>TITLE-ABS-KEY("Pseudomonas aeruginosa")</code>.
+            </p>
+        </div>
+        <div>
+            <h2>Cochrane Library</h2>
+            <p>
+                <ol>
+                    <li>Go to: https://www.cochranelibrary.com/</li>
+                    <li>Select "Advanced Search."</li>
+                    <li>Navigate to the "Search Manager."</li>
+                    <li>Enter search term #1 and click "Continue."</li>
+                    <li>Repeat the process for search terms #2 through #8, entering and combining them as necessary.</li>
+                    <li>Click on the search result count to display the citations.</li>
+                    <li>Select all or desired results and choose "Export selected citation(s)."</li>
+                    <li>Select "RIS (EndNote)" format, check the box to "include abstract," and click "Download."</li>
+                </ol>
+            </p>
+            <p style="border-left: 3px solid #ffc000; padding-left: 10px; margin-top: 20px;">
+                *Note: The Cochrane Library offers advanced options for focused searching:
+                <br>
+                You can refine your search by Title, Abstract, and Keywords (S), or by using MeSH terms (controlled vocabulary) to improve specificity.<br>
+                You can also use the Limits function to filter results based on various criteria, such as Content Type (e.g., "Cochrane Reviews," "Trials").
+            </p>
+        </div>
+
+      <p style="text-align: center; margin-top: 30px">
+        <button
+          onclick="history.back()"
+          style="
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #005a9c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+          "
+        >
+          ← Back to Flowchart
+        </button>
+      </p>
+
+    </div>
+        <footer>
+      <p>
+        This explanation was created to help R beginners understand the process.
+      </p>
+      <p>This lesson is written with assist from ChatGPT5 and GoogleGemini.</p>
+      <p style="font-size: 0.9em; color: #777; margin-top: 10px">
+        Disclaimer: This flowchart and the related R code are provided for
+        educational purposes only.
+      </p>
+    </footer>
+  </body>
+</html>
