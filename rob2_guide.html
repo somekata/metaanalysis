@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>RoB 2.0 Guide: Risk of Bias Tool</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* RoB 2.0固有のスタイル - ステップを見やすくする */
+      .rob2-domain {
+        background-color: #f7f7f7;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 5px solid var(--secondary-color); /* 黄色の線 */
+      }
+      .rob2-domain h3 {
+        margin-top: 0;
+        color: var(--secondary-color);
+        font-size: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Guide to RoB 2.0: Risk of Bias Tool for RCTs</h1>
+
+    <div id="main">
+      <p>
+        The RoB 2.0 tool assesses the risk of bias in randomized controlled
+        trials (RCTs) based on five specific domains. A judgment (Low, Some
+        Concerns, High) is made for each domain, leading to an overall judgment.
+      </p>
+
+      <p>
+        <strong>Source:</strong>
+        <a
+          href="https://methods.cochrane.org/bias/resources/rob-2-revised-cochrane-risk-bias-tool-randomized-trials"
+          target="_blank"
+          >Cochrane RoB 2.0 Website</a
+        >
+      </p>
+
+      <h2>The Five Domains of RoB 2.0</h2>
+      <div class="rob2-domain">
+        <h3>Domain 1: Bias arising from the randomization process</h3>
+        <p>
+          <strong>Question:</strong> Is the assignment to intervention groups
+          random and concealed?
+        </p>
+        <p>
+          <strong>Focus:</strong> Was the sequence generation truly random, and
+          was allocation concealment adequate?
+        </p>
+      </div>
+
+      <div class="rob2-domain">
+        <h3>Domain 2: Bias due to deviations from intended interventions</h3>
+        <p>
+          <strong>Question:</strong> Were participants and personnel blinded,
+          and was the intervention administered as intended?
+        </p>
+        <p>
+          <strong>Focus:</strong> Were there differences in care received
+          between groups other than the intervention itself? Was blinding
+          successful?
+        </p>
+      </div>
+
+      <div class="rob2-domain">
+        <h3>Domain 3: Bias due to missing outcome data</h3>
+        <p>
+          <strong>Question:</strong> Is the outcome data complete for all
+          randomized participants?
+        </p>
+        <p>
+          <strong>Focus:</strong> Was the amount and nature of missing data
+          similar across groups? Was the missing data appropriately addressed
+          (e.g., intention-to-treat analysis)?
+        </p>
+      </div>
+
+      <div class="rob2-domain">
+        <h3>Domain 4: Bias in measurement of the outcome</h3>
+        <p>
+          <strong>Question:</strong> Was the outcome assessment biased due to
+          knowledge of the intervention received?
+        </p>
+        <p>
+          <strong>Focus:</strong> Was the outcome measured in the same way for
+          all groups? Were the outcome assessors blinded?
+        </p>
+      </div>
+
+      <div class="rob2-domain">
+        <h3>Domain 5: Bias in selection of the reported result</h3>
+        <p>
+          <strong>Question:</strong> Was the reported outcome selected based on
+          the results?
+        </p>
+        <p>
+          <strong>Focus:</strong> Did the study report pre-specified outcomes
+          and analyses, or were there selective omissions based on statistical
+          significance?
+        </p>
+      </div>
+
+      <h2>Overall Risk of Bias Judgments</h2>
+      <p>
+        The overall judgment for the study is derived from the judgments across
+        the five domains:
+      </p>
+      <ul>
+        <li>
+          <strong>Low Risk of Bias:</strong> Low risk for all five domains.
+        </li>
+        <li>
+          <strong>Some Concerns:</strong> Some concerns in at least one domain,
+          but not high risk.
+        </li>
+        <li>
+          <strong>High Risk of Bias:</strong> High risk in at least one domain,
+          or some concerns in multiple domains that raise serious doubts.
+        </li>
+      </ul>
+
+      <p style="text-align: center; margin-top: 50px; margin-bottom: 50px">
+        <button
+          onclick="history.back()"
+          style="
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #005a9c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+          "
+        >
+          ← Back to Flowchart
+        </button>
+      </p>
+    </div>
+
+    <footer>
+      <p>
+        This guide was created to help users understand the basic structure and
+        application of the Cochrane RoB 2.0 tool.
+      </p>
+      <p>This lesson is written with assist from ChatGPT5 and GoogleGemini.</p>
+      <p style="font-size: 0.9em; color: #777; margin-top: 10px">
+        Disclaimer: This flowchart and the related R code are provided for
+        educational purposes only.
+      </p>
+    </footer>
+  </body>
+</html>

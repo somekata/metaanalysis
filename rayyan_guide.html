@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Guide to Rayyan for Systematic Reviews</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Rayyan固有のスタイル - ガイドのステップを見やすくする */
+      .rayyan-step {
+        background-color: #f7f7f7;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 5px solid var(--secondary-color); /* 黄色の線 */
+      }
+      .rayyan-step h3 {
+        margin-top: 0;
+        color: var(--primary-color); /* 青色のテキスト */
+        font-size: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Guide to Rayyan: Systematic Review Screening Tool</h1>
+
+    <div id="main">
+      <p>
+        Rayyan is a free web application designed to help researchers screen
+        articles for systematic reviews collaboratively and efficiently.
+      </p>
+
+      <h2>1. Access and Login/Account Creation</h2>
+      <div class="rayyan-step">
+        <p><strong>Access the website:</strong></p>
+        <p>
+          <a href="https://www.rayyan.ai/" target="_blank"
+            >https://www.rayyan.ai/</a
+          >
+        </p>
+        <ul>
+          <li>
+            If you do not have an account, click "Start For Free" in the upper
+            right corner to create one.
+          </li>
+          <li>
+            If you already have an account (or after creating one), click
+            "Login."
+          </li>
+        </ul>
+      </div>
+
+      <h2>2. Create a New Review</h2>
+      <div class="rayyan-step">
+        <p>Click "Create Review" in the upper right corner of the dashboard.</p>
+
+        <h3>Required Settings:</h3>
+        <ul>
+          <li>
+            <strong>Review Title:</strong> Enter a title (you can change this
+            later).
+          </li>
+          <li><strong>Review Type:</strong> Select Systematic Review.</li>
+          <li><strong>Review Domain:</strong> Select Biomedical.</li>
+          <li>
+            <strong>Description:</strong> Enter a brief description (you can
+            change this later).
+          </li>
+        </ul>
+      </div>
+
+      <h2>3. Invite Collaborators</h2>
+      <div class="rayyan-step">
+        <p>
+          After creating the review, you can invite team members to participate
+          in the screening process.
+        </p>
+
+        <h3>Invitation Fields:</h3>
+        <ul>
+          <li>
+            <strong>User Email:</strong> Enter the collaborator's email address
+            (e.g., `xxx@xxx.ac.jp`).
+          </li>
+          <li><strong>User Role:</strong> Select Reviewer.</li>
+          <li>
+            <strong>Reason/Message:</strong> Not required for basic invitation.
+          </li>
+        </ul>
+        <p>The invited members will receive an email to join the review.</p>
+      </div>
+
+      <h2>4. Import References</h2>
+      <div class="rayyan-step">
+        <p>
+          Once the review is created, you can import the citation files (e.g.,
+          RIS, CSV, PubMed format) exported from databases like PubMed, Scopus,
+          and Cochrane.
+        </p>
+        <p>
+          Click "Add" or "Import" within the new review dashboard and upload the
+          files one by one.
+        </p>
+      </div>
+
+      <h2>5. Screening Process</h2>
+      <div class="rayyan-step">
+        <p>After importing references, you can start the screening process.</p>
+
+        <h3>Screening Steps:</h3>
+        <ul>
+          <li>
+            <strong>Title and Abstract Screening:</strong> Reviewers can screen
+            articles based on titles and abstracts. They can label articles as
+            "Include," "Exclude," or "Maybe."
+          </li>
+          <li>
+            <strong>Full-Text Screening:</strong> For articles marked as
+            "Include" or "Maybe," reviewers can upload and review the full text
+            to make final inclusion decisions.
+          </li>
+          <li>
+            <strong>Conflict Resolution:</strong> If there are disagreements
+            between reviewers, Rayyan provides tools to resolve conflicts and
+            reach consensus.
+          </li>
+        </ul>
+      </div>
+      <h2>6. Exporting Results</h2>
+      <div class="rayyan-step">
+        <p>
+          After completing the screening, you can export the results for further
+          analysis. Click on the "Export" button in the review dashboard to
+          download the screened articles in various formats (e.g., RIS, CSV).
+        </p>
+      </div>
+
+      <p style="text-align: center; margin-top: 50px; margin-bottom: 50px">
+        <button
+          onclick="history.back()"
+          style="
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #005a9c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+          "
+        >
+          ← Back to Flowchart
+        </button>
+      </p>
+    </div>
+
+    <footer>
+      <p>
+        This guide was created to help users understand the basic process of
+        setting up a screening project in Rayyan.
+      </p>
+      <p>This lesson is written with assist from ChatGPT5 and GoogleGemini.</p>
+      <p style="font-size: 0.9em; color: #777; margin-top: 10px">
+        Disclaimer: This flowchart and the related R code are provided for
+        educational purposes only.
+      </p>
+    </footer>
+  </body>
+</html>
