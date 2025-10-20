@@ -75,6 +75,7 @@ ol > li {
     counter-increment: step-counter; /* Increment counter */
     background: var(--card-background);
     padding: 20px;
+    padding-left: 55px; /* 元のpadding: 20px から 55px に増やす */
     margin-bottom: 25px;
     border-left: 5px solid var(--primary-color);
     position: relative;
