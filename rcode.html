@@ -7,9 +7,9 @@
   </head>
   <body>
     <h1>R Code for Systematic Review Meta-Analysis</h1>
-
-    <h2>1. Setup and Data Loading</h2>
-    <pre><code>
+    <div>
+      <h2>1. Setup and Data Loading</h2>
+      <pre><code>
 # Install necessary packages (only run the first time)
 # install.packages("meta")
 # install.packages("readr")
@@ -47,8 +47,8 @@ print(head(data_clean))
 
 </code></pre>
 
-    <h2>2. Meta-Analysis Model Execution</h2>
-    <pre><code>
+      <h2>2. Meta-Analysis Model Execution</h2>
+      <pre><code>
 # Execute the meta-analysis model using the 'metabin' function (for binary data)
 # We calculate the Risk Ratio (sm="RR") using the Inverse Variance method.
 # A random-effects model is appropriate for clinical heterogeneity.
@@ -72,8 +72,8 @@ print(summary(meta_result))
 
 </code></pre>
 
-    <h2>3. Forest Plot Generation</h2>
-    <pre><code>
+      <h2>3. Forest Plot Generation</h2>
+      <pre><code>
 # Generate the Forest Plot
 forest(
   meta_result,
@@ -91,8 +91,8 @@ forest(
 
 </code></pre>
 
-    <h2>4. Funnel Plot Generation</h2>
-    <pre><code>
+      <h2>4. Funnel Plot Generation</h2>
+      <pre><code>
 # Generate the Funnel Plot (To visually assess potential publication bias)
 funnel(
   meta_result,
@@ -107,6 +107,23 @@ funnel(
 metabias(meta_result, method.bias = "Egger")
 
 </code></pre>
+      <p style="text-align: center; margin-top: 30px">
+        <button
+          onclick="history.back()"
+          style="
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #005a9c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+          "
+        >
+          ← back to Flowchart
+        </button>
+      </p>
+    </div>
     <footer>
       <p>This lesson is written with assist from ChatGPT5 and GoogleGemini.</p>
       <p style="font-size: 0.9em; color: #777; margin-top: 10px">
