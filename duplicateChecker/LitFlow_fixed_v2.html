@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="ja" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">LitFlow — 文献管理統合ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f3ee;--surface:#fff;--surface2:#f0ede6;--surface3:#e8e4dc;
+  --border:#ddd8ce;--border2:#c8c2b4;
+  --text:#1a1814;--text2:#6b6456;--text3:#9c9385;
+  --accent:#2d4a3e;--accent2:#4a7c6a;--accent-light:#e8f0ed;
+  --blue:#1d3f6e;--blue-light:#e4ecf7;
+  --amber:#7a4e0d;--amber-light:#fdf0dc;
+  --red:#6e1d1d;--red-light:#fae8e8;
+  --green:#1d5c2e;--green-light:#e4f5e8;
+  --purple:#4a1d6e;--purple-light:#f0e8f7;
+  --mono:'DM Mono',monospace;--sans:'Noto Sans JP',sans-serif;
+  --radius:8px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+.page{max-width:900px;margin:0 auto;padding:2rem 1.5rem 6rem}
+
+/* ===== HEADER ===== */
+header{margin-bottom:2rem}
+.logo{font-family:var(--mono);font-size:1.6rem;font-weight:500;color:var(--accent);letter-spacing:-0.02em}
+.logo span{color:var(--text3)}
+.tagline{font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:.15rem}
+
+/* ===== STEP PIPELINE ===== */
+.pipeline{display:flex;align-items:center;gap:0;margin-bottom:2rem;overflow-x:auto;padding-bottom:2px}
+.step-pill{display:flex;align-items:center;gap:8px;padding:.45rem 1rem;border-radius:20px;font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s;border:1.5px solid var(--border);background:var(--surface);color:var(--text3);white-space:nowrap;flex-shrink:0}
+.step-pill:hover{border-color:var(--border2);color:var(--text)}
+.step-pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.step-pill.done{background:var(--accent-light);border-color:var(--accent2);color:var(--accent)}
+.step-pill.locked{opacity:.4;cursor:not-allowed}
+.step-arrow{color:var(--border2);font-size:16px;flex-shrink:0;margin:0 4px}
+.step-num{font-size:10px;opacity:.7}
+
+/* ===== PANELS ===== */
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* ===== CARDS ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.card-title{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text3);text-transform:uppercase;margin-bottom:1rem}
+
+/* ===== DROP ZONE ===== */
+.dropzone{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);background:var(--surface);padding:2rem 1.5rem;text-align:center;cursor:pointer;position:relative;transition:border-color .15s,background .15s}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent2);background:var(--accent-light)}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-title{font-size:14px;font-weight:500;margin-bottom:.2rem}
+.dz-sub{font-size:12px;color:var(--text3)}
+
+.file-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:.75rem}
+.file-tag{display:flex;align-items:center;gap:6px;padding:4px 9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:var(--mono)}
+.file-tag button{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;line-height:1;padding:0 0 0 2px}
+.file-tag button:hover{color:var(--red)}
+.src-badge{font-size:10px;padding:1px 5px;border-radius:3px;font-weight:500;font-family:var(--mono)}
+.src-pubmed{background:var(--blue-light);color:var(--blue)}
+.src-scopus{background:var(--green-light);color:var(--green)}
+.src-cochrane{background:var(--amber-light);color:var(--amber)}
+.src-unknown{background:var(--surface2);color:var(--text2)}
+
+/* ===== OPTIONS ===== */
+.options-panel{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);margin-bottom:1rem}
+.opt{flex:1;display:flex;align-items:center;gap:7px;padding:.55rem .85rem;cursor:pointer;border-right:1px solid var(--border);transition:background .1s;font-size:13px;color:var(--text2);user-select:none}
+.opt:last-child{border-right:none}
+.opt:hover{background:var(--surface2)}
+.opt input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
+.opt.active{color:var(--text);background:var(--accent-light)}
+.opt-tag{font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:3px;background:var(--surface2);color:var(--text3);margin-left:auto}
+
+/* ===== BUTTONS ===== */
+.btn-primary{padding:.8rem 1.5rem;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.04em;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.btn-primary:hover:not(:disabled){background:#1e3328}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+.btn-secondary{padding:.6rem 1rem;font-family:var(--mono);font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text2);transition:all .12s}
+.btn-secondary:hover{border-color:var(--accent2);color:var(--accent);background:var(--accent-light)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:1rem}
+
+/* ===== PROGRESS ===== */
+.progress{height:3px;background:var(--border);border-radius:2px;margin-top:.75rem;overflow:hidden}
+.progress-bar{height:100%;width:0;background:var(--accent2);transition:width .25s ease}
+
+/* ===== STATS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.stats-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.9rem 1rem}
+.stat-label{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:.35rem;letter-spacing:.04em}
+.stat-val{font-family:var(--mono);font-size:1.9rem;font-weight:500;line-height:1}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:.25rem}
+.c-green{color:var(--green)}.c-blue{color:var(--blue)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}.c-purple{color:var(--purple)}
+
+/* ===== CONFIDENCE BADGES ===== */
+.conf-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;font-weight:500}
+.conf-certain{background:var(--blue-light);color:var(--blue)}
+.conf-likely{background:var(--green-light);color:var(--green)}
+.conf-possible{background:var(--amber-light);color:var(--amber)}
+
+/* ===== DUP GROUP ===== */
+.dup-group{margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.grp-header{display:flex;align-items:center;gap:8px;padding:.4rem .85rem;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--mono);color:var(--text3)}
+.dup-item{padding:.65rem 1rem;font-size:13px;border-bottom:1px solid var(--border)}
+.dup-item:last-child{border-bottom:none}
+.dup-item.is-kept{background:var(--accent-light)}
+.dup-item.is-dup{background:var(--surface2)}
+.dup-row{display:flex;align-items:flex-start;gap:8px}
+.dup-title{flex:1;font-weight:500;font-size:13px;line-height:1.4}
+.dup-item.is-dup .dup-title{color:var(--text2);text-decoration:line-through;text-decoration-color:var(--border2)}
+.dup-meta{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.match-badge{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.mb-kept{background:var(--accent-light);color:var(--accent)}
+.mb-doi{background:var(--blue-light);color:var(--blue)}
+.mb-title{background:var(--green-light);color:var(--green)}
+.mb-fuzzy{background:var(--amber-light);color:var(--amber)}
+
+/* ===== CONF FILTER ===== */
+.conf-filter{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.cf-label{font-size:11px;font-family:var(--mono);color:var(--text3)}
+.cf-btn{padding:3px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-family:var(--mono);cursor:pointer;color:var(--text2);transition:all .12s}
+.cf-btn.active{border-color:transparent}
+.cf-btn[data-cf="all"].active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cf-btn[data-cf="certain"].active{background:var(--blue-light);color:var(--blue);border-color:var(--blue)}
+.cf-btn[data-cf="likely"].active{background:var(--green-light);color:var(--green);border-color:var(--green)}
+.cf-btn[data-cf="possible"].active{background:var(--amber-light);color:var(--amber);border-color:var(--amber)}
+
+/* ===== COMPARE (Step 2) ===== */
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:1rem}
+.tab{padding:.55rem 1rem;font-family:var(--mono);font-size:12px;cursor:pointer;border:none;background:none;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-count{font-size:10px;padding:1px 5px;border-radius:3px;background:var(--surface2);color:var(--text3);margin-left:4px}
+.tab.active .tab-count{background:var(--accent-light);color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.rec-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.65rem .9rem;font-size:13px;margin-bottom:6px}
+.rec-row{display:flex;align-items:flex-start;gap:8px}
+.rec-title{flex:1;font-weight:500;line-height:1.4}
+.rec-meta{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+
+/* ===== SCREENING (Step 3) ===== */
+.criteria-box{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.criteria-row{display:flex;align-items:center;gap:10px;padding:.55rem .85rem;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;transition:background .1s}
+.criteria-row:last-child{border-bottom:none}
+.criteria-row:hover{background:var(--surface2)}
+.criteria-row input[type=checkbox]{accent-color:var(--accent);flex-shrink:0}
+.criteria-name{font-weight:500;flex:1}
+.criteria-desc{font-size:11px;color:var(--text3);flex:2}
+.criteria-badge{font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:var(--surface2);color:var(--text3);flex-shrink:0}
+
+.custom-kw{margin-top:.75rem}
+.custom-kw label{font-size:12px;color:var(--text2);display:block;margin-bottom:.4rem}
+.custom-kw textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface);resize:vertical;min-height:70px;outline:none;transition:border-color .12s}
+.custom-kw textarea:focus{border-color:var(--accent2)}
+
+.screen-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}
+.screen-header{display:flex;align-items:flex-start;gap:10px;padding:.65rem .9rem;cursor:pointer}
+.screen-header:hover{background:var(--surface2)}
+.screen-title{flex:1;font-weight:500;font-size:13px;line-height:1.4}
+.screen-meta{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.screen-body{padding:.5rem .9rem .75rem;border-top:1px solid var(--border);background:var(--surface2);display:none}
+.screen-body.open{display:block}
+.reason-tag{display:inline-block;font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:var(--red-light);color:var(--red);margin:2px 3px 2px 0}
+.abstract-text{font-size:12px;color:var(--text2);margin-top:.5rem;line-height:1.6;max-height:200px;overflow-y:auto;white-space:pre-wrap}
+
+/* ===== DOWNLOAD ===== */
+.dl-grid{display:flex;gap:8px;flex-wrap:wrap}
+.btn-dl{display:flex;align-items:center;gap:6px;padding:.55rem .9rem;font-family:var(--mono);font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text);transition:all .12s}
+.btn-dl:hover{border-color:var(--accent2);background:var(--accent-light);color:var(--accent)}
+
+/* ===== MISC ===== */
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+.sec-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
+.sec-label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase}
+.sec-count{font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:3px;background:var(--surface2);color:var(--text2)}
+.empty{padding:1.5rem;text-align:center;color:var(--text3);font-size:13px;border:1px dashed var(--border);border-radius:var(--radius);font-family:var(--mono)}
+.note{font-size:12px;color:var(--text2);background:var(--amber-light);border-radius:var(--radius);padding:.6rem .9rem;margin-bottom:.75rem}
+.search-bar{position:relative;margin-bottom:.75rem}
+.search-bar input{width:100%;padding:.5rem .85rem .5rem 2rem;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--surface);color:var(--text);outline:none;transition:border-color .12s}
+.search-bar input:focus{border-color:var(--accent2)}
+.search-icon{position:absolute;left:.65rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+
+/* ===== FAB ===== */
+.fab{position:fixed;right:1.5rem;bottom:1.5rem;display:flex;flex-direction:column;gap:8px;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.fab.visible{opacity:1;pointer-events:auto}
+.fab-btn{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.18);transition:background .12s,transform .1s}
+.fab-btn:hover{background:#1e3328;transform:scale(1.08)}
+
+footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
+
+/* LANG SWITCHER */
+.lang-sw{display:flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden;margin-left:auto;align-self:flex-start;margin-top:.15rem}
+.lang-btn{font-family:var(--mono);font-size:11px;padding:3px 10px;background:transparent;border:none;cursor:pointer;color:var(--text3);transition:background .12s,color .12s;letter-spacing:.04em}
+.lang-btn.active{background:var(--accent);color:#fff}
+.lang-btn:hover:not(.active){background:var(--surface2);color:var(--text)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header style="display:flex;align-items:flex-start">
+  <div>
+    <div class="logo">Lit<span>Flow</span></div>
+    <div class="tagline" id="lf-tagline">// 文献管理統合ツール — 重複除去 → Rayyan比較 → 一次スクリーニング</div>
+  </div>
+  <div class="lang-sw"><button class="lang-btn active" onclick="setLang('ja')">JA</button><button class="lang-btn" onclick="setLang('en')">EN</button></div>
+</header>
+
+<!-- ===== PIPELINE NAV ===== -->
+<div class="pipeline">
+  <div class="step-pill active" id="pill1" onclick="gotoStep(1)"><span class="step-num">01</span> <span id="pill1txt">取込・重複除去</span></div>
+  <div class="step-arrow">→</div>
+  <div class="step-pill locked" id="pill2" onclick="gotoStep(2)"><span class="step-num">02</span> <span id="pill2txt">Rayyan比較</span></div>
+  <div class="step-arrow">→</div>
+  <div class="step-pill locked" id="pill3" onclick="gotoStep(3)"><span class="step-num">03</span> <span id="pill3txt">一次スクリーニング</span></div>
+</div>
+
+<!-- ========================================
+     STEP 1: 取込・自動重複除去
+     ======================================== -->
+<div class="step-panel active" id="panel1">
+
+  <div class="dropzone" id="dz1">
+    <input type="file" id="fi1" multiple accept=".ris,.txt">
+    <div style="font-size:36px;margin-bottom:.5rem">📄</div>
+    <div class="dz-title" id="s1dzTitle">RIS・TXTファイルをドロップ、またはクリックして選択</div>
+    <div class="dz-sub" id="s1dzSub">PubMed / Scopus / Cochrane のエクスポートファイルに対応（複数可）</div>
+  </div>
+  <div class="file-list" id="fl1"></div>
+
+  <div class="options-panel" style="margin-top:1rem">
+    <label class="opt active" id="lDoi"><input type="checkbox" id="optDoi" checked><span id="optDoiLbl">DOI照合</span><span class="opt-tag" id="optDoiTag">推奨</span></label>
+    <label class="opt active" id="lTitle"><input type="checkbox" id="optTitle" checked><span id="optTitleLbl">タイトル正規化</span></label>
+    <label class="opt" id="lFuzzy"><input type="checkbox" id="optFuzzy"><span id="optFuzzyLbl">あいまい照合</span><span class="opt-tag">β</span></label>
+  </div>
+
+  <div class="btn-row" style="margin-top:1rem">
+    <button class="btn-primary" id="runDedup" disabled>▶ <span id="runDedupTxt">重複を検出する</span></button>
+  </div>
+  <div class="progress"><div class="progress-bar" id="pb1"></div></div>
+
+  <!-- Step1 results -->
+  <div id="s1results" style="display:none">
+    <div class="divider"></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label" id="lblS1Total">取り込み合計</div><div class="stat-val" id="s1total">0</div><div class="stat-sub" id="s1break"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS1Dup">重複数</div><div class="stat-val c-blue" id="s1dup">0</div><div class="stat-sub" id="s1dupsub"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS1Dedup">重複除去後</div><div class="stat-val c-green" id="s1dedup">0</div><div class="stat-sub" id="s1deduppct"></div></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:1rem">
+      <span class="sec-label" id="lblDupGrp">重複グループ</span>
+      <span class="sec-count" id="s1grpCount">0グループ</span>
+    </div>
+    <div class="conf-filter">
+      <span class="cf-label">絞り込み：</span>
+      <button class="cf-btn active" data-cf="all">すべて</button>
+      <button class="cf-btn" data-cf="certain">🔵 確実</button>
+      <button class="cf-btn" data-cf="likely">🟢 ほぼ確実</button>
+      <button class="cf-btn" data-cf="possible">🟡 可能性</button>
+    </div>
+    <div id="s1dupList"></div>
+
+    <div class="divider"></div>
+    <div class="sec-head"><span class="sec-label">ダウンロード（重複除去後）</span></div>
+    <div class="dl-grid">
+      <button class="btn-dl" id="dlDedupRis">⬇ deduplicated.ris</button>
+      <button class="btn-dl" id="dlDedupTsv">⬇ deduplicated.tsv</button>
+      <button class="btn-dl" id="dlDedupReport">⬇ dedup_report.txt</button>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.5rem">
+      <button class="btn-primary" onclick="gotoStep(2)" id="btnToS2">次へ → Rayyan比較</button>
+      <button class="btn-secondary" onclick="gotoStep(3)" id="btnSkipS2">比較をスキップして一次スクリーニングへ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     STEP 2: Rayyan比較
+     ======================================== -->
+<div class="step-panel" id="panel2">
+
+  <div class="note" id="s2note">💡 Rayyanでの目視除去済みファイルをアップロードして、RefSieveの自動除去結果と比較します。CSV・RIS両対応。</div>
+
+  <div class="dropzone" id="dz2">
+    <input type="file" id="fi2" accept=".ris,.txt,.csv">
+    <div style="font-size:36px;margin-bottom:.5rem">📋</div>
+    <div class="dz-title" id="s2dzTitle">Rayyan エクスポートファイルをドロップ</div>
+    <div class="dz-sub" id="s2dzSub">CSV（Rayyan標準）または RIS</div>
+    <div class="dp-loaded" id="lbl2"></div>
+  </div>
+
+  <div class="btn-row" style="margin-top:.75rem">
+    <button class="btn-primary" id="runCompare" disabled>▶ <span id="runCompareTxt">比較する</span></button>
+    <button class="btn-secondary" onclick="gotoStep(3)" id="btnSkipS3">スキップして一次スクリーニングへ</button>
+  </div>
+  <div class="progress"><div class="progress-bar" id="pb2"></div></div>
+
+  <div id="s2results" style="display:none">
+    <div class="divider"></div>
+    <div class="stats-grid-4">
+      <div class="stat-card"><div class="stat-label">RefSieve</div><div class="stat-val c-blue" id="s2cntA">0</div><div class="stat-sub" id="lblS2Unit1">件</div></div>
+      <div class="stat-card"><div class="stat-label">Rayyan</div><div class="stat-val c-purple" id="s2cntB">0</div><div class="stat-sub" id="lblS2Unit2">件</div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS2Match">一致</div><div class="stat-val c-green" id="s2match">0</div><div class="stat-sub" id="s2matchpct"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS2Diff">不一致</div><div class="stat-val c-amber" id="s2diff">0</div><div class="stat-sub" id="s2diffsub"></div></div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab active" data-tab="cmatch"><span id="tabMatch">✓ 一致</span> <span class="tab-count" id="tc0">0</span></button>
+      <button class="tab" data-tab="conly-a"><span id="tabOnlyA">RefSieveのみ</span> <span class="tab-count" id="tc1">0</span></button>
+      <button class="tab" data-tab="conly-b"><span id="tabOnlyB">Rayyanのみ</span> <span class="tab-count" id="tc2">0</span></button>
+    </div>
+    <div class="tab-panel active" id="tab-cmatch">
+      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q0" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
+      <div id="s2list0"></div>
+    </div>
+    <div class="tab-panel" id="tab-conly-a">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem" id="noteOnlyA">RefSieveが残したが Rayyan では除去された文献（RefSieveの取り逃した重複候補）</p>
+      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q1" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
+      <div id="s2list1"></div>
+    </div>
+    <div class="tab-panel" id="tab-conly-b">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem" id="noteOnlyB">Rayyanが残したが RefSieve では除去された文献（Rayyanの取り逃した重複候補）</p>
+      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q2" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
+      <div id="s2list2"></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-head"><span class="sec-label">ダウンロード（比較結果）</span></div>
+    <div class="dl-grid">
+      <button class="btn-dl" id="dlCmpReport">⬇ compare_report.txt</button>
+      <button class="btn-dl" id="dlCmpOnlyA">⬇ refsieve_only.tsv</button>
+      <button class="btn-dl" id="dlCmpOnlyB">⬇ rayyan_only.tsv</button>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.5rem">
+      <button class="btn-primary" onclick="gotoStep(3)" id="btnToS3">次へ → 一次スクリーニング</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     STEP 3: 一次スクリーニング
+     ======================================== -->
+<div class="step-panel" id="panel3">
+
+  <div class="note" id="s3note"><span id="s3notePre">重複除去後の</span> <strong id="s3srcNote">0 件</strong> <span id="s3notePost">を対象にスクリーニングします。</span></div>
+
+  <!-- 除外基準 -->
+  <div class="card">
+    <div class="card-title" id="cardCriteriaTitle">除外基準（タイトル＋抄録で判定）</div>
+    <div class="criteria-box" id="criteriaBox"></div>
+
+    <div class="custom-kw" style="margin-top:.75rem">
+      <label id="lblCustomKw">追加キーワード（除外したいフレーズ、1行1語句）</label>
+      <textarea id="customKw" placeholder="例:&#10;case report&#10;letter to the editor&#10;in vitro"></textarea>
+    </div>
+
+    <div style="margin-top:.75rem">
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:.4rem" id="lblLangExcl">除外ターゲット言語（英語以外を除外する場合）</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="langBox"></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" id="runScreen">▶ <span id="runScreenTxt">スクリーニング実行</span></button>
+  </div>
+  <div class="progress"><div class="progress-bar" id="pb3"></div></div>
+
+  <div id="s3results" style="display:none">
+    <div class="divider"></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label" id="lblS3Total">スクリーニング対象</div><div class="stat-val" id="s3total">0</div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS3Excl">除外</div><div class="stat-val c-red" id="s3excl">0</div><div class="stat-sub" id="s3exclsub"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS3Keep">残存（次ステップへ）</div><div class="stat-val c-green" id="s3keep">0</div><div class="stat-sub" id="s3keeppct"></div></div>
+    </div>
+
+    <!-- 除外理由内訳 -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title" id="lblReasonBreak">除外理由別内訳</div>
+      <div id="s3reasonBreak"></div>
+    </div>
+
+    <!-- 除外リスト -->
+    <div class="sec-head" style="margin-top:1rem">
+      <span class="sec-label" id="lblExclList">除外文献リスト</span>
+      <span class="sec-count" id="s3exclCount">0件</span>
+    </div>
+    <div class="conf-filter" id="s3filter">
+      <span class="cf-label" id="s3cfLabel">絞り込み：</span>
+      <button class="cf-btn active" data-scf="all" id="s3cfAll">すべて</button>
+      <button class="cf-btn" data-scf="certain" id="s3cfCertain">🔵 確実</button>
+      <button class="cf-btn" data-scf="likely" id="s3cfLikely">🟢 ほぼ確実</button>
+      <button class="cf-btn" data-scf="possible" id="s3cfPossible">🟡 可能性</button>
+    </div>
+    <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s3q" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
+    <div id="s3exclList"></div>
+
+    <div class="divider"></div>
+    <div class="sec-head"><span class="sec-label">ダウンロード</span></div>
+    <div class="dl-grid">
+      <button class="btn-dl" id="dlScreenRis">⬇ screened.ris<span id="lblScreenRisSub">（残存）</span></button>
+      <button class="btn-dl" id="dlExclTsv">⬇ excluded.tsv<span id="lblExclTsvSub">（除外一覧）</span></button>
+      <button class="btn-dl" id="dlScreenReport">⬇ screen_report.txt</button>
+    </div>
+  </div>
+</div>
+
+<footer>LitFlow v1.0 &nbsp;—&nbsp; <span id="lfFooter">ローカル処理のみ・データは外部送信されません</span></footer>
+</div><!-- /page -->
+
+<!-- FAB -->
+<div class="fab" id="fab">
+  <button class="fab-btn" id="fabTop" title="先頭へ">↑</button>
+  <button class="fab-btn" id="fabPrev" title="前へ">‹</button>
+  <button class="fab-btn" id="fabNext" title="次へ">›</button>
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+//  GLOBAL STATE
+// ============================================================
+const S = {
+  files: [],          // Step1入力ファイル
+  records: [],        // Step1 全レコード
+  dupGroups: [],      // Step1 重複グループ
+  dedupRecs: [],      // Step1 重複除去後レコード
+  rayyanRecs: [],     // Step2 Rayyanレコード
+  cmpMatched: [],     // Step2 一致
+  cmpOnlyA: [],       // Step2 RefSieveのみ
+  cmpOnlyB: [],       // Step2 Rayyanのみ
+  screenSrc: [],      // Step3 スクリーニング対象
+  exclRecs: [],       // Step3 除外レコード
+  keepRecs: [],       // Step3 残存レコード
+  currentStep: 1,
+};
+
+// ============================================================
+//  UTILITIES
+// ============================================================
+const $ = id => document.getElementById(id);
+const escH = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function normLE(t){ return t.replace(/\r\n/g,'\n').replace(/\r/g,'\n'); }
+
+function normalizeTitle(t){
+  if(!t) return '';
+  return t.toLowerCase()
+    .replace(/[\u2018\u2019\u201c\u201d\u2010\u2011\u2012\u2013\u2014]/g,' ')
+    .replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff\uac00-\ud7af ]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
+function normDoi(v){
+  if(!v) return null;
+  const m = String(v).match(/10\.\d{4,}\/[^\s\[\]]+/i);
+  return m ? m[0].replace(/[.,;>\]]+$/,'').toLowerCase() : null;
+}
+
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  let dp=Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){
+    const ndp=[i];
+    for(let j=1;j<=n;j++)
+      ndp[j]=a[i-1]===b[j-1]?dp[j-1]:1+Math.min(dp[j],ndp[j-1],dp[j-1]);
+    dp=ndp;
+  }
+  return dp[n];
+}
+function similarity(a,b){
+  if(!a||!b) return 0;
+  const mx=Math.max(a.length,b.length);
+  return mx===0?1:1-levenshtein(a,b)/mx;
+}
+
+function doiSimilar(a,b){
+  if(!a||!b) return false;
+  if(Math.abs(a.length-b.length)>5) return false;
+  const m=a.length,n=b.length;
+  let dp=Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){
+    const ndp=[i];
+    for(let j=1;j<=n;j++)
+      ndp[j]=a[i-1]===b[j-1]?dp[j-1]:1+Math.min(dp[j],ndp[j-1],dp[j-1]);
+    dp=ndp;
+  }
+  return dp[n]<=3;
+}
+
+function readFile(f){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result);
+    r.onerror=rej;
+    r.readAsText(f,'UTF-8');
+  });
+}
+
+function dlFile(content,filename,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+// ============================================================
+//  PARSERS
+// ============================================================
+function detectSource(fn,content){
+  const f=fn.toLowerCase();
+  if(f.includes('pubmed')||f.includes('medline')) return 'pubmed';
+  if(f.includes('scopus')) return 'scopus';
+  if(f.includes('cochrane')||f.includes('cdsr')) return 'cochrane';
+  if(content.includes('Provider: Elsevier')||content.includes('DB  - Scopus')) return 'scopus';
+  if(content.includes('PMID-')||content.includes('JID - ')) return 'pubmed';
+  if(content.includes('Cochrane')||content.includes('CDSR')) return 'cochrane';
+  return 'unknown';
+}
+
+function parseRIS(text,source,filename){
+  text=normLE(text);
+  const records=[];
+  const entries=text.split(/\nER\s*-[^\n]*/);
+  entries.forEach(entry=>{
+    if(!entry.includes('TY  -')) return;
+    const rec={_source:source,_file:filename,_raw:entry.trimEnd()+'\nER  - \n\n'};
+    let lastTag=null;
+    entry.split('\n').forEach(line=>{
+      const m=line.match(/^([A-Z][A-Z0-9])\s+-\s*(.*)/);
+      if(m){
+        lastTag=m[1];
+        if(!rec[lastTag]) rec[lastTag]=[];
+        rec[lastTag].push(m[2].trim());
+      } else if(lastTag&&/^\s+\S/.test(line)){
+        rec[lastTag][rec[lastTag].length-1]+=' '+line.trim();
+      }
+    });
+    const doiRaw=(rec['DO']||rec['DOI']||[]).join(' ')||
+                 (rec['UR']||rec['N1']||rec['M3']||[]).join(' ');
+    const doi=normDoi(doiRaw);
+    const title=(rec['TI']||rec['T1']||[]).join(' ');
+    const abstract=(rec['AB']||rec['N2']||[]).join(' ');
+    if(doi||title){
+      const au=(rec['AU']||rec['A1']||[''])[0];
+      const yr=(rec['PY']||rec['Y1']||rec['DA']||[''])[0];
+      const ay=(au.split(',')[0].toLowerCase()+yr.slice(0,4)).trim();
+      records.push({...rec,_doi:doi,_title:title,_abstract:abstract,
+        _normTitle:normalizeTitle(title),_authorYear:ay});
+    }
+  });
+  return records;
+}
+
+function parsePubMedTxt(text,source,filename){
+  text=normLE(text);
+  const records=[];
+  text.split(/\n{2,}/).forEach(chunk=>{
+    if(!chunk.startsWith('PMID')) return;
+    const rec={_source:source,_file:filename,_raw:chunk};
+    let lastTag=null;
+    chunk.split('\n').forEach(line=>{
+      const m=line.match(/^([A-Z]+)\s+-\s+(.*)/);
+      if(m){
+        lastTag=m[1];
+        if(!rec[lastTag]) rec[lastTag]=[];
+        rec[lastTag].push(m[2].trim());
+      } else if(lastTag&&line.startsWith('      ')){
+        rec[lastTag][rec[lastTag].length-1]+=' '+line.trim();
+      }
+    });
+    let doi=null;
+    for(const f of['LID','AID']){
+      for(const v of(rec[f]||[])){
+        if(/\[doi\]/i.test(v)){
+          const m2=v.match(/10\.\d{4,}\/[^\s\[\]]+/i);
+          if(m2){doi=m2[0].replace(/[.,;>\]]+$/,'').toLowerCase();break;}
+        }
+      }
+      if(doi) break;
+    }
+    const title=(rec['TI']||[]).join(' ');
+    const abstract=(rec['AB']||[]).join(' ');
+    if(title){
+      const au=(rec['AU']||[''])[0];
+      const yr=(rec['DP']||[''])[0];
+      const ay=(au.split(' ')[0].toLowerCase()+yr.slice(0,4)).trim();
+      records.push({...rec,_doi:doi,_title:title,_abstract:abstract,
+        _normTitle:normalizeTitle(title),_authorYear:ay});
+    }
+  });
+  return records;
+}
+
+function parseRayyanCSV(text,label){
+  text=normLE(text);
+  const lines=text.split('\n');
+  if(!lines.length) return [];
+  const headers=parseCSVLine(lines[0]);
+  const records=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const vals=parseCSVLine(lines[i]);
+    const rec={_source:label,_file:label};
+    headers.forEach((h,idx)=>{ rec[h.trim()]=(vals[idx]||'').trim(); });
+    const doi=normDoi(rec['doi']||rec['DOI']||rec['url']||'');
+    const title=rec['title']||rec['Title']||'';
+    const abstract=rec['abstract']||rec['Abstract']||'';
+    if(title||doi){
+      records.push({...rec,_doi:doi,_title:title,_abstract:abstract,
+        _normTitle:normalizeTitle(title),_authorYear:''});
+    }
+  }
+  return records;
+}
+
+function parseCSVLine(line){
+  const result=[];
+  let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else{inQ=!inQ;}}
+    else if(c===','&&!inQ){result.push(cur);cur='';}
+    else cur+=c;
+  }
+  result.push(cur);
+  return result;
+}
+
+function autoParseFile(text,filename,label){
+  const fn=filename.toLowerCase();
+  if(fn.endsWith('.csv')) return parseRayyanCSV(text,label);
+  text=normLE(text);
+  if(/^PMID-/m.test(text)) return parsePubMedTxt(text,detectSource(filename,text),filename);
+  return parseRIS(text,detectSource(filename,text),filename);
+}
+
+// ============================================================
+//  DEDUP LOGIC
+// ============================================================
+function calcConfidence(grp){
+  const types=grp.slice(1).map(x=>x.matchType);
+  if(types.includes('doi')) return 'certain';
+  if(types.includes('title')) return 'likely';
+  return 'possible';
+}
+let currentLang = 'ja';
+let LF = {
+  confCertain:'確実', confLikely:'ほぼ確実', confPossible:'可能性',
+  cr_case_name:'症例報告・症例シリーズ', cr_case_desc:'タイトルに case report などを含む',
+  cr_review_name:'レビュー論文（SR/MA含む）', cr_review_desc:'review, meta-analysis など',
+  cr_animal_name:'動物実験・in vitro', cr_animal_desc:'mouse, rat, in vitro など',
+  cr_noab_name:'抄録なし（会議録等）', cr_noab_desc:'抄録が空白または極端に短い',
+  cr_edit_name:'社説・レター・コメント', cr_edit_desc:'editorial, letter, comment など',
+  cr_guide_name:'ガイドライン・教科書', cr_guide_desc:'guideline, consensus など',
+  cr_proto_name:'プロトコル・研究計画', cr_proto_desc:'protocol, study design など',
+  langJa:'日本語', langZh:'中国語', langDe:'ドイツ語', langFr:'フランス語', langEs:'スペイン語', langPt:'ポルトガル語',
+  langExclSuffix:'を除外',
+  title:'LitFlow — 文献管理統合ツール'
+};
+
+const CONF_INFO={
+  certain:{get label(){return LF.confCertain},cls:'conf-certain',icon:'🔵'},
+  likely:{get label(){return LF.confLikely},cls:'conf-likely',icon:'🟢'},
+  possible:{get label(){return LF.confPossible},cls:'conf-possible',icon:'🟡'},
+};
+
+function runDedup(records,useDoi,useTitle,useFuzzy){
+  const groups=[];
+  const assigned=new Set();
+
+  // Phase1: DOI
+  if(useDoi){
+    const doiMap=new Map();
+    records.forEach((rec,i)=>{
+      if(!rec._doi) return;
+      if(!doiMap.has(rec._doi)) doiMap.set(rec._doi,[]);
+      doiMap.get(rec._doi).push(i);
+    });
+    doiMap.forEach(idxs=>{
+      if(idxs.length<2) return;
+      const grp=idxs.map((idx,pos)=>({idx,matchType:pos===0?'kept':'doi'}));
+      idxs.forEach(i=>assigned.add(i));
+      groups.push(grp);
+    });
+  }
+
+  // Phase2: タイトル正規化
+  if(useTitle){
+    const titleMap=new Map();
+    records.forEach((rec,i)=>{
+      if(assigned.has(i)) return;
+      const nt=rec._normTitle;
+      if(!nt||nt.length<8) return;
+      if(!titleMap.has(nt)) titleMap.set(nt,[]);
+      titleMap.get(nt).push(i);
+    });
+    titleMap.forEach(idxs=>{
+      if(idxs.length<2) return;
+      const keepGroup=[{idx:idxs[0],matchType:'kept'}];
+      assigned.add(idxs[0]);
+      for(let ji=1;ji<idxs.length;ji++){
+        const j=idxs[ji];
+        const rj=records[j];
+        let isDup=false;
+        for(const kept of keepGroup){
+          const rk=records[kept.idx];
+          const dj=rj._doi,dk=rk._doi;
+          if(dj&&dk&&dj!==dk){ isDup=doiSimilar(dj,dk); }
+          else { isDup=true; }
+          if(isDup) break;
+        }
+        if(isDup){ keepGroup.push({idx:j,matchType:'title'}); assigned.add(j); }
+      }
+      if(keepGroup.length>1) groups.push(keepGroup);
+    });
+  }
+
+  // Phase3: あいまい照合
+  if(useFuzzy){
+    const remaining=records.map((_,i)=>i).filter(i=>!assigned.has(i));
+    remaining.forEach((i,ai)=>{
+      if(assigned.has(i)) return;
+      const rec=records[i];
+      if(!rec._authorYear||rec._authorYear.length<4) return;
+      if(!rec._normTitle||rec._normTitle.length<15) return;
+      const grp=[{idx:i,matchType:'kept'}];
+      assigned.add(i);
+      remaining.slice(ai+1).forEach(j=>{
+        if(assigned.has(j)) return;
+        const other=records[j];
+        if(rec._authorYear!==other._authorYear) return;
+        if(!other._normTitle||other._normTitle.length<15) return;
+        if(rec._doi&&other._doi&&rec._doi!==other._doi&&!doiSimilar(rec._doi,other._doi)) return;
+        if(similarity(rec._normTitle,other._normTitle)>0.85){
+          grp.push({idx:j,matchType:'fuzzy'}); assigned.add(j);
+        }
+      });
+      if(grp.length>1) groups.push(grp);
+    });
+  }
+
+  const dupIndices=new Set();
+  groups.forEach(g=>g.slice(1).forEach(x=>dupIndices.add(x.idx)));
+  const dedupRecs=records.filter((_,i)=>!dupIndices.has(i));
+  return{groups,dedupRecs};
+}
+
+// ============================================================
+//  STEP 1 UI
+// ============================================================
+['optDoi','optTitle','optFuzzy'].forEach(id=>{
+  $(id).addEventListener('change',function(){
+    this.closest('label').classList.toggle('active',this.checked);
+  });
+});
+
+// ドロップゾーン
+const dz1=$('dz1'),fi1=$('fi1');
+fi1.addEventListener('change',e=>addFiles([...e.target.files]));
+dz1.addEventListener('dragover',e=>{e.preventDefault();dz1.classList.add('drag');});
+dz1.addEventListener('dragleave',()=>dz1.classList.remove('drag'));
+dz1.addEventListener('drop',e=>{e.preventDefault();dz1.classList.remove('drag');addFiles([...e.dataTransfer.files]);});
+
+function addFiles(newFiles){
+  newFiles.forEach(f=>{
+    if(!S.files.find(x=>x.name===f.name&&x.size===f.size)) S.files.push(f);
+  });
+  renderFileList1();
+  $('runDedup').disabled=S.files.length===0;
+}
+function removeFile(idx){ S.files.splice(idx,1); renderFileList1(); $('runDedup').disabled=S.files.length===0; }
+
+function renderFileList1(){
+  const fl=$('fl1');
+  fl.innerHTML='';
+  S.files.forEach((f,i)=>{
+    const src=f._src||'unknown';
+    const tag=document.createElement('div');
+    tag.className='file-tag';
+    tag.innerHTML=`<span class="src-badge src-${src}">${src.toUpperCase()}</span>${escH(f.name)}<button onclick="removeFile(${i})">×</button>`;
+    fl.appendChild(tag);
+  });
+}
+
+// Run dedup
+$('runDedup').addEventListener('click',async()=>{
+  $('runDedup').disabled=true;
+  $('s1results').style.display='none';
+  const pb=$('pb1');
+  pb.style.width='5%';
+  S.records=[];
+
+  for(let i=0;i<S.files.length;i++){
+    pb.style.width=Math.round(10+50*(i/S.files.length))+'%';
+    const raw=await readFile(S.files[i]);
+    const text=normLE(raw);
+    const src=detectSource(S.files[i].name,text);
+    S.files[i]._src=src;
+    let recs;
+    if(S.files[i].name.toLowerCase().endsWith('.ris')){
+      recs=parseRIS(text,src,S.files[i].name);
+    } else {
+      recs=/^PMID-/m.test(text)?parsePubMedTxt(text,src,S.files[i].name):parseRIS(text,src,S.files[i].name);
+    }
+    S.records.push(...recs);
+  }
+  renderFileList1();
+  pb.style.width='70%';
+
+  const {groups,dedupRecs}=runDedup(S.records,$('optDoi').checked,$('optTitle').checked,$('optFuzzy').checked);
+  S.dupGroups=groups;
+  S.dedupRecs=dedupRecs;
+
+  // stats
+  const total=S.records.length,dupCnt=total-dedupRecs.length,dedup=dedupRecs.length;
+  $('s1total').textContent=total;
+  $('s1dup').textContent=dupCnt;
+  $('s1dedup').textContent=dedup;
+  const srcCounts={};
+  S.records.forEach(r=>{srcCounts[r._source]=(srcCounts[r._source]||0)+1;});
+  $('s1break').textContent=Object.entries(srcCounts).map(([k,v])=>k.toUpperCase()+' '+v).join(' / ');
+  const cfCounts={certain:0,likely:0,possible:0};
+  groups.forEach(g=>{cfCounts[calcConfidence(g)]++;});
+  $('s1dupsub').textContent=LF.statDupFmt(groups.length,cfCounts.certain,cfCounts.likely,cfCounts.possible);
+  $('s1deduppct').textContent=total>0?LF.pctFmt(Math.round(dedup/total*100)):'';
+  $('s1grpCount').textContent=groups.length+LF.grpSuffix;
+
+  renderDupGroups('all');
+
+  pb.style.width='100%';
+  setTimeout(()=>{pb.style.width='0';},700);
+  $('s1results').style.display='block';
+  $('runDedup').disabled=false;
+  unlockStep(2);
+  unlockStep(3);
+  updateS3Note();
+  $('s1results').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// conf filter
+let s1filter='all';
+document.querySelectorAll('.conf-filter .cf-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.conf-filter .cf-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    s1filter=btn.dataset.cf;
+    renderDupGroups(s1filter);
+  });
+});
+
+function renderDupGroups(cf){
+  const dl=$('s1dupList');
+  if(S.dupGroups.length===0){dl.innerHTML='<div class="empty">'+LF.nodup+'</div>';return;}
+  dl.innerHTML='';
+  let shown=0;
+  S.dupGroups.forEach((grp,gi)=>{
+    const c=calcConfidence(grp);
+    if(cf!=='all'&&c!==cf) return;
+    shown++;
+    const ci=CONF_INFO[c];
+    const div=document.createElement('div');
+    div.className='dup-group';
+    div.innerHTML=`<div class="grp-header"><span style="color:var(--text3)">#${gi+1}</span><span class="conf-badge ${ci.cls}">${ci.icon} ${ci.label}</span></div>`;
+    grp.forEach(({idx,matchType})=>{
+      const r=S.records[idx];
+      const isKept=matchType==='kept';
+      const lbl=isKept?LF.kept:matchType==='doi'?LF.doiMatch:matchType==='fuzzy'?LF.fuzzyMatch:LF.titleMatch;
+      const cls=isKept?'mb-kept':matchType==='doi'?'mb-doi':matchType==='fuzzy'?'mb-fuzzy':'mb-title';
+      const item=document.createElement('div');
+      item.className='dup-item '+(isKept?'is-kept':'is-dup');
+      item.innerHTML=`<div class="dup-row"><span class="dup-title">${escH(r._title||LF.noTitle)}</span><span class="match-badge ${cls}">${lbl}</span></div><div class="dup-meta">${r._source.toUpperCase()} · ${escH(r._file)}${r._doi?' · '+escH(r._doi):''}</div>`;
+      div.appendChild(item);
+    });
+    dl.appendChild(div);
+  });
+  if(shown===0) dl.innerHTML='<div class="empty">'+LF.nogroup+'</div>';
+}
+
+// Step1 downloads
+function toRIS(records){
+  return records.map(r=>{
+    if(r._raw) return r._raw.trim()+'\n\n';
+    return 'TY  - JOUR\n'+(r._doi?'DO  - '+r._doi+'\n':'')+'TI  - '+(r._title||'')+'\nER  - \n\n';
+  }).join('');
+}
+function toTSV(records,extraHeaders=[]){
+  const bom='\uFEFF';
+  const baseH=['Title','DOI','Source','File','Authors','Year'];
+  const header=[...baseH,...extraHeaders].join('\t')+'\n';
+  const rows=records.map(r=>{
+    const au=(r['AU']||r['A1']||r['FAU']||[]).join('; ');
+    const yr=(r['PY']||r['Y1']||r['DA']||r['DP']||[])[0]||'';
+    const base=[r._title||'',r._doi||'',r._source,r._file||'',au,yr];
+    const extra=extraHeaders.map(h=>r[h]||'');
+    return [...base,...extra].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join('\t');
+  });
+  return bom+header+rows.join('\n');
+}
+
+$('dlDedupRis').addEventListener('click',()=>dlFile(toRIS(S.dedupRecs),'deduplicated.ris','application/x-research-info-systems'));
+$('dlDedupTsv').addEventListener('click',()=>dlFile(toTSV(S.dedupRecs),'deduplicated.tsv','text/tab-separated-values'));
+$('dlDedupReport').addEventListener('click',()=>{
+  const now=new Date().toLocaleString(currentLang==='ja'?'ja-JP':'en-US');
+  const lines=[LF.r1Title,LF.rDate+now,'',LF.rSum,
+    LF.rTotal+S.records.length+LF.rUnit,
+    LF.rDup+(S.records.length-S.dedupRecs.length)+LF.rUnit,
+    LF.rDedup+S.dedupRecs.length+LF.rUnit,'',
+    LF.r1Methods];
+  const mt={doi:0,title:0,fuzzy:0};
+  const cf={certain:0,likely:0,possible:0};
+  S.dupGroups.forEach(g=>{
+    g.slice(1).forEach(x=>{mt[x.matchType]=(mt[x.matchType]||0)+1;});
+    cf[calcConfidence(g)]++;
+  });
+  lines.push(LF.rDOI+(mt.doi||0)+LF.rArrow+cf.certain+LF.rGrp);
+  lines.push(LF.rTitle2+(mt.title||0)+LF.rArrow+cf.likely+LF.rGrp);
+  lines.push(LF.rFuzzy+(mt.fuzzy||0)+LF.rArrow+cf.possible+LF.rGrp);
+  lines.push('','■ 重複グループ詳細 ('+S.dupGroups.length+' グループ)');
+  S.dupGroups.forEach((grp,i)=>{
+    lines.push('\n[グループ '+(i+1)+'] 確信度: '+CONF_INFO[calcConfidence(grp)].label);
+    grp.forEach(({idx,matchType})=>{
+      const r=S.records[idx];
+      const pfx=matchType==='kept'?'  [保持] ':'  [除外:'+matchType+'] ';
+      lines.push(pfx+(r._title||'(タイトル不明)'));
+      lines.push('           '+r._file+' ('+r._source+')'+(r._doi?' | '+r._doi:''));
+    });
+  });
+  dlFile(lines.join('\n'),'dedup_report.txt','text/plain;charset=utf-8');
+});
+
+// ============================================================
+//  STEP 2: COMPARE
+// ============================================================
+const dz2=$('dz2'),fi2=$('fi2');
+fi2.addEventListener('change',e=>{if(e.target.files[0]) loadRayyan(e.target.files[0]);});
+dz2.addEventListener('dragover',e=>{e.preventDefault();dz2.classList.add('drag');});
+dz2.addEventListener('dragleave',()=>dz2.classList.remove('drag'));
+dz2.addEventListener('drop',e=>{
+  e.preventDefault();dz2.classList.remove('drag');
+  if(e.dataTransfer.files[0]) loadRayyan(e.dataTransfer.files[0]);
+});
+
+async function loadRayyan(f){
+  const raw=await readFile(f);
+  S.rayyanRecs=autoParseFile(raw,f.name,'rayyan');
+  $('lbl2').textContent='✓ '+f.name+' ('+S.rayyanRecs.length+'件)';
+  $('runCompare').disabled=false;
+}
+
+$('runCompare').addEventListener('click',()=>{
+  const pb=$('pb2');
+  pb.style.width='30%';
+  const refSet=new Map();
+  S.dedupRecs.forEach((r,i)=>{
+    if(r._doi) refSet.set(r._doi,i);
+    if(r._normTitle&&r._normTitle.length>=8) refSet.set('t:'+r._normTitle,i);
+  });
+
+  const matched=[],onlyA=[],onlyB=[];
+  const matchedRefIdx=new Set();
+
+  S.rayyanRecs.forEach(rr=>{
+    let foundIdx=-1,mtype='';
+    if(rr._doi&&refSet.has(rr._doi)){foundIdx=refSet.get(rr._doi);mtype='DOI';}
+    else if(rr._normTitle&&rr._normTitle.length>=8&&refSet.has('t:'+rr._normTitle)){foundIdx=refSet.get('t:'+rr._normTitle);mtype='タイトル';}
+    if(foundIdx>=0){
+      matched.push({ref:S.dedupRecs[foundIdx],rayyan:rr,mtype});
+      matchedRefIdx.add(foundIdx);
+    } else {
+      onlyB.push(rr);
+    }
+  });
+  S.dedupRecs.forEach((r,i)=>{
+    if(!matchedRefIdx.has(i)) onlyA.push(r);
+  });
+
+  S.cmpMatched=matched; S.cmpOnlyA=onlyA; S.cmpOnlyB=onlyB;
+  pb.style.width='90%';
+
+  $('s2cntA').textContent=S.dedupRecs.length;
+  $('s2cntB').textContent=S.rayyanRecs.length;
+  $('s2match').textContent=matched.length;
+  $('s2matchpct').textContent=S.dedupRecs.length>0?LF.pctMatchFmt(Math.round(matched.length/S.dedupRecs.length*100)):'';
+  $('s2diff').textContent=onlyA.length+onlyB.length;
+  $('s2diffsub').textContent=LF.onlyA+' '+onlyA.length+' / '+LF.onlyB+' '+onlyB.length;
+  $('tc0').textContent=matched.length;
+  $('tc1').textContent=onlyA.length;
+  $('tc2').textContent=onlyB.length;
+
+  renderCompareList('s2list0',matched.map(x=>({...x.ref,_mtype:x.mtype})),'match');
+  renderCompareList('s2list1',onlyA,'refsieve');
+  renderCompareList('s2list2',onlyB,'rayyan');
+
+  setupCompareSearch('s2q0','s2list0',matched.map(x=>({...x.ref,_mtype:x.mtype})),'match');
+  setupCompareSearch('s2q1','s2list1',onlyA,'refsieve');
+  setupCompareSearch('s2q2','s2list2',onlyB,'rayyan');
+
+  pb.style.width='100%';
+  setTimeout(()=>{pb.style.width='0';},600);
+  $('s2results').style.display='block';
+  $('s2results').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+function renderCompareList(containerId,recs,type){
+  const el=$(containerId);
+  if(!recs.length){el.innerHTML='<div class="empty">'+LF.noResults+'</div>';return;}
+  el.innerHTML=recs.map(r=>{
+    const badgeCls=type==='match'?'badge-match':type==='refsieve'?'badge-refsieve':'badge-rayyan';
+    const badgeTxt=type==='match'?(LF.matchedParen+r._mtype+')'):type==='refsieve'?LF.onlyA:LF.onlyB;
+    return `<div class="rec-item">
+      <div class="rec-row"><span class="rec-title">${escH(r._title||LF.noTitle)}</span>
+      <span class="conf-badge ${type==='match'?'conf-certain':type==='refsieve'?'conf-likely':'conf-possible'}">${badgeTxt}</span></div>
+      <div class="rec-meta">${(r._source||'').toUpperCase()}${r._doi?' · '+escH(r._doi):''}</div>
+    </div>`;
+  }).join('');
+}
+
+function setupCompareSearch(inputId,listId,recs,type){
+  $(inputId).addEventListener('input',function(){
+    const q=this.value.toLowerCase();
+    const filtered=recs.filter(r=>(r._title||'').toLowerCase().includes(q)||(r._doi||'').toLowerCase().includes(q));
+    renderCompareList(listId,filtered,type);
+  });
+}
+
+// Tab switching (step2)
+document.querySelectorAll('.tab-bar .tab').forEach(tab=>{
+  tab.addEventListener('click',function(){
+    const bar=this.closest('.tab-bar');
+    bar.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    const target=this.dataset.tab;
+    document.querySelectorAll('.tab-panel').forEach(p=>{
+      if(p.id==='tab-'+target) p.classList.add('active');
+      else if([...bar.nextElementSibling.classList,...(bar.nextElementSibling.nextElementSibling?.classList||[])].includes('tab-panel'))
+        p.classList.remove('active');
+    });
+    // simple: toggle all panels in results
+    document.querySelectorAll('#s2results .tab-panel').forEach(p=>{
+      p.classList.toggle('active',p.id==='tab-'+target);
+    });
+  });
+});
+
+// Compare downloads
+$('dlCmpReport').addEventListener('click',()=>{
+  const now=new Date().toLocaleString(currentLang==='ja'?'ja-JP':'en-US');
+  const lines=[LF.r2Title,LF.rDate+now,'',LF.rSum,
+    '  RefSieve: '+S.dedupRecs.length+LF.rUnit,
+    '  Rayyan: '+S.rayyanRecs.length+LF.rUnit,
+    '  '+LF.matched+': '+S.cmpMatched.length+LF.rUnit,
+    '  '+LF.onlyA+': '+S.cmpOnlyA.length+LF.rUnit+LF.r2OnlyANote,
+    '  '+LF.onlyB+': '+S.cmpOnlyB.length+LF.rUnit+LF.r2OnlyBNote,
+    '','  '+LF.onlyA+':'];
+  S.cmpOnlyA.forEach(r=>lines.push('  '+( r._title||'')+(r._doi?' ['+r._doi+']':'')));
+  lines.push('','  '+LF.onlyB+':');
+  S.cmpOnlyB.forEach(r=>lines.push('  '+(r._title||'')+(r._doi?' ['+r._doi+']':'')));
+  dlFile(lines.join('\n'),'compare_report.txt','text/plain;charset=utf-8');
+});
+$('dlCmpOnlyA').addEventListener('click',()=>dlFile(toTSV(S.cmpOnlyA),'refsieve_only.tsv','text/tab-separated-values'));
+$('dlCmpOnlyB').addEventListener('click',()=>dlFile(toTSV(S.cmpOnlyB),'rayyan_only.tsv','text/tab-separated-values'));
+
+// ============================================================
+//  STEP 3: SCREENING
+// ============================================================
+const CRITERIA=[
+  {id:'case_report',
+   get name(){return LF.cr_case_name}, get desc(){return LF.cr_case_desc},
+   patterns:[/\bcase\s+report/i,/\bcase\s+series/i,/\ba\s+case\s+of\b/i,/\bcase\s+presentation/i,/症例報告/],
+   conf:'certain'},
+  {id:'review',
+   get name(){return LF.cr_review_name}, get desc(){return LF.cr_review_desc},
+   patterns:[/\breview\b/i,/\bmeta[- ]?analysis\b/i,/\bsystematic\s+review/i,/\bscoping\s+review/i,/\bnarrative\s+review/i,/レビュー/,/メタ解析/],
+   conf:'likely'},
+  {id:'animal',
+   get name(){return LF.cr_animal_name}, get desc(){return LF.cr_animal_desc},
+   patterns:[/\bin\s+vitro\b/i,/\bmouse\b/i,/\bmice\b/i,/\bmurine\b/i,/\brat\b/i,/\brats\b/i,/\banimal\s+model/i,/\bcell\s+line/i,/\bin\s+vivo\b/i],
+   conf:'possible'},
+  {id:'no_abstract',
+   get name(){return LF.cr_noab_name}, get desc(){return LF.cr_noab_desc},
+   patterns:[],
+   conf:'likely'},
+  {id:'editorial',
+   get name(){return LF.cr_edit_name}, get desc(){return LF.cr_edit_desc},
+   patterns:[/\beditorial\b/i,/\bletter\b/i,/\bcorrespondence\b/i,/\bcomment\b/i,/\berratum\b/i,/\bcorrection\b/i,/\bresponse\s+to\b/i],
+   conf:'certain'},
+  {id:'guideline',
+   get name(){return LF.cr_guide_name}, get desc(){return LF.cr_guide_desc},
+   patterns:[/\bguideline/i,/\bconsensus\b/i,/\brecommendation/i,/\bpractice\s+parameter/i],
+   conf:'likely'},
+  {id:'protocol',
+   get name(){return LF.cr_proto_name}, get desc(){return LF.cr_proto_desc},
+   patterns:[/\bprotocol\b/i,/\bstudy\s+design\b/i,/\bstudy\s+protocol\b/i],
+   conf:'possible'},
+];
+
+const LANG_OPTIONS=[
+  {code:'ja',get label(){return LF.langJa},_label:'日本語',patterns:[/[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/]},
+  {code:'zh',get label(){return LF.langZh},_label:'中国語',patterns:[/[\u4e00-\u9fff]{10,}/]},
+  {code:'de',get label(){return LF.langDe},_label:'ドイツ語',patterns:[/\b(und|die|der|das|ist|mit|für)\b/i]},
+  {code:'fr',get label(){return LF.langFr},_label:'フランス語',patterns:[/\b(et|le|la|les|des|une|dans)\b/i]},
+  {code:'es',get label(){return LF.langEs},_label:'スペイン語',patterns:[/\b(los|las|del|para|con|una)\b/i]},
+  {code:'pt',get label(){return LF.langPt},_label:'ポルトガル語',patterns:[/\b(dos|das|para|com|uma)\b/i]},
+];
+
+// criteria UI build
+const criteriaBox=$('criteriaBox');
+CRITERIA.forEach(cr=>{
+  const row=document.createElement('label');
+  row.className='criteria-row';
+  row.innerHTML=`<input type="checkbox" id="cr_${cr.id}" checked>
+    <span class="criteria-name">${cr.name}</span>
+    <span class="criteria-desc">${cr.desc}</span>
+    <span class="criteria-badge">${CONF_INFO[cr.conf].icon} ${CONF_INFO[cr.conf].label}</span>`;
+  criteriaBox.appendChild(row);
+});
+
+const langBox=$('langBox');
+LANG_OPTIONS.forEach(lang=>{
+  const lbl=document.createElement('label');
+  lbl.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer';
+  lbl.innerHTML=`<input type="checkbox" id="lang_${lang.code}" style="accent-color:var(--accent)"> ${lang.label}${LF.langExclSuffix}`;
+  langBox.appendChild(lbl);
+});
+
+function updateS3Note(){
+  S.screenSrc=S.dedupRecs.length>0?S.dedupRecs:[];
+  $('s3srcNote').textContent=S.screenSrc.length+(LF.unit||' 件');
+}
+
+$('runScreen').addEventListener('click',()=>{
+  if(!S.screenSrc.length){ alert(LF.alertNoSrc); return; }
+  const pb=$('pb3');
+  pb.style.width='10%';
+
+  // 有効基準
+  const activeCr=CRITERIA.filter(cr=>$('cr_'+cr.id)?.checked);
+  const activeLangs=LANG_OPTIONS.filter(l=>$('lang_'+l.code)?.checked);
+  const customKwRaw=$('customKw').value.trim();
+  const customKws=customKwRaw?customKwRaw.split('\n').map(s=>s.trim()).filter(Boolean):[];
+
+  const excl=[],keep=[];
+
+  S.screenSrc.forEach((rec,ri)=>{
+    if(ri%50===0) pb.style.width=Math.round(10+80*(ri/S.screenSrc.length))+'%';
+    const titleStr=(rec._title||'').toLowerCase();
+    const absStr=(rec._abstract||'').toLowerCase();
+    const fullStr=titleStr+' '+absStr;
+
+    const reasons=[];
+    let maxConf='';
+    const confRank={certain:3,likely:2,possible:1};
+    const rankConf=(a,b)=>confRank[a]>=confRank[b]?a:b;
+
+    // 組み込み基準
+    activeCr.forEach(cr=>{
+      if(cr.id==='no_abstract'){
+        if((rec._abstract||'').trim().length<50){
+          reasons.push({label:cr.name,conf:cr.conf,src:LF.srcTitleAb});
+          maxConf=maxConf?rankConf(maxConf,cr.conf):cr.conf;
+        }
+        return;
+      }
+      // タイトルで検出 → 確実寄り、抄録のみ → 1段階下げ
+      let hitTitle=cr.patterns.some(p=>p.test(rec._title||''));
+      let hitAbs=!hitTitle&&cr.patterns.some(p=>p.test(rec._abstract||''));
+      if(hitTitle||hitAbs){
+        const conf=hitTitle?cr.conf:(cr.conf==='certain'?'likely':cr.conf==='likely'?'possible':'possible');
+        reasons.push({label:cr.name,conf,src:hitTitle?LF.srcTitle:LF.srcAbs});
+        maxConf=maxConf?rankConf(maxConf,conf):conf;
+      }
+    });
+
+    // 言語除外
+    activeLangs.forEach(lang=>{
+      if(lang.patterns.some(p=>p.test(fullStr))){
+        reasons.push({label:lang.label+LF.langSuffix,conf:'likely',src:LF.srcTitleAb});
+        maxConf=maxConf?rankConf(maxConf,'likely'):'likely';
+      }
+    });
+
+    // カスタムキーワード
+    customKws.forEach(kw=>{
+      if(fullStr.includes(kw.toLowerCase())){
+        reasons.push({label:LF.customPrefix+kw,conf:'possible',src:LF.srcTitleAb});
+        maxConf=maxConf?rankConf(maxConf,'possible'):'possible';
+      }
+    });
+
+    if(reasons.length>0){
+      excl.push({...rec,_reasons:reasons,_conf:maxConf});
+    } else {
+      keep.push(rec);
+    }
+  });
+
+  S.exclRecs=excl; S.keepRecs=keep;
+  pb.style.width='95%';
+
+  // stats
+  $('s3total').textContent=S.screenSrc.length;
+  $('s3excl').textContent=excl.length;
+  $('s3keep').textContent=keep.length;
+  const cfCounts={certain:0,likely:0,possible:0};
+  excl.forEach(r=>cfCounts[r._conf]++);
+  $('s3exclsub').textContent=LF.exclSubFmt(cfCounts.certain,cfCounts.likely,cfCounts.possible);
+  $('s3keeppct').textContent=S.screenSrc.length>0?LF.pctFmt(Math.round(keep.length/S.screenSrc.length*100)):'';
+  $('s3exclCount').textContent=excl.length+(LF.unit||'件');
+
+  // reason breakdown
+  const rBreak={};
+  excl.forEach(r=>r._reasons.forEach(rs=>{
+    rBreak[rs.label]=(rBreak[rs.label]||0)+1;
+  }));
+  $('s3reasonBreak').innerHTML=Object.entries(rBreak).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span>${escH(k)}</span><span style="font-family:var(--mono);font-weight:500">${v} 件</span>
+    </div>`).join('')||'<div style="color:var(--text3);font-size:13px">'+LF.none+'</div>';
+
+  renderScreenList('all','');
+  pb.style.width='100%';
+  setTimeout(()=>{pb.style.width='0';},600);
+  $('s3results').style.display='block';
+  $('s3results').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// screen filter
+let s3filter='all';
+document.querySelectorAll('#s3filter .cf-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#s3filter .cf-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    s3filter=btn.dataset.scf;
+    renderScreenList(s3filter,$('s3q').value);
+  });
+});
+$('s3q').addEventListener('input',function(){ renderScreenList(s3filter,this.value); });
+
+function renderScreenList(cf,q){
+  const el=$('s3exclList');
+  const ql=q.toLowerCase();
+  const filtered=S.exclRecs.filter(r=>{
+    if(cf!=='all'&&r._conf!==cf) return false;
+    if(ql&&!(r._title||'').toLowerCase().includes(ql)&&!(r._doi||'').toLowerCase().includes(ql)) return false;
+    return true;
+  });
+  if(!filtered.length){el.innerHTML='<div class="empty">'+LF.noResults+'</div>';return;}
+  el.innerHTML=filtered.map((r,ri)=>{
+    const ci=CONF_INFO[r._conf];
+    const reasonHtml=r._reasons.map(rs=>{
+      const rci=CONF_INFO[rs.conf];
+      return `<span class="reason-tag">${rs.src}: ${escH(rs.label)} <span style="opacity:.7">${rci.icon}</span></span>`;
+    }).join('');
+    const hasAb=(r._abstract||'').trim().length>0;
+    return `<div class="screen-item">
+      <div class="screen-header" onclick="toggleAb(this)">
+        <div style="flex:1">
+          <div class="rec-row"><span class="rec-title">${escH(r._title||LF.noTitle)}</span><span class="conf-badge ${ci.cls}">${ci.icon} ${ci.label}</span></div>
+          <div class="rec-meta">${(r._source||'').toUpperCase()}${r._doi?' · '+escH(r._doi):''}</div>
+          <div style="margin-top:4px">${reasonHtml}</div>
+        </div>
+        <span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px;font-family:var(--mono)">${hasAb?LF.showAbs:''}</span>
+      </div>
+      ${hasAb?`<div class="screen-body" id="ab${ri}"><div class="abstract-text">${escH(r._abstract)}</div></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function toggleAb(el){
+  const id=el.nextElementSibling?.id;
+  if(!id) return;
+  const body=$(id);
+  if(body) body.classList.toggle('open');
+}
+
+// Screen downloads
+$('dlScreenRis').addEventListener('click',()=>dlFile(toRIS(S.keepRecs),'screened.ris','application/x-research-info-systems'));
+$('dlExclTsv').addEventListener('click',()=>{
+  const bom='\uFEFF';
+  const header='Title\tDOI\tSource\tConfidence\tReasons\tAbstract\n';
+  const rows=S.exclRecs.map(r=>[
+    r._title||'',r._doi||'',r._source,
+    CONF_INFO[r._conf].label,
+    r._reasons.map(x=>x.src+': '+x.label).join(' | '),
+    (r._abstract||'').replace(/\n/g,' ')
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join('\t'));
+  dlFile(bom+header+rows.join('\n'),'excluded.tsv','text/tab-separated-values');
+});
+$('dlScreenReport').addEventListener('click',()=>{
+  const now=new Date().toLocaleString(currentLang==='ja'?'ja-JP':'en-US');
+  const lines=[LF.r3Title,LF.rDate+now,'',LF.rSum,
+    LF.r3Src+S.screenSrc.length+LF.rUnit,
+    LF.r3Excl+S.exclRecs.length+LF.rUnit,
+    LF.r3Keep+S.keepRecs.length+LF.rUnit,'',
+    LF.r3Conf];
+  const cfC={certain:0,likely:0,possible:0};
+  S.exclRecs.forEach(r=>cfC[r._conf]++);
+  lines.push('  '+LF.confCertain+': '+cfC.certain+LF.rUnit);
+  lines.push('  '+LF.confLikely+': '+cfC.likely+LF.rUnit);
+  lines.push('  '+LF.confPossible+': '+cfC.possible+LF.rUnit);
+  lines.push('',LF.r3Reasons);
+  const rBreak={};
+  S.exclRecs.forEach(r=>r._reasons.forEach(rs=>{rBreak[rs.label]=(rBreak[rs.label]||0)+1;}));
+  Object.entries(rBreak).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>lines.push('  '+k+' : '+v+' 件'));
+  lines.push('',LF.r3ExclList);
+  S.exclRecs.forEach((r,i)=>{
+    lines.push('\n['+(i+1)+'] '+CONF_INFO[r._conf].label);
+    lines.push('  '+LF.rRptTitle+': '+(r._title||''));
+    lines.push('  DOI: '+(r._doi||LF.noDoi));
+    lines.push('  '+LF.rRptReasons+': '+r._reasons.map(x=>x.src+': '+x.label).join(' / '));
+  });
+  dlFile(lines.join('\n'),'screen_report.txt','text/plain;charset=utf-8');
+});
+
+// 初期表示を currentLang に同期
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
+} else {
+  setLang(currentLang);
+}
+
+// ============================================================
+//  PIPELINE NAV
+// ============================================================
+function gotoStep(n){
+  const pill=$('pill'+n);
+  if(pill.classList.contains('locked')) return;
+  [1,2,3].forEach(i=>{
+    $('panel'+i).classList.toggle('active',i===n);
+    const p=$('pill'+i);
+    p.classList.remove('active');
+    if(i<n) p.classList.add('done');
+    if(i===n) p.classList.add('active');
+  });
+  S.currentStep=n;
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===3) updateS3Note();
+}
+
+function unlockStep(n){
+  $('pill'+n).classList.remove('locked');
+}
+
+// ============================================================
+//  FAB
+// ============================================================
+const fab=$('fab');
+window.addEventListener('scroll',()=>fab.classList.toggle('visible',window.scrollY>250));
+$('fabTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+function getVisItems(){
+  return [...document.querySelectorAll('.dup-group,.screen-item,.rec-item')];
+}
+$('fabNext').addEventListener('click',()=>{
+  const items=getVisItems();
+  const sy=window.scrollY+100;
+  const next=items.find(el=>el.getBoundingClientRect().top+window.scrollY>sy);
+  if(next) next.scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('fabPrev').addEventListener('click',()=>{
+  const items=getVisItems();
+  const sy=window.scrollY+80;
+  const rev=[...items].reverse();
+  const prev=rev.find(el=>el.getBoundingClientRect().top+window.scrollY<sy-10);
+  if(prev) prev.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// ============================================================
+//  i18n
+// ============================================================
+const LFDICT = {
+  ja: {
+    // meta
+    title:        'LitFlow — 文献管理統合ツール',
+    tagline:      '// 文献管理統合ツール — 重複除去 → Rayyan比較 → 一次スクリーニング',
+    // pipeline
+    pill1:        '取込・重複除去',
+    pill2:        'Rayyan比較',
+    pill3:        '一次スクリーニング',
+    // step1
+    s1dzTitle:    'RIS・TXTファイルをドロップ、またはクリックして選択',
+    s1dzSub:      'PubMed / Scopus / Cochrane のエクスポートファイルに対応（複数可）',
+    optDoiLbl:    'DOI照合', optDoiTag:'推奨',
+    optTitleLbl:  'タイトル正規化', optFuzzyLbl:'あいまい照合',
+    runDedupTxt:  '重複を検出する',
+    lblS1Total:   '取り込み合計', lblS1Dup:'重複数', lblS1Dedup:'重複除去後',
+    lblDupGrp:    '重複グループ', lblDlDedup:'ダウンロード（重複除去後）',
+    btnToS2:      '次へ → Rayyan比較',
+    btnSkipS2:    '比較をスキップして一次スクリーニングへ',
+    // step2
+    s2note:       '💡 Rayyanでの目視除去済みファイルをアップロードして、RefSieveの自動除去結果と比較します。CSV・RIS両対応。',
+    s2dzTitle:    'Rayyan エクスポートファイルをドロップ',
+    s2dzSub:      'CSV（Rayyan標準）または RIS',
+    runCompareTxt:'比較する',
+    btnSkipS3:    'スキップして一次スクリーニングへ',
+    lblS2Unit1:   '件', lblS2Unit2:'件',
+    lblS2Match:   '一致', lblS2Diff:'不一致',
+    tabMatch:     '✓ 一致', tabOnlyA:'RefSieveのみ', tabOnlyB:'Rayyanのみ',
+    noteOnlyA:    'RefSieveが残したが Rayyan では除去された文献（RefSieveの取り逃した重複候補）',
+    noteOnlyB:    'Rayyanが残したが RefSieve では除去された文献（Rayyanの取り逃した重複候補）',
+    lblDlCmp:     'ダウンロード（比較結果）',
+    btnToS3:      '次へ → 一次スクリーニング',
+    // step3
+    s3notePre:    '重複除去後の', s3notePost:'を対象にスクリーニングします。',
+    cardCriteriaTitle:'除外基準（タイトル＋抄録で判定）',
+    lblCustomKw:  '追加キーワード（除外したいフレーズ、1行1語句）',
+    lblLangExcl:  '除外ターゲット言語（英語以外を除外する場合）',
+    runScreenTxt: 'スクリーニング実行',
+    lblS3Total:   'スクリーニング対象', lblS3Excl:'除外', lblS3Keep:'残存（次ステップへ）',
+    lblReasonBreak:'除外理由別内訳', lblExclList:'除外文献リスト',
+    s3cfLabel:    '絞り込み：',
+    s3cfAll:'すべて', s3cfCertain:'🔵 確実', s3cfLikely:'🟢 ほぼ確実', s3cfPossible:'🟡 可能性',
+    lblDlScreen:  'ダウンロード',
+    lblScreenRisSub:'（残存）', lblExclTsvSub:'（除外一覧）',
+    phSearch:     'タイトル・DOI で絞り込み…',
+    // footer
+    lfFooter:     'ローカル処理のみ・データは外部送信されません',
+    // confidence
+    confCertain:'確実', confLikely:'ほぼ確実', confPossible:'可能性',
+    // JS runtime
+    nodup:        '重複は検出されませんでした',
+    nogroup:      '該当するグループがありません',
+    noResults:    '該当なし',
+    noTitle:      '(タイトル不明)',
+    none:         'なし',
+    noDoi:        'なし',
+    kept:'保持', doiMatch:'DOI一致', titleMatch:'タイトル一致', fuzzyMatch:'あいまい',
+    grpSuffix:    ' グループ',
+    unit:         ' 件',
+    matched:      '一致',
+    onlyA:        'RefSieveのみ', onlyB:'Rayyanのみ',
+    matchedParen: '一致（',
+    alertNoSrc:   '先にStep1で重複除去を実行してください',
+    pctFmt:       (p) => p+'% 残存',
+    pctMatchFmt:  (p) => p+'% 一致',
+    statDupFmt:   (g,c,l,p) => `${g}グループ（確実 ${c} / ほぼ確実 ${l} / 可能性 ${p}）`,
+    exclSubFmt:   (c,l,p) => `確実 ${c} / ほぼ確実 ${l} / 可能性 ${p}`,
+    showAbs:      '▼ 抄録',
+    srcTitle:     'タイトル', srcAbs:'抄録', srcTitleAb:'タイトル/抄録',
+    customPrefix: 'カスタム: ',
+    langSuffix:   'の文献', langExclSuffix:'を除外',
+    langJa:'日本語', langZh:'中国語', langDe:'ドイツ語',
+    langFr:'フランス語', langEs:'スペイン語', langPt:'ポルトガル語',
+    // criteria
+    cr_case_name:'症例報告・症例シリーズ', cr_case_desc:'タイトルに "case report", "case series", "a case of" 等を含む',
+    cr_review_name:'レビュー論文（SR/MA含む）', cr_review_desc:'"review", "meta-analysis", "systematic review", "scoping review" 等',
+    cr_animal_name:'動物実験・in vitro', cr_animal_desc:'"mouse", "rat", "murine", "in vitro", "in vivo" 等（動物・細胞実験）',
+    cr_noab_name:'抄録なし（会議録等）', cr_noab_desc:'ABフィールドが空白または極端に短い（50字未満）',
+    cr_edit_name:'社説・レター・コメント', cr_edit_desc:'"editorial", "letter", "comment", "correspondence", "erratum" 等',
+    cr_guide_name:'ガイドライン・教科書', cr_guide_desc:'"guideline", "consensus", "recommendation", "textbook" 等',
+    cr_proto_name:'プロトコル・研究計画', cr_proto_desc:'"protocol", "study design", "study protocol" 等',
+    // reports
+    r1Title:'=== LitFlow Step1: 重複検出レポート ===',
+    r2Title:'=== LitFlow Step2: Rayyan比較レポート ===',
+    r3Title:'=== LitFlow Step3: 一次スクリーニングレポート ===',
+    rDate:'生成日時: ', rSum:'■ サマリー',
+    rTotal:'  取り込み合計 : ', rDup:'  重複数       : ', rDedup:'  重複除去後   : ',
+    rUnit:' 件',
+    r1Methods:'■ 照合方法別内訳',
+    rDOI:'  DOI照合（確実）          : ', rTitle2:'  タイトル照合（ほぼ確実） : ', rFuzzy:'  あいまい照合（可能性）   : ',
+    rArrow:' 件 → ', rGrp:' グループ',
+    rGrpDetail:'■ 重複グループ詳細 (', rGrpDetailClose:' グループ)',
+    rGrpLabel:'[グループ ', rGrpConf:'] 確信度: ',
+    rKept:'  [保持] ', rExcl:'  [除外:',
+    r2OnlyANote:'（RefSieveが取り逃した重複の可能性）', r2OnlyBNote:'（Rayyanが取り逃した重複の可能性）',
+    r3Src:'  スクリーニング対象 : ', r3Excl:'  除外数             : ', r3Keep:'  残存数             : ',
+    r3Conf:'■ 確信度別内訳', r3Reasons:'■ 除外理由別内訳', r3ExclList:'■ 除外文献一覧',
+    rRptTitle:'タイトル', rRptReasons:'除外理由',
+  },
+  en: {
+    title:        'LitFlow — Literature Management Pipeline',
+    tagline:      '// Deduplication → Rayyan comparison → Title/abstract screening',
+    pill1:        'Import & Dedup',
+    pill2:        'Rayyan compare',
+    pill3:        'Screening',
+    s1dzTitle:    'Drop RIS / TXT files here, or click to select',
+    s1dzSub:      'Supports export files from PubMed, Scopus, and Cochrane (multiple files)',
+    optDoiLbl:    'DOI matching', optDoiTag:'Recommended',
+    optTitleLbl:  'Title normalization', optFuzzyLbl:'Fuzzy matching',
+    runDedupTxt:  'Detect duplicates',
+    lblS1Total:   'Total imported', lblS1Dup:'Duplicates', lblS1Dedup:'After deduplication',
+    lblDupGrp:    'Duplicate groups', lblDlDedup:'Download (deduplicated)',
+    btnToS2:      'Next → Rayyan comparison',
+    btnSkipS2:    'Skip comparison, go to screening',
+    s2note:       '💡 Upload your Rayyan export file to compare it with the automated deduplication result. Supports CSV and RIS.',
+    s2dzTitle:    'Drop Rayyan export file here',
+    s2dzSub:      'CSV (Rayyan default) or RIS',
+    runCompareTxt:'Compare',
+    btnSkipS3:    'Skip, go to screening',
+    lblS2Unit1:   '', lblS2Unit2:'',
+    lblS2Match:   'Matched', lblS2Diff:'Discrepancies',
+    tabMatch:     '✓ Matched', tabOnlyA:'RefSieve only', tabOnlyB:'Rayyan only',
+    noteOnlyA:    'In RefSieve but removed by Rayyan — possible missed duplicates in RefSieve',
+    noteOnlyB:    'In Rayyan but removed by RefSieve — possible missed duplicates in Rayyan',
+    lblDlCmp:     'Download (comparison)',
+    btnToS3:      'Next → Screening',
+    s3notePre:    'Screening', s3notePost:'records from deduplication.',
+    cardCriteriaTitle:'Exclusion criteria (title + abstract)',
+    lblCustomKw:  'Additional keywords (one phrase per line)',
+    lblLangExcl:  'Language exclusion (exclude non-English)',
+    runScreenTxt: 'Run screening',
+    lblS3Total:   'Records screened', lblS3Excl:'Excluded', lblS3Keep:'Remaining',
+    lblReasonBreak:'Exclusion reasons breakdown', lblExclList:'Excluded references',
+    s3cfLabel:    'Filter: ',
+    s3cfAll:'All', s3cfCertain:'🔵 Certain', s3cfLikely:'🟢 Likely', s3cfPossible:'🟡 Possible',
+    lblDlScreen:  'Download',
+    lblScreenRisSub:' (remaining)', lblExclTsvSub:' (exclusion list)',
+    phSearch:     'Filter by title or DOI…',
+    lfFooter:     'Local processing only — no data is transmitted',
+    confCertain:'Certain', confLikely:'Likely', confPossible:'Possible',
+    nodup:        'No duplicates detected',
+    nogroup:      'No groups match the filter',
+    noResults:    'No results',
+    noTitle:      '(No title)',
+    none:         'None',
+    noDoi:        'N/A',
+    kept:'Kept', doiMatch:'DOI match', titleMatch:'Title match', fuzzyMatch:'Fuzzy',
+    grpSuffix:    ' groups',
+    unit:         '',
+    matched:      'Matched',
+    onlyA:        'RefSieve only', onlyB:'Rayyan only',
+    matchedParen: 'Matched (',
+    alertNoSrc:   'Please run deduplication in Step 1 first.',
+    pctFmt:       (p) => p+'% remaining',
+    pctMatchFmt:  (p) => p+'% matched',
+    statDupFmt:   (g,c,l,p) => `${g} groups (Certain: ${c} / Likely: ${l} / Possible: ${p})`,
+    exclSubFmt:   (c,l,p) => `Certain: ${c} / Likely: ${l} / Possible: ${p}`,
+    showAbs:      '▼ Abstract',
+    srcTitle:     'Title', srcAbs:'Abstract', srcTitleAb:'Title/Abstract',
+    customPrefix: 'Custom: ',
+    langSuffix:   ' references', langExclSuffix:' — exclude',
+    langJa:'Japanese', langZh:'Chinese', langDe:'German',
+    langFr:'French', langEs:'Spanish', langPt:'Portuguese',
+    cr_case_name:'Case reports / case series', cr_case_desc:'Matches "case report", "case series", "a case of", "case presentation"',
+    cr_review_name:'Review articles (incl. SR/MA)', cr_review_desc:'Matches "review", "meta-analysis", "systematic review", "scoping review"',
+    cr_animal_name:'Animal / in vitro studies', cr_animal_desc:'Matches "mouse", "rat", "murine", "in vitro", "in vivo", "animal model"',
+    cr_noab_name:'No abstract (conference abstracts etc.)', cr_noab_desc:'AB field is empty or very short (< 50 characters)',
+    cr_edit_name:'Editorials / letters / comments', cr_edit_desc:'Matches "editorial", "letter", "correspondence", "comment", "erratum"',
+    cr_guide_name:'Guidelines / textbooks', cr_guide_desc:'Matches "guideline", "consensus", "recommendation", "practice parameter"',
+    cr_proto_name:'Protocols / study designs', cr_proto_desc:'Matches "protocol", "study design", "study protocol"',
+    r1Title:'=== LitFlow Step1: Deduplication Report ===',
+    r2Title:'=== LitFlow Step2: Rayyan Comparison Report ===',
+    r3Title:'=== LitFlow Step3: Screening Report ===',
+    rDate:'Generated: ', rSum:'■ Summary',
+    rTotal:'  Total imported  : ', rDup:'  Duplicates      : ', rDedup:'  After dedup     : ',
+    rUnit:'',
+    r1Methods:'■ Breakdown by method',
+    rDOI:'  DOI match (Certain)        : ', rTitle2:'  Title match (Likely)        : ', rFuzzy:'  Fuzzy match (Possible)      : ',
+    rArrow:' → ', rGrp:' groups',
+    rGrpDetail:'■ Duplicate group details (', rGrpDetailClose:' groups)',
+    rGrpLabel:'[Group ', rGrpConf:'] Confidence: ',
+    rKept:'  [Kept] ', rExcl:'  [Excluded:',
+    r2OnlyANote:' (possible missed duplicates in RefSieve)', r2OnlyBNote:' (possible missed duplicates in Rayyan)',
+    r3Src:'  Records screened : ', r3Excl:'  Excluded         : ', r3Keep:'  Remaining        : ',
+    r3Conf:'■ Breakdown by confidence', r3Reasons:'■ Breakdown by exclusion reason', r3ExclList:'■ Excluded references',
+    rRptTitle:'Title', rRptReasons:'Exclusion reason',
+  }
+};
+
+currentLang = 'ja';
+LF = LFDICT.ja;
+
+function setLang(lang) {
+  currentLang = lang;
+  LF = LFDICT[lang];
+  document.getElementById('htmlRoot').lang = lang;
+  document.getElementById('pageTitle').textContent = LF.title;
+
+  // lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === lang);
+  });
+
+  // id → 辞書キー マップ
+  const textMap = {
+    'lf-tagline': 'tagline',
+    'pill1txt': 'pill1',
+    'pill2txt': 'pill2',
+    'pill3txt': 'pill3',
+    's1dzTitle': 's1dzTitle',
+    's1dzSub': 's1dzSub',
+    'optDoiLbl': 'optDoiLbl',
+    'optDoiTag': 'optDoiTag',
+    'optTitleLbl': 'optTitleLbl',
+    'optFuzzyLbl': 'optFuzzyLbl',
+    'runDedupTxt': 'runDedupTxt',
+    'lblS1Total': 'lblS1Total',
+    'lblS1Dup': 'lblS1Dup',
+    'lblS1Dedup': 'lblS1Dedup',
+    'lblDupGrp': 'lblDupGrp',
+    'lblDlDedup': 'lblDlDedup',
+    'btnToS2': 'btnToS2',
+    'btnSkipS2': 'btnSkipS2',
+    's2dzTitle': 's2dzTitle',
+    's2dzSub': 's2dzSub',
+    'runCompareTxt': 'runCompareTxt',
+    'btnSkipS3': 'btnSkipS3',
+    'lblS2Unit1': 'lblS2Unit1',
+    'lblS2Unit2': 'lblS2Unit2',
+    'lblS2Match': 'lblS2Match',
+    'lblS2Diff': 'lblS2Diff',
+    'tabMatch': 'tabMatch',
+    'tabOnlyA': 'tabOnlyA',
+    'tabOnlyB': 'tabOnlyB',
+    'noteOnlyA': 'noteOnlyA',
+    'noteOnlyB': 'noteOnlyB',
+    'lblDlCmp': 'lblDlCmp',
+    'btnToS3': 'btnToS3',
+    's3notePre': 's3notePre',
+    's3notePost': 's3notePost',
+    'cardCriteriaTitle': 'cardCriteriaTitle',
+    'lblCustomKw': 'lblCustomKw',
+    'lblLangExcl': 'lblLangExcl',
+    'runScreenTxt': 'runScreenTxt',
+    'lblS3Total': 'lblS3Total',
+    'lblS3Excl': 'lblS3Excl',
+    'lblS3Keep': 'lblS3Keep',
+    'lblReasonBreak': 'lblReasonBreak',
+    'lblExclList': 'lblExclList',
+    's3cfLabel': 's3cfLabel',
+    's3cfAll': 's3cfAll',
+    's3cfCertain': 's3cfCertain',
+    's3cfLikely': 's3cfLikely',
+    's3cfPossible': 's3cfPossible',
+    'lblDlScreen': 'lblDlScreen',
+    'lblScreenRisSub': 'lblScreenRisSub',
+    'lblExclTsvSub': 'lblExclTsvSub',
+    'lfFooter': 'lfFooter'
+  };
+  Object.entries(textMap).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && LF[key] !== undefined) el.textContent = LF[key];
+  });
+
+  // s2note は innerHTML（絵文字含む）
+  const s2n = document.getElementById('s2note');
+  if (s2n) s2n.textContent = LF.s2note;
+
+  // search placeholders
+  document.querySelectorAll('[data-ph="phSearch"]').forEach(el => {
+    el.placeholder = LF.phSearch;
+  });
+
+  // criteria box 再描画
+  rebuildCriteria();
+
+  // lang box 再描画
+  rebuildLangBox();
+
+  // 結果が表示中なら動的テキストも更新
+  refreshDynamicTexts();
+}
+
+function rebuildCriteria() {
+  const box = document.getElementById('criteriaBox');
+  if (!box) return;
+  const checked = {};
+  CRITERIA.forEach(cr => {
+    const el = document.getElementById('cr_' + cr.id);
+    checked[cr.id] = el ? el.checked : true;
+  });
+  box.innerHTML = '';
+  CRITERIA.forEach(cr => {
+    const row = document.createElement('label');
+    row.className = 'criteria-row';
+    row.innerHTML = `<input type="checkbox" id="cr_${cr.id}" ${checked[cr.id]?'checked':''}>
+      <span class="criteria-name">${cr.name}</span>
+      <span class="criteria-desc">${cr.desc}</span>
+      <span class="criteria-badge">${CONF_INFO[cr.conf].icon} ${CONF_INFO[cr.conf].label}</span>`;
+    box.appendChild(row);
+  });
+}
+
+function rebuildLangBox() {
+  const box = document.getElementById('langBox');
+  if (!box) return;
+  const checked = {};
+  LANG_OPTIONS.forEach(l => {
+    const el = document.getElementById('lang_' + l.code);
+    checked[l.code] = el ? el.checked : false;
+  });
+  box.innerHTML = '';
+  LANG_OPTIONS.forEach(lang => {
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer';
+    lbl.innerHTML = `<input type="checkbox" id="lang_${lang.code}" ${checked[lang.code]?'checked':''} style="accent-color:var(--accent)"> ${lang.label}${LF.langExclSuffix}`;
+    box.appendChild(lbl);
+  });
+}
+
+function refreshDynamicTexts() {
+  // Step1 stats（結果表示中のみ）
+  if ($('s1results') && $('s1results').style.display !== 'none' && S.dupGroups.length > 0) {
+    const cfC = {certain:0,likely:0,possible:0};
+    S.dupGroups.forEach(g => { cfC[calcConfidence(g)]++; });
+    const total = S.records.length, dedup = S.dedupRecs.length;
+    $('s1dupsub').textContent = LF.statDupFmt(S.dupGroups.length, cfC.certain, cfC.likely, cfC.possible);
+    $('s1deduppct').textContent = total > 0 ? LF.pctFmt(Math.round(dedup/total*100)) : '';
+    $('s1grpCount').textContent = S.dupGroups.length + LF.grpSuffix;
+    renderDupGroups(s1filter);
+  }
+  // Step2 stats
+  if ($('s2results') && $('s2results').style.display !== 'none') {
+    $('s2matchpct').textContent = S.dedupRecs.length > 0 ?
+      LF.pctMatchFmt(Math.round(S.cmpMatched.length/S.dedupRecs.length*100)) : '';
+    $('s2diffsub').textContent = LF.onlyA+' '+S.cmpOnlyA.length+' / '+LF.onlyB+' '+S.cmpOnlyB.length;
+    renderCompareList('s2list0', S.cmpMatched.map(x=>({...x.ref,_mtype:x.mtype})), 'match');
+    renderCompareList('s2list1', S.cmpOnlyA, 'refsieve');
+    renderCompareList('s2list2', S.cmpOnlyB, 'rayyan');
+  }
+  // Step3 stats
+  if ($('s3results') && $('s3results').style.display !== 'none') {
+    const cfC = {certain:0,likely:0,possible:0};
+    S.exclRecs.forEach(r => cfC[r._conf]++);
+    $('s3exclsub').textContent = LF.exclSubFmt(cfC.certain, cfC.likely, cfC.possible);
+    const pct = S.screenSrc.length > 0 ? Math.round(S.keepRecs.length/S.screenSrc.length*100) : 0;
+    $('s3keeppct').textContent = S.screenSrc.length > 0 ? LF.pctFmt(pct) : '';
+    renderScreenList(s3filter, $('s3q').value);
+  }
+}
+</script>
+</body>
+</html>
