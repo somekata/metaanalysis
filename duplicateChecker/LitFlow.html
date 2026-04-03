@@ -255,7 +255,7 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
 
     <div class="sec-head" style="margin-top:1rem">
       <span class="sec-label" id="lblDupGrp">重複グループ</span>
-      <span class="sec-count" id="s1grpCount">0グループ</span>
+      <span class="sec-count" id="s1grpCount">0</span>
     </div>
     <div class="conf-filter">
       <span class="cf-label">絞り込み：</span>
@@ -267,7 +267,7 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
     <div id="s1dupList"></div>
 
     <div class="divider"></div>
-    <div class="sec-head"><span class="sec-label">ダウンロード（重複除去後）</span></div>
+    <div class="sec-head"><span class="sec-label" id="lblDlDedup">ダウンロード（重複除去後）</span></div>
     <div class="dl-grid">
       <button class="btn-dl" id="dlDedupRis">⬇ deduplicated.ris</button>
       <button class="btn-dl" id="dlDedupTsv">⬇ deduplicated.tsv</button>
@@ -332,7 +332,7 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
     </div>
 
     <div class="divider"></div>
-    <div class="sec-head"><span class="sec-label">ダウンロード（比較結果）</span></div>
+    <div class="sec-head"><span class="sec-label" id="lblDlCmp">ダウンロード（比較結果）</span></div>
     <div class="dl-grid">
       <button class="btn-dl" id="dlCmpReport">⬇ compare_report.txt</button>
       <button class="btn-dl" id="dlCmpOnlyA">⬇ refsieve_only.tsv</button>
@@ -403,7 +403,7 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
     <div id="s3exclList"></div>
 
     <div class="divider"></div>
-    <div class="sec-head"><span class="sec-label">ダウンロード</span></div>
+    <div class="sec-head"><span class="sec-label" id="lblDlScreen">ダウンロード</span></div>
     <div class="dl-grid">
       <button class="btn-dl" id="dlScreenRis">⬇ screened.ris<span id="lblScreenRisSub">（残存）</span></button>
       <button class="btn-dl" id="dlExclTsv">⬇ excluded.tsv<span id="lblExclTsvSub">（除外一覧）</span></button>
