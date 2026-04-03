@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaFlow — Systematic Review & Meta-Analysis Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Serif+JP:wght@400;500;700&family=Zen+Antique&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee;--surface:#fff;--surface2:#f0ede6;--surface3:#e8e4dc;
+  --border:#ddd8ce;--border2:#c8c2b4;
+  --text:#1a1814;--text2:#6b6456;--text3:#9c9385;
+  --accent:#2d4a3e;--accent2:#4a7c6a;--accent-light:#e8f0ed;
+  --blue:#1d3f6e;--blue-light:#e4ecf7;
+  --amber:#7a4e0d;--amber-light:#fdf0dc;--amber-border:#e0c06a;
+  --green:#1d5c2e;--green-light:#e4f5e8;
+  --mono:'DM Mono',monospace;
+  --serif:'Noto Serif JP',serif;
+  --zen:'Zen Antique',serif;
+  --radius:8px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.75;font-size:15px}
+
+/* ===== HERO ===== */
+.hero{background:var(--accent);padding:3rem 2rem 2.5rem;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;opacity:.06;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 30px,#fff 30px,#fff 31px),
+                   repeating-linear-gradient(90deg,transparent,transparent 30px,#fff 30px,#fff 31px)}
+.hero-inner{max-width:860px;margin:0 auto;position:relative;z-index:1}
+.logo-row{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.4rem}
+.logo{font-family:var(--mono);font-size:2.2rem;font-weight:500;color:#fff;letter-spacing:-.03em}
+.logo em{color:#6aad8e;font-style:normal}
+.logo-ver{font-family:var(--mono);font-size:11px;color:#5a9070;padding:2px 7px;border:1px solid #3d6e57;border-radius:3px;align-self:center}
+.hero-sub{font-family:var(--mono);font-size:11px;color:#7ab89a;letter-spacing:.05em;margin-bottom:1.25rem}
+.hero-lead{font-size:14.5px;color:#c5dbd3;line-height:1.9;max-width:560px}
+.hero-lead strong{color:#e8f4f0;font-weight:500}
+.hero-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:1.25rem}
+.hbadge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:3px;border:1px solid;letter-spacing:.03em}
+.hbadge-g{background:rgba(106,173,142,.12);border-color:#3d6e57;color:#8fc4ab}
+.hbadge-y{background:rgba(232,194,106,.1);border-color:#7a6020;color:#c9a84c}
+
+/* ===== PAGE ===== */
+.page{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+
+/* ===== SECTION LABEL ===== */
+.sec-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.section{margin-bottom:2.75rem}
+
+/* ===== TOOL CARDS ===== */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.4rem 1.4rem 1.2rem;position:relative;overflow:hidden;transition:border-color .15s,transform .12s,box-shadow .12s;text-decoration:none;display:block;color:inherit}
+.tool-card:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(45,74,62,.08)}
+.tool-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.tc-green::before{background:var(--accent2)}
+.tc-blue::before{background:var(--blue)}
+.tc-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;font-weight:500;letter-spacing:.04em;margin-bottom:.65rem;display:inline-block}
+.tc-green .tc-badge{background:var(--accent-light);color:var(--accent)}
+.tc-blue .tc-badge{background:var(--blue-light);color:var(--blue)}
+.tc-name{font-family:var(--mono);font-size:1.2rem;font-weight:500;color:var(--text);margin-bottom:.4rem}
+.tc-desc{font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:.85rem}
+.tc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.9rem}
+.tc-tag{font-size:10px;padding:2px 7px;background:var(--surface2);color:var(--text3);border-radius:3px;font-family:var(--mono)}
+.tc-link{font-family:var(--mono);font-size:11px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:500}
+.tc-blue .tc-link{color:var(--blue)}
+.tc-link::after{content:'→';transition:transform .12s}
+.tool-card:hover .tc-link::after{transform:translateX(4px)}
+
+/* ===== WORKFLOW ===== */
+.flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem 1.5rem 1.25rem}
+.flow-svg-wrap{overflow-x:auto;margin-bottom:1.1rem}
+.rayyan-note{background:var(--amber-light);border:1px solid var(--amber-border);border-radius:var(--radius);padding:.85rem 1rem;font-size:12.5px;color:var(--amber);line-height:1.75}
+.rayyan-note strong{font-weight:700}
+.rayyan-note a{color:var(--amber);font-weight:700}
+
+/* ===== EXPORT GUIDE ===== */
+.db-grid{display:flex;flex-direction:column;gap:12px}
+.db-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.db-header{display:flex;align-items:center;gap:10px;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .12s}
+.db-header:hover{background:var(--surface2)}
+.db-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-pubmed{background:#e25a4e}
+.dot-scopus{background:#f59e0b}
+.dot-cochrane{background:#3b82f6}
+.db-name{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);flex:1}
+.db-format{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:3px;background:var(--surface2);color:var(--text3)}
+.db-chevron{color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0}
+.db-card.open .db-chevron{transform:rotate(180deg)}
+.db-body{display:none;padding:1rem 1.1rem 1.1rem}
+.db-card.open .db-body{display:block}
+.db-steps{display:flex;flex-direction:column;gap:0}
+.ds{display:flex;gap:.85rem;padding:.6rem 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.ds:last-child{border-bottom:none;padding-bottom:0}
+.ds-num{font-family:var(--mono);font-size:10px;color:var(--text3);width:18px;flex-shrink:0;padding-top:1px}
+.ds-body{font-size:12.5px;color:var(--text2);line-height:1.65;flex:1}
+.ds-body strong{color:var(--text);font-weight:500}
+.kbd{display:inline-block;font-family:var(--mono);font-size:10px;padding:1px 7px;background:var(--surface2);border:1px solid var(--border2);border-radius:3px;color:var(--text);white-space:nowrap}
+.ds-note{font-size:11px;color:var(--text3);margin-top:.3rem;font-family:var(--mono)}
+.detail-link{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;color:var(--accent2);margin-top:.85rem;text-decoration:none;transition:color .12s}
+.detail-link:hover{color:var(--accent)}
+.detail-link::after{content:'↗';font-size:10px}
+
+/* ===== GUIDE STEPS ===== */
+.guide-steps{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.gs{display:flex;gap:1.1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);align-items:flex-start}
+.gs:last-child{border-bottom:none}
+.gs-num{font-family:var(--mono);font-size:11px;color:#fff;background:var(--accent);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.gs-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:.2rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.gs-tool{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:3px;background:var(--accent-light);color:var(--accent)}
+.gs-tool-b{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:3px;background:var(--blue-light);color:var(--blue)}
+.gs-tool-y{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:3px;background:var(--amber-light);color:var(--amber)}
+.gs-desc{font-size:12.5px;color:var(--text2);line-height:1.7}
+
+/* ===== FOOTER ===== */
+footer{border-top:1px solid var(--border);max-width:860px;margin:0 auto}
+.footer-disclaimer{padding:1.75rem 1.5rem;border-bottom:1px solid var(--border)}
+.disclaimer-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem}
+.disclaimer-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.disclaimer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.disc-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem .9rem;font-size:11.5px;color:var(--text2);line-height:1.75}
+.disc-item strong{font-family:var(--mono);font-size:10px;display:block;color:var(--text3);letter-spacing:.04em;margin-bottom:.3rem;text-transform:uppercase}
+.footer-bar{padding:.9rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.footer-logo{font-family:var(--mono);font-size:12px;color:var(--text3)}
+.footer-meta{font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;gap:1.25rem;flex-wrap:wrap}
+
+@media(max-width:600px){
+  .tool-grid{grid-template-columns:1fr}
+  .logo{font-size:1.7rem}
+  .disclaimer-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="logo-row">
+      <div class="logo">Meta<em>Flow</em></div>
+      <div class="logo-ver">v1.0</div>
+    </div>
+    <div class="hero-sub">// Systematic Review &amp; Meta-Analysis Toolkit</div>
+    <div class="hero-lead">
+      システマティックレビュー・メタ解析のための<strong>文献管理ツール集</strong>。<br>
+      重複除去から一次スクリーニングまでを、ブラウザ上で完結。<br>
+      <strong>Rayyan</strong> との組み合わせでさらに強力に機能します。
+    </div>
+    <div class="hero-badges">
+      <span class="hbadge hbadge-g">完全ローカル処理</span>
+      <span class="hbadge hbadge-g">データ外部送信なし</span>
+      <span class="hbadge hbadge-g">インストール不要</span>
+      <span class="hbadge hbadge-y">Rayyan 連携対応</span>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ===== TOOLS ===== -->
+  <div class="section">
+    <div class="sec-label">ツール</div>
+    <div class="tool-grid">
+
+      <a class="tool-card tc-green" href="RefSieve_v2.html">
+        <span class="tc-badge">重複除去のみ</span>
+        <div class="tc-name">RefSieve</div>
+        <div class="tc-desc">PubMed・Scopus・Cochraneのエクスポートファイルを読み込み、重複文献を自動検出・除去。シンプルに重複除去だけ行いたいときに。</div>
+        <div class="tc-tags">
+          <span class="tc-tag">DOI照合</span>
+          <span class="tc-tag">タイトル正規化</span>
+          <span class="tc-tag">あいまい照合</span>
+          <span class="tc-tag">確信度ランク</span>
+          <span class="tc-tag">RIS / TSV 出力</span>
+        </div>
+        <div class="tc-link">RefSieve を開く</div>
+      </a>
+
+      <a class="tool-card tc-blue" href="LitFlow.html">
+        <span class="tc-badge">3ステップ統合</span>
+        <div class="tc-name">LitFlow</div>
+        <div class="tc-desc">重複除去 → Rayyan比較 → 一次スクリーニングの3ステップを1ツールで完結。各ステップの結果を次に引き渡すパイプライン設計。</div>
+        <div class="tc-tags">
+          <span class="tc-tag">重複除去</span>
+          <span class="tc-tag">Rayyan比較</span>
+          <span class="tc-tag">1次スクリーニング</span>
+          <span class="tc-tag">抄録判定</span>
+          <span class="tc-tag">除外理由付き出力</span>
+        </div>
+        <div class="tc-link">LitFlow を開く</div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ===== WORKFLOW ===== -->
+  <div class="section">
+    <div class="sec-label">ワークフロー</div>
+    <div class="flow-card">
+      <div class="flow-svg-wrap">
+        <svg width="100%" viewBox="0 0 780 72" style="display:block;min-width:480px">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#c8c2b4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <!-- DB sources -->
+          <rect x="2" y="16" width="96" height="40" rx="6" fill="#f0ede6" stroke="#ddd8ce" stroke-width=".5"/>
+          <text font-family="DM Mono,monospace" font-size="9.5" fill="#6b6456" x="50" y="30" text-anchor="middle" dominant-baseline="central" font-weight="500">PubMed</text>
+          <text font-family="DM Mono,monospace" font-size="8.5" fill="#9c9385" x="50" y="46" text-anchor="middle" dominant-baseline="central">Scopus / Cochrane</text>
+          <!-- Arrow -->
+          <line x1="100" y1="36" x2="126" y2="36" stroke="#c8c2b4" stroke-width="1" marker-end="url(#ar)"/>
+          <!-- RefSieve -->
+          <rect x="128" y="8" width="128" height="56" rx="8" fill="#e8f0ed" stroke="#4a7c6a" stroke-width="1"/>
+          <text font-family="DM Mono,monospace" font-size="11" fill="#2d4a3e" x="192" y="27" text-anchor="middle" dominant-baseline="central" font-weight="500">RefSieve</text>
+          <text font-family="DM Mono,monospace" font-size="9" fill="#4a7c6a" x="192" y="46" text-anchor="middle" dominant-baseline="central">自動重複除去</text>
+          <!-- Arrow -->
+          <line x1="258" y1="36" x2="284" y2="36" stroke="#c8c2b4" stroke-width="1" marker-end="url(#ar)"/>
+          <!-- Rayyan -->
+          <rect x="286" y="8" width="128" height="56" rx="8" fill="#fdf0dc" stroke="#e0c06a" stroke-width="1"/>
+          <text font-family="DM Mono,monospace" font-size="11" fill="#7a4e0d" x="350" y="27" text-anchor="middle" dominant-baseline="central" font-weight="500">Rayyan</text>
+          <text font-family="DM Mono,monospace" font-size="9" fill="#a87030" x="350" y="46" text-anchor="middle" dominant-baseline="central">目視確認（推奨）</text>
+          <!-- Arrow -->
+          <line x1="416" y1="36" x2="442" y2="36" stroke="#c8c2b4" stroke-width="1" marker-end="url(#ar)"/>
+          <!-- LitFlow -->
+          <rect x="444" y="8" width="128" height="56" rx="8" fill="#e4ecf7" stroke="#1d3f6e" stroke-width="1"/>
+          <text font-family="DM Mono,monospace" font-size="11" fill="#1d3f6e" x="508" y="27" text-anchor="middle" dominant-baseline="central" font-weight="500">LitFlow</text>
+          <text font-family="DM Mono,monospace" font-size="9" fill="#2a5a9e" x="508" y="46" text-anchor="middle" dominant-baseline="central">1次スクリーニング</text>
+          <!-- Arrow -->
+          <line x1="574" y1="36" x2="600" y2="36" stroke="#c8c2b4" stroke-width="1" marker-end="url(#ar)"/>
+          <!-- Output -->
+          <rect x="602" y="16" width="172" height="40" rx="6" fill="#e4f5e8" stroke="#4a7c6a" stroke-width=".5"/>
+          <text font-family="DM Mono,monospace" font-size="9.5" fill="#1d5c2e" x="688" y="36" text-anchor="middle" dominant-baseline="central" font-weight="500">2次スクリーニングへ</text>
+        </svg>
+      </div>
+      <div class="rayyan-note">
+        💡 <strong>Rayyan との組み合わせがベターです。</strong>
+        RefSieve で自動除去した後、Rayyan で目視確認。LitFlow の「Rayyan 比較」機能でエクスポートファイルを照合すれば差分がひと目でわかります。
+        より詳細な検索戦略は <a href="https://somekata.github.io/metaanalysis/searchDB.html" target="_blank">こちら（英語）</a> を参照。
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXPORT GUIDE ===== -->
+  <div class="section">
+    <div class="sec-label">データベース別 エクスポート方法</div>
+    <div class="db-grid">
+
+      <!-- PubMed -->
+      <div class="db-card open" id="db-pubmed">
+        <div class="db-header" onclick="toggleDb('db-pubmed')">
+          <span class="db-dot dot-pubmed"></span>
+          <span class="db-name">PubMed</span>
+          <span class="db-format">TXT (MEDLINE)</span>
+          <span class="db-chevron">▼</span>
+        </div>
+        <div class="db-body">
+          <div class="db-steps">
+            <div class="ds">
+              <span class="ds-num">01</span>
+              <div class="ds-body">検索結果画面で <kbd class="kbd">Save</kbd> ボタンをクリック</div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">02</span>
+              <div class="ds-body">
+                <strong>Selection</strong> で <kbd class="kbd">All results</kbd> を選択
+                <div class="ds-note">※ 件数が多い場合は複数回に分けてダウンロード（上限 10,000 件）</div>
+              </div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">03</span>
+              <div class="ds-body"><strong>Format</strong> で <kbd class="kbd">PubMed</kbd> を選択</div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">04</span>
+              <div class="ds-body"><kbd class="kbd">Create file</kbd> をクリックしてダウンロード</div>
+            </div>
+          </div>
+          <a class="detail-link" href="https://somekata.github.io/metaanalysis/searchDB.html" target="_blank">詳細な検索方法（英語）</a>
+        </div>
+      </div>
+
+      <!-- Scopus -->
+      <div class="db-card" id="db-scopus">
+        <div class="db-header" onclick="toggleDb('db-scopus')">
+          <span class="db-dot dot-scopus"></span>
+          <span class="db-name">Scopus</span>
+          <span class="db-format">RIS</span>
+          <span class="db-chevron">▼</span>
+        </div>
+        <div class="db-body">
+          <div class="db-steps">
+            <div class="ds">
+              <span class="ds-num">01</span>
+              <div class="ds-body">検索結果画面で全件選択し、<kbd class="kbd">Export</kbd> をクリック</div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">02</span>
+              <div class="ds-body">
+                形式として <kbd class="kbd">RIS format</kbd> を選択
+              </div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">03</span>
+              <div class="ds-body">
+                出力する情報のチェックボックスで <strong>Abstract &amp; Keywords</strong>（抄録とキーワード）まで<strong>すべてチェック</strong>
+                <div class="ds-note">※ 抄録まで含めることで LitFlow の一次スクリーニング精度が向上します</div>
+              </div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">04</span>
+              <div class="ds-body"><kbd class="kbd">Export</kbd> をクリックしてダウンロード</div>
+            </div>
+          </div>
+          <a class="detail-link" href="https://somekata.github.io/metaanalysis/searchDB.html" target="_blank">詳細な検索方法（英語）</a>
+        </div>
+      </div>
+
+      <!-- Cochrane -->
+      <div class="db-card" id="db-cochrane">
+        <div class="db-header" onclick="toggleDb('db-cochrane')">
+          <span class="db-dot dot-cochrane"></span>
+          <span class="db-name">Cochrane Library</span>
+          <span class="db-format">RIS (EndNote)</span>
+          <span class="db-chevron">▼</span>
+        </div>
+        <div class="db-body">
+          <div class="db-steps">
+            <div class="ds">
+              <span class="ds-num">01</span>
+              <div class="ds-body">検索後、画面上部の <kbd class="kbd">Advanced Search</kbd> をクリック</div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">02</span>
+              <div class="ds-body"><kbd class="kbd">Search Manager</kbd> タブを開く</div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">03</span>
+              <div class="ds-body">
+                対象の検索をチェックし、<kbd class="kbd">Export selected citation(s)</kbd> をクリック
+              </div>
+            </div>
+            <div class="ds">
+              <span class="ds-num">04</span>
+              <div class="ds-body">
+                形式で <kbd class="kbd">RIS (EndNote)</kbd> を選択し、<kbd class="kbd">Download</kbd>
+              </div>
+            </div>
+          </div>
+          <a class="detail-link" href="https://somekata.github.io/metaanalysis/searchDB.html" target="_blank">詳細な検索方法（英語）</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== USAGE GUIDE ===== -->
+  <div class="section">
+    <div class="sec-label">使い方</div>
+    <div class="guide-steps">
+      <div class="gs">
+        <div class="gs-num">1</div>
+        <div>
+          <div class="gs-title">各データベースから文献をエクスポート</div>
+          <div class="gs-desc">上記の手順で PubMed（TXT）、Scopus（RIS）、Cochrane（RIS）からファイルをダウンロードします。Scopus は抄録までチェックしておくと後のスクリーニングが楽になります。</div>
+        </div>
+      </div>
+      <div class="gs">
+        <div class="gs-num">2</div>
+        <div>
+          <div class="gs-title">自動重複除去 <span class="gs-tool">RefSieve</span> または <span class="gs-tool">LitFlow Step 1</span></div>
+          <div class="gs-desc">ファイルをドロップするだけで、DOI照合→タイトル照合→あいまい照合の3段階で重複を検出。確実・ほぼ確実・可能性の確信度でランク付けされ、除去後のRISをダウンロードできます。</div>
+        </div>
+      </div>
+      <div class="gs">
+        <div class="gs-num">3</div>
+        <div>
+          <div class="gs-title">Rayyan で目視確認 <span class="gs-tool-y">推奨</span></div>
+          <div class="gs-desc">重複除去後のRISをRayyanにインポートし、確信度「可能性」のグループを中心に目視で最終確認します。LitFlow Step 2 でRayyanのエクスポートファイルを読み込めば、差分（RefSieveのみ／Rayyanのみ）がリスト表示されます。</div>
+        </div>
+      </div>
+      <div class="gs">
+        <div class="gs-num">4</div>
+        <div>
+          <div class="gs-title">一次スクリーニング <span class="gs-tool-b">LitFlow Step 3</span></div>
+          <div class="gs-desc">タイトル・抄録を読み込み、症例報告・レビュー・動物実験・言語などの除外基準を自動判定。カスタムキーワードも設定できます。除外理由・確信度付きの一覧と残存RISをダウンロードできます。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-disclaimer">
+    <div class="disclaimer-title">注意事項</div>
+    <div class="disclaimer-grid">
+
+      <div class="disc-item">
+        <strong>作成について</strong>
+        本ツール群（MetaFlow）は、生成AI Claude（Anthropic）を活用して作成されました。AIが生成したコードを含むため、意図しない動作や予期せぬ結果が生じる可能性があります。
+      </div>
+
+      <div class="disc-item">
+        <strong>免責事項</strong>
+        本ツールの使用により生じたいかなる損害・不利益についても、作成者は責任を負いません。研究・臨床上の最終判断は、必ず利用者自身が行ってください。
+      </div>
+
+      <div class="disc-item">
+        <strong>構造上の限界</strong>
+        自動重複除去はDOIやタイトルの一致に基づきます。DOIが付与されていない文献、タイトル表記が大きく異なる文献は取り逃す場合があります。あいまい照合では誤検出が生じることもあります。ツールの出力を鵜呑みにせず、目視による確認を推奨します。
+      </div>
+
+      <div class="disc-item">
+        <strong>一次スクリーニングの限界</strong>
+        スクリーニングはタイトル・抄録のキーワードマッチングによるものです。文脈の理解は行いません。「可能性」ランクの文献は特に目視確認が必要です。除外すべき文献を残したり、残すべき文献を除外したりする可能性があります。
+      </div>
+
+      <div class="disc-item">
+        <strong>データの取り扱い</strong>
+        アップロードされたファイルはすべてブラウザ上でローカル処理されます。データはサーバーに送信されず、外部に保存・記録されることはありません。
+      </div>
+
+      <div class="disc-item">
+        <strong>推奨する使い方</strong>
+        Rayyan等のツールと組み合わせて使用することを推奨します。本ツールはあくまで作業効率化の補助であり、システマティックレビューのプロトコルに従った適切な手順を省略するものではありません。
+      </div>
+
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="footer-logo">MetaFlow v1.0</span>
+    <span class="footer-meta">
+      <span>Built with Claude (Anthropic)</span>
+      <span>完全ローカル処理</span>
+      <span>データ外部送信なし</span>
+    </span>
+  </div>
+</footer>
+
+<script>
+function toggleDb(id){
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+</script>
+</body>
+</html>
