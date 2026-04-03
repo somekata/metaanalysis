@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LitFlow — 文献管理統合ツール</title>
+<title id="pageTitle">LitFlow — 文献管理統合ツール</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -192,25 +192,32 @@ header{margin-bottom:2rem}
 .fab-btn:hover{background:#1e3328;transform:scale(1.08)}
 
 footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)}
+
+/* LANG SWITCHER */
+.lang-sw{display:flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden;margin-left:auto;align-self:flex-start;margin-top:.15rem}
+.lang-btn{font-family:var(--mono);font-size:11px;padding:3px 10px;background:transparent;border:none;cursor:pointer;color:var(--text3);transition:background .12s,color .12s;letter-spacing:.04em}
+.lang-btn.active{background:var(--accent);color:#fff}
+.lang-btn:hover:not(.active){background:var(--surface2);color:var(--text)}
 </style>
 </head>
 <body>
 <div class="page">
 
-<header>
+<header style="display:flex;align-items:flex-start">
   <div>
     <div class="logo">Lit<span>Flow</span></div>
-    <div class="tagline">// 文献管理統合ツール — 重複除去 → Rayyan比較 → 一次スクリーニング</div>
+    <div class="tagline" id="lf-tagline">// 文献管理統合ツール — 重複除去 → Rayyan比較 → 一次スクリーニング</div>
   </div>
+  <div class="lang-sw"><button class="lang-btn active" onclick="setLang('ja')">JA</button><button class="lang-btn" onclick="setLang('en')">EN</button></div>
 </header>
 
 <!-- ===== PIPELINE NAV ===== -->
 <div class="pipeline">
-  <div class="step-pill active" id="pill1" onclick="gotoStep(1)"><span class="step-num">01</span> 取込・重複除去</div>
+  <div class="step-pill active" id="pill1" onclick="gotoStep(1)"><span class="step-num">01</span> <span id="pill1txt">取込・重複除去</span></div>
   <div class="step-arrow">→</div>
-  <div class="step-pill locked" id="pill2" onclick="gotoStep(2)"><span class="step-num">02</span> Rayyan比較</div>
+  <div class="step-pill locked" id="pill2" onclick="gotoStep(2)"><span class="step-num">02</span> <span id="pill2txt">Rayyan比較</span></div>
   <div class="step-arrow">→</div>
-  <div class="step-pill locked" id="pill3" onclick="gotoStep(3)"><span class="step-num">03</span> 一次スクリーニング</div>
+  <div class="step-pill locked" id="pill3" onclick="gotoStep(3)"><span class="step-num">03</span> <span id="pill3txt">一次スクリーニング</span></div>
 </div>
 
 <!-- ========================================
@@ -221,19 +228,19 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
   <div class="dropzone" id="dz1">
     <input type="file" id="fi1" multiple accept=".ris,.txt">
     <div style="font-size:36px;margin-bottom:.5rem">📄</div>
-    <div class="dz-title">RIS・TXTファイルをドロップ、またはクリックして選択</div>
-    <div class="dz-sub">PubMed / Scopus / Cochrane のエクスポートファイルに対応（複数可）</div>
+    <div class="dz-title" id="s1dzTitle">RIS・TXTファイルをドロップ、またはクリックして選択</div>
+    <div class="dz-sub" id="s1dzSub">PubMed / Scopus / Cochrane のエクスポートファイルに対応（複数可）</div>
   </div>
   <div class="file-list" id="fl1"></div>
 
   <div class="options-panel" style="margin-top:1rem">
-    <label class="opt active" id="lDoi"><input type="checkbox" id="optDoi" checked>DOI照合<span class="opt-tag">推奨</span></label>
-    <label class="opt active" id="lTitle"><input type="checkbox" id="optTitle" checked>タイトル正規化</label>
-    <label class="opt" id="lFuzzy"><input type="checkbox" id="optFuzzy">あいまい照合<span class="opt-tag">β</span></label>
+    <label class="opt active" id="lDoi"><input type="checkbox" id="optDoi" checked><span id="optDoiLbl">DOI照合</span><span class="opt-tag" id="optDoiTag">推奨</span></label>
+    <label class="opt active" id="lTitle"><input type="checkbox" id="optTitle" checked><span id="optTitleLbl">タイトル正規化</span></label>
+    <label class="opt" id="lFuzzy"><input type="checkbox" id="optFuzzy"><span id="optFuzzyLbl">あいまい照合</span><span class="opt-tag">β</span></label>
   </div>
 
   <div class="btn-row" style="margin-top:1rem">
-    <button class="btn-primary" id="runDedup" disabled>▶ 重複を検出する</button>
+    <button class="btn-primary" id="runDedup" disabled>▶ <span id="runDedupTxt">重複を検出する</span></button>
   </div>
   <div class="progress"><div class="progress-bar" id="pb1"></div></div>
 
@@ -241,13 +248,13 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
   <div id="s1results" style="display:none">
     <div class="divider"></div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">取り込み合計</div><div class="stat-val" id="s1total">0</div><div class="stat-sub" id="s1break"></div></div>
-      <div class="stat-card"><div class="stat-label">重複数</div><div class="stat-val c-blue" id="s1dup">0</div><div class="stat-sub" id="s1dupsub"></div></div>
-      <div class="stat-card"><div class="stat-label">重複除去後</div><div class="stat-val c-green" id="s1dedup">0</div><div class="stat-sub" id="s1deduppct"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS1Total">取り込み合計</div><div class="stat-val" id="s1total">0</div><div class="stat-sub" id="s1break"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS1Dup">重複数</div><div class="stat-val c-blue" id="s1dup">0</div><div class="stat-sub" id="s1dupsub"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS1Dedup">重複除去後</div><div class="stat-val c-green" id="s1dedup">0</div><div class="stat-sub" id="s1deduppct"></div></div>
     </div>
 
     <div class="sec-head" style="margin-top:1rem">
-      <span class="sec-label">重複グループ</span>
+      <span class="sec-label" id="lblDupGrp">重複グループ</span>
       <span class="sec-count" id="s1grpCount">0グループ</span>
     </div>
     <div class="conf-filter">
@@ -268,8 +275,8 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
     </div>
 
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn-primary" onclick="gotoStep(2)">次へ → Rayyan比較</button>
-      <button class="btn-secondary" onclick="gotoStep(3)">比較をスキップして一次スクリーニングへ</button>
+      <button class="btn-primary" onclick="gotoStep(2)" id="btnToS2">次へ → Rayyan比較</button>
+      <button class="btn-secondary" onclick="gotoStep(3)" id="btnSkipS2">比較をスキップして一次スクリーニングへ</button>
     </div>
   </div>
 </div>
@@ -279,48 +286,48 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
      ======================================== -->
 <div class="step-panel" id="panel2">
 
-  <div class="note">💡 Rayyanでの目視除去済みファイルをアップロードして、RefSieveの自動除去結果と比較します。CSV・RIS両対応。</div>
+  <div class="note" id="s2note">💡 Rayyanでの目視除去済みファイルをアップロードして、RefSieveの自動除去結果と比較します。CSV・RIS両対応。</div>
 
   <div class="dropzone" id="dz2">
     <input type="file" id="fi2" accept=".ris,.txt,.csv">
     <div style="font-size:36px;margin-bottom:.5rem">📋</div>
-    <div class="dz-title">Rayyan エクスポートファイルをドロップ</div>
-    <div class="dz-sub">CSV（Rayyan標準）または RIS</div>
+    <div class="dz-title" id="s2dzTitle">Rayyan エクスポートファイルをドロップ</div>
+    <div class="dz-sub" id="s2dzSub">CSV（Rayyan標準）または RIS</div>
     <div class="dp-loaded" id="lbl2"></div>
   </div>
 
   <div class="btn-row" style="margin-top:.75rem">
-    <button class="btn-primary" id="runCompare" disabled>▶ 比較する</button>
-    <button class="btn-secondary" onclick="gotoStep(3)">スキップして一次スクリーニングへ</button>
+    <button class="btn-primary" id="runCompare" disabled>▶ <span id="runCompareTxt">比較する</span></button>
+    <button class="btn-secondary" onclick="gotoStep(3)" id="btnSkipS3">スキップして一次スクリーニングへ</button>
   </div>
   <div class="progress"><div class="progress-bar" id="pb2"></div></div>
 
   <div id="s2results" style="display:none">
     <div class="divider"></div>
     <div class="stats-grid-4">
-      <div class="stat-card"><div class="stat-label">RefSieve</div><div class="stat-val c-blue" id="s2cntA">0</div><div class="stat-sub">件</div></div>
-      <div class="stat-card"><div class="stat-label">Rayyan</div><div class="stat-val c-purple" id="s2cntB">0</div><div class="stat-sub">件</div></div>
-      <div class="stat-card"><div class="stat-label">一致</div><div class="stat-val c-green" id="s2match">0</div><div class="stat-sub" id="s2matchpct"></div></div>
-      <div class="stat-card"><div class="stat-label">不一致</div><div class="stat-val c-amber" id="s2diff">0</div><div class="stat-sub" id="s2diffsub"></div></div>
+      <div class="stat-card"><div class="stat-label">RefSieve</div><div class="stat-val c-blue" id="s2cntA">0</div><div class="stat-sub" id="lblS2Unit1">件</div></div>
+      <div class="stat-card"><div class="stat-label">Rayyan</div><div class="stat-val c-purple" id="s2cntB">0</div><div class="stat-sub" id="lblS2Unit2">件</div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS2Match">一致</div><div class="stat-val c-green" id="s2match">0</div><div class="stat-sub" id="s2matchpct"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS2Diff">不一致</div><div class="stat-val c-amber" id="s2diff">0</div><div class="stat-sub" id="s2diffsub"></div></div>
     </div>
 
     <div class="tab-bar">
-      <button class="tab active" data-tab="cmatch">✓ 一致 <span class="tab-count" id="tc0">0</span></button>
-      <button class="tab" data-tab="conly-a">RefSieveのみ <span class="tab-count" id="tc1">0</span></button>
-      <button class="tab" data-tab="conly-b">Rayyanのみ <span class="tab-count" id="tc2">0</span></button>
+      <button class="tab active" data-tab="cmatch"><span id="tabMatch">✓ 一致</span> <span class="tab-count" id="tc0">0</span></button>
+      <button class="tab" data-tab="conly-a"><span id="tabOnlyA">RefSieveのみ</span> <span class="tab-count" id="tc1">0</span></button>
+      <button class="tab" data-tab="conly-b"><span id="tabOnlyB">Rayyanのみ</span> <span class="tab-count" id="tc2">0</span></button>
     </div>
     <div class="tab-panel active" id="tab-cmatch">
-      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q0" placeholder="タイトル・DOI で絞り込み…"></div>
+      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q0" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
       <div id="s2list0"></div>
     </div>
     <div class="tab-panel" id="tab-conly-a">
-      <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem">RefSieveが残したが Rayyan では除去された文献（RefSieveの取り逃した重複候補）</p>
-      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q1" placeholder="タイトル・DOI で絞り込み…"></div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem" id="noteOnlyA">RefSieveが残したが Rayyan では除去された文献（RefSieveの取り逃した重複候補）</p>
+      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q1" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
       <div id="s2list1"></div>
     </div>
     <div class="tab-panel" id="tab-conly-b">
-      <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem">Rayyanが残したが RefSieve では除去された文献（Rayyanの取り逃した重複候補）</p>
-      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q2" placeholder="タイトル・DOI で絞り込み…"></div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:.6rem" id="noteOnlyB">Rayyanが残したが RefSieve では除去された文献（Rayyanの取り逃した重複候補）</p>
+      <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s2q2" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
       <div id="s2list2"></div>
     </div>
 
@@ -333,7 +340,7 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
     </div>
 
     <div class="btn-row" style="margin-top:1.5rem">
-      <button class="btn-primary" onclick="gotoStep(3)">次へ → 一次スクリーニング</button>
+      <button class="btn-primary" onclick="gotoStep(3)" id="btnToS3">次へ → 一次スクリーニング</button>
     </div>
   </div>
 </div>
@@ -343,69 +350,69 @@ footer{margin-top:3rem;text-align:center;font-family:var(--mono);font-size:12px;
      ======================================== -->
 <div class="step-panel" id="panel3">
 
-  <div class="note" id="s3note">重複除去後の <strong id="s3srcNote">0 件</strong> を対象にスクリーニングします。</div>
+  <div class="note" id="s3note"><span id="s3notePre">重複除去後の</span> <strong id="s3srcNote">0 件</strong> <span id="s3notePost">を対象にスクリーニングします。</span></div>
 
   <!-- 除外基準 -->
   <div class="card">
-    <div class="card-title">除外基準（タイトル＋抄録で判定）</div>
+    <div class="card-title" id="cardCriteriaTitle">除外基準（タイトル＋抄録で判定）</div>
     <div class="criteria-box" id="criteriaBox"></div>
 
     <div class="custom-kw" style="margin-top:.75rem">
-      <label>追加キーワード（除外したいフレーズ、1行1語句）</label>
+      <label id="lblCustomKw">追加キーワード（除外したいフレーズ、1行1語句）</label>
       <textarea id="customKw" placeholder="例:&#10;case report&#10;letter to the editor&#10;in vitro"></textarea>
     </div>
 
     <div style="margin-top:.75rem">
-      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:.4rem">除外ターゲット言語（英語以外を除外する場合）</label>
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:.4rem" id="lblLangExcl">除外ターゲット言語（英語以外を除外する場合）</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="langBox"></div>
     </div>
   </div>
 
   <div class="btn-row">
-    <button class="btn-primary" id="runScreen">▶ スクリーニング実行</button>
+    <button class="btn-primary" id="runScreen">▶ <span id="runScreenTxt">スクリーニング実行</span></button>
   </div>
   <div class="progress"><div class="progress-bar" id="pb3"></div></div>
 
   <div id="s3results" style="display:none">
     <div class="divider"></div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">スクリーニング対象</div><div class="stat-val" id="s3total">0</div></div>
-      <div class="stat-card"><div class="stat-label">除外</div><div class="stat-val c-red" id="s3excl">0</div><div class="stat-sub" id="s3exclsub"></div></div>
-      <div class="stat-card"><div class="stat-label">残存（次ステップへ）</div><div class="stat-val c-green" id="s3keep">0</div><div class="stat-sub" id="s3keeppct"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS3Total">スクリーニング対象</div><div class="stat-val" id="s3total">0</div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS3Excl">除外</div><div class="stat-val c-red" id="s3excl">0</div><div class="stat-sub" id="s3exclsub"></div></div>
+      <div class="stat-card"><div class="stat-label" id="lblS3Keep">残存（次ステップへ）</div><div class="stat-val c-green" id="s3keep">0</div><div class="stat-sub" id="s3keeppct"></div></div>
     </div>
 
     <!-- 除外理由内訳 -->
     <div class="card" style="margin-top:1rem">
-      <div class="card-title">除外理由別内訳</div>
+      <div class="card-title" id="lblReasonBreak">除外理由別内訳</div>
       <div id="s3reasonBreak"></div>
     </div>
 
     <!-- 除外リスト -->
     <div class="sec-head" style="margin-top:1rem">
-      <span class="sec-label">除外文献リスト</span>
+      <span class="sec-label" id="lblExclList">除外文献リスト</span>
       <span class="sec-count" id="s3exclCount">0件</span>
     </div>
     <div class="conf-filter" id="s3filter">
-      <span class="cf-label">絞り込み：</span>
-      <button class="cf-btn active" data-scf="all">すべて</button>
-      <button class="cf-btn" data-scf="certain">🔵 確実</button>
-      <button class="cf-btn" data-scf="likely">🟢 ほぼ確実</button>
-      <button class="cf-btn" data-scf="possible">🟡 可能性</button>
+      <span class="cf-label" id="s3cfLabel">絞り込み：</span>
+      <button class="cf-btn active" data-scf="all" id="s3cfAll">すべて</button>
+      <button class="cf-btn" data-scf="certain" id="s3cfCertain">🔵 確実</button>
+      <button class="cf-btn" data-scf="likely" id="s3cfLikely">🟢 ほぼ確実</button>
+      <button class="cf-btn" data-scf="possible" id="s3cfPossible">🟡 可能性</button>
     </div>
-    <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s3q" placeholder="タイトル・DOI で絞り込み…"></div>
+    <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="s3q" placeholder="タイトル・DOI で絞り込み…" data-ph="phSearch"></div>
     <div id="s3exclList"></div>
 
     <div class="divider"></div>
     <div class="sec-head"><span class="sec-label">ダウンロード</span></div>
     <div class="dl-grid">
-      <button class="btn-dl" id="dlScreenRis">⬇ screened.ris（残存）</button>
-      <button class="btn-dl" id="dlExclTsv">⬇ excluded.tsv（除外一覧）</button>
+      <button class="btn-dl" id="dlScreenRis">⬇ screened.ris<span id="lblScreenRisSub">（残存）</span></button>
+      <button class="btn-dl" id="dlExclTsv">⬇ excluded.tsv<span id="lblExclTsvSub">（除外一覧）</span></button>
       <button class="btn-dl" id="dlScreenReport">⬇ screen_report.txt</button>
     </div>
   </div>
 </div>
 
-<footer>LitFlow v1.0 &nbsp;—&nbsp; ローカル処理のみ・データは外部送信されません</footer>
+<footer>LitFlow v1.0 &nbsp;—&nbsp; <span id="lfFooter">ローカル処理のみ・データは外部送信されません</span></footer>
 </div><!-- /page -->
 
 <!-- FAB -->
@@ -645,10 +652,25 @@ function calcConfidence(grp){
   if(types.includes('title')) return 'likely';
   return 'possible';
 }
+let currentLang = 'ja';
+let LF = {
+  confCertain:'確実', confLikely:'ほぼ確実', confPossible:'可能性',
+  cr_case_name:'症例報告・症例シリーズ', cr_case_desc:'タイトルに case report などを含む',
+  cr_review_name:'レビュー論文（SR/MA含む）', cr_review_desc:'review, meta-analysis など',
+  cr_animal_name:'動物実験・in vitro', cr_animal_desc:'mouse, rat, in vitro など',
+  cr_noab_name:'抄録なし（会議録等）', cr_noab_desc:'抄録が空白または極端に短い',
+  cr_edit_name:'社説・レター・コメント', cr_edit_desc:'editorial, letter, comment など',
+  cr_guide_name:'ガイドライン・教科書', cr_guide_desc:'guideline, consensus など',
+  cr_proto_name:'プロトコル・研究計画', cr_proto_desc:'protocol, study design など',
+  langJa:'日本語', langZh:'中国語', langDe:'ドイツ語', langFr:'フランス語', langEs:'スペイン語', langPt:'ポルトガル語',
+  langExclSuffix:'を除外',
+  title:'LitFlow — 文献管理統合ツール'
+};
+
 const CONF_INFO={
-  certain:{label:'確実',cls:'conf-certain',icon:'🔵'},
-  likely:{label:'ほぼ確実',cls:'conf-likely',icon:'🟢'},
-  possible:{label:'可能性',cls:'conf-possible',icon:'🟡'},
+  certain:{get label(){return LF.confCertain},cls:'conf-certain',icon:'🔵'},
+  likely:{get label(){return LF.confLikely},cls:'conf-likely',icon:'🟢'},
+  possible:{get label(){return LF.confPossible},cls:'conf-possible',icon:'🟡'},
 };
 
 function runDedup(records,useDoi,useTitle,useFuzzy){
@@ -808,9 +830,9 @@ $('runDedup').addEventListener('click',async()=>{
   $('s1break').textContent=Object.entries(srcCounts).map(([k,v])=>k.toUpperCase()+' '+v).join(' / ');
   const cfCounts={certain:0,likely:0,possible:0};
   groups.forEach(g=>{cfCounts[calcConfidence(g)]++;});
-  $('s1dupsub').textContent=`${groups.length}グループ（確実 ${cfCounts.certain} / ほぼ確実 ${cfCounts.likely} / 可能性 ${cfCounts.possible}）`;
-  $('s1deduppct').textContent=total>0?Math.round(dedup/total*100)+'% 残存':'';
-  $('s1grpCount').textContent=groups.length+' グループ';
+  $('s1dupsub').textContent=LF.statDupFmt(groups.length,cfCounts.certain,cfCounts.likely,cfCounts.possible);
+  $('s1deduppct').textContent=total>0?LF.pctFmt(Math.round(dedup/total*100)):'';
+  $('s1grpCount').textContent=groups.length+LF.grpSuffix;
 
   renderDupGroups('all');
 
@@ -837,7 +859,7 @@ document.querySelectorAll('.conf-filter .cf-btn').forEach(btn=>{
 
 function renderDupGroups(cf){
   const dl=$('s1dupList');
-  if(S.dupGroups.length===0){dl.innerHTML='<div class="empty">重複は検出されませんでした</div>';return;}
+  if(S.dupGroups.length===0){dl.innerHTML='<div class="empty">'+LF.nodup+'</div>';return;}
   dl.innerHTML='';
   let shown=0;
   S.dupGroups.forEach((grp,gi)=>{
@@ -851,16 +873,16 @@ function renderDupGroups(cf){
     grp.forEach(({idx,matchType})=>{
       const r=S.records[idx];
       const isKept=matchType==='kept';
-      const lbl=isKept?'保持':matchType==='doi'?'DOI一致':matchType==='fuzzy'?'あいまい':'タイトル一致';
+      const lbl=isKept?LF.kept:matchType==='doi'?LF.doiMatch:matchType==='fuzzy'?LF.fuzzyMatch:LF.titleMatch;
       const cls=isKept?'mb-kept':matchType==='doi'?'mb-doi':matchType==='fuzzy'?'mb-fuzzy':'mb-title';
       const item=document.createElement('div');
       item.className='dup-item '+(isKept?'is-kept':'is-dup');
-      item.innerHTML=`<div class="dup-row"><span class="dup-title">${escH(r._title||'(タイトル不明)')}</span><span class="match-badge ${cls}">${lbl}</span></div><div class="dup-meta">${r._source.toUpperCase()} · ${escH(r._file)}${r._doi?' · '+escH(r._doi):''}</div>`;
+      item.innerHTML=`<div class="dup-row"><span class="dup-title">${escH(r._title||LF.noTitle)}</span><span class="match-badge ${cls}">${lbl}</span></div><div class="dup-meta">${r._source.toUpperCase()} · ${escH(r._file)}${r._doi?' · '+escH(r._doi):''}</div>`;
       div.appendChild(item);
     });
     dl.appendChild(div);
   });
-  if(shown===0) dl.innerHTML='<div class="empty">該当するグループがありません</div>';
+  if(shown===0) dl.innerHTML='<div class="empty">'+LF.nogroup+'</div>';
 }
 
 // Step1 downloads
@@ -887,21 +909,21 @@ function toTSV(records,extraHeaders=[]){
 $('dlDedupRis').addEventListener('click',()=>dlFile(toRIS(S.dedupRecs),'deduplicated.ris','application/x-research-info-systems'));
 $('dlDedupTsv').addEventListener('click',()=>dlFile(toTSV(S.dedupRecs),'deduplicated.tsv','text/tab-separated-values'));
 $('dlDedupReport').addEventListener('click',()=>{
-  const now=new Date().toLocaleString('ja-JP');
-  const lines=['=== LitFlow Step1: 重複検出レポート ===','生成日時: '+now,'','■ サマリー',
-    '  取り込み合計 : '+S.records.length+' 件',
-    '  重複数       : '+(S.records.length-S.dedupRecs.length)+' 件',
-    '  重複除去後   : '+S.dedupRecs.length+' 件','',
-    '■ 照合方法別内訳'];
+  const now=new Date().toLocaleString(currentLang==='ja'?'ja-JP':'en-US');
+  const lines=[LF.r1Title,LF.rDate+now,'',LF.rSum,
+    LF.rTotal+S.records.length+LF.rUnit,
+    LF.rDup+(S.records.length-S.dedupRecs.length)+LF.rUnit,
+    LF.rDedup+S.dedupRecs.length+LF.rUnit,'',
+    LF.r1Methods];
   const mt={doi:0,title:0,fuzzy:0};
   const cf={certain:0,likely:0,possible:0};
   S.dupGroups.forEach(g=>{
     g.slice(1).forEach(x=>{mt[x.matchType]=(mt[x.matchType]||0)+1;});
     cf[calcConfidence(g)]++;
   });
-  lines.push('  DOI照合（確実）          : '+(mt.doi||0)+' 件 → '+cf.certain+' グループ');
-  lines.push('  タイトル照合（ほぼ確実） : '+(mt.title||0)+' 件 → '+cf.likely+' グループ');
-  lines.push('  あいまい照合（可能性）   : '+(mt.fuzzy||0)+' 件 → '+cf.possible+' グループ');
+  lines.push(LF.rDOI+(mt.doi||0)+LF.rArrow+cf.certain+LF.rGrp);
+  lines.push(LF.rTitle2+(mt.title||0)+LF.rArrow+cf.likely+LF.rGrp);
+  lines.push(LF.rFuzzy+(mt.fuzzy||0)+LF.rArrow+cf.possible+LF.rGrp);
   lines.push('','■ 重複グループ詳細 ('+S.dupGroups.length+' グループ)');
   S.dupGroups.forEach((grp,i)=>{
     lines.push('\n[グループ '+(i+1)+'] 確信度: '+CONF_INFO[calcConfidence(grp)].label);
@@ -967,9 +989,9 @@ $('runCompare').addEventListener('click',()=>{
   $('s2cntA').textContent=S.dedupRecs.length;
   $('s2cntB').textContent=S.rayyanRecs.length;
   $('s2match').textContent=matched.length;
-  $('s2matchpct').textContent=S.dedupRecs.length>0?Math.round(matched.length/S.dedupRecs.length*100)+'% 一致':'';
+  $('s2matchpct').textContent=S.dedupRecs.length>0?LF.pctMatchFmt(Math.round(matched.length/S.dedupRecs.length*100)):'';
   $('s2diff').textContent=onlyA.length+onlyB.length;
-  $('s2diffsub').textContent='RefSieveのみ '+onlyA.length+' / Rayyanのみ '+onlyB.length;
+  $('s2diffsub').textContent=LF.onlyA+' '+onlyA.length+' / '+LF.onlyB+' '+onlyB.length;
   $('tc0').textContent=matched.length;
   $('tc1').textContent=onlyA.length;
   $('tc2').textContent=onlyB.length;
@@ -990,12 +1012,12 @@ $('runCompare').addEventListener('click',()=>{
 
 function renderCompareList(containerId,recs,type){
   const el=$(containerId);
-  if(!recs.length){el.innerHTML='<div class="empty">該当なし</div>';return;}
+  if(!recs.length){el.innerHTML='<div class="empty">'+LF.noResults+'</div>';return;}
   el.innerHTML=recs.map(r=>{
     const badgeCls=type==='match'?'badge-match':type==='refsieve'?'badge-refsieve':'badge-rayyan';
-    const badgeTxt=type==='match'?('一致（'+r._mtype+'）'):type==='refsieve'?'RefSieveのみ':'Rayyanのみ';
+    const badgeTxt=type==='match'?(LF.matchedParen+r._mtype+')'):type==='refsieve'?LF.onlyA:LF.onlyB;
     return `<div class="rec-item">
-      <div class="rec-row"><span class="rec-title">${escH(r._title||'(タイトル不明)')}</span>
+      <div class="rec-row"><span class="rec-title">${escH(r._title||LF.noTitle)}</span>
       <span class="conf-badge ${type==='match'?'conf-certain':type==='refsieve'?'conf-likely':'conf-possible'}">${badgeTxt}</span></div>
       <div class="rec-meta">${(r._source||'').toUpperCase()}${r._doi?' · '+escH(r._doi):''}</div>
     </div>`;
@@ -1031,17 +1053,16 @@ document.querySelectorAll('.tab-bar .tab').forEach(tab=>{
 
 // Compare downloads
 $('dlCmpReport').addEventListener('click',()=>{
-  const now=new Date().toLocaleString('ja-JP');
-  const lines=['=== LitFlow Step2: Rayyan比較レポート ===','生成日時: '+now,'',
-    '■ サマリー',
-    '  RefSieve件数 : '+S.dedupRecs.length+' 件',
-    '  Rayyan件数   : '+S.rayyanRecs.length+' 件',
-    '  一致         : '+S.cmpMatched.length+' 件',
-    '  RefSieveのみ : '+S.cmpOnlyA.length+' 件（RefSieveが取り逃した重複の可能性）',
-    '  Rayyanのみ   : '+S.cmpOnlyB.length+' 件（Rayyanが取り逃した重複の可能性）',
-    '','■ RefSieveのみ一覧'];
+  const now=new Date().toLocaleString(currentLang==='ja'?'ja-JP':'en-US');
+  const lines=[LF.r2Title,LF.rDate+now,'',LF.rSum,
+    '  RefSieve: '+S.dedupRecs.length+LF.rUnit,
+    '  Rayyan: '+S.rayyanRecs.length+LF.rUnit,
+    '  '+LF.matched+': '+S.cmpMatched.length+LF.rUnit,
+    '  '+LF.onlyA+': '+S.cmpOnlyA.length+LF.rUnit+LF.r2OnlyANote,
+    '  '+LF.onlyB+': '+S.cmpOnlyB.length+LF.rUnit+LF.r2OnlyBNote,
+    '','  '+LF.onlyA+':'];
   S.cmpOnlyA.forEach(r=>lines.push('  '+( r._title||'')+(r._doi?' ['+r._doi+']':'')));
-  lines.push('','■ Rayyanのみ一覧');
+  lines.push('','  '+LF.onlyB+':');
   S.cmpOnlyB.forEach(r=>lines.push('  '+(r._title||'')+(r._doi?' ['+r._doi+']':'')));
   dlFile(lines.join('\n'),'compare_report.txt','text/plain;charset=utf-8');
 });
@@ -1052,43 +1073,43 @@ $('dlCmpOnlyB').addEventListener('click',()=>dlFile(toTSV(S.cmpOnlyB),'rayyan_on
 //  STEP 3: SCREENING
 // ============================================================
 const CRITERIA=[
-  {id:'case_report',name:'症例報告・症例シリーズ',
-   desc:'タイトルに "case report", "case series", "a case of" 等を含む',
+  {id:'case_report',
+   get name(){return LF.cr_case_name}, get desc(){return LF.cr_case_desc},
    patterns:[/\bcase\s+report/i,/\bcase\s+series/i,/\ba\s+case\s+of\b/i,/\bcase\s+presentation/i,/症例報告/],
    conf:'certain'},
-  {id:'review',name:'レビュー論文（SR/MA含む）',
-   desc:'"review", "meta-analysis", "systematic review", "scoping review" 等',
+  {id:'review',
+   get name(){return LF.cr_review_name}, get desc(){return LF.cr_review_desc},
    patterns:[/\breview\b/i,/\bmeta[- ]?analysis\b/i,/\bsystematic\s+review/i,/\bscoping\s+review/i,/\bnarrative\s+review/i,/レビュー/,/メタ解析/],
    conf:'likely'},
-  {id:'animal',name:'動物実験・in vitro',
-   desc:'"mouse", "rat", "murine", "in vitro", "in vivo" 等（動物・細胞実験）',
+  {id:'animal',
+   get name(){return LF.cr_animal_name}, get desc(){return LF.cr_animal_desc},
    patterns:[/\bin\s+vitro\b/i,/\bmouse\b/i,/\bmice\b/i,/\bmurine\b/i,/\brat\b/i,/\brats\b/i,/\banimal\s+model/i,/\bcell\s+line/i,/\bin\s+vivo\b/i],
    conf:'possible'},
-  {id:'no_abstract',name:'抄録なし（会議録等）',
-   desc:'ABフィールドが空白または極端に短い（50字未満）',
-   patterns:[],  // 特殊処理
+  {id:'no_abstract',
+   get name(){return LF.cr_noab_name}, get desc(){return LF.cr_noab_desc},
+   patterns:[],
    conf:'likely'},
-  {id:'editorial',name:'社説・レター・コメント',
-   desc:'"editorial", "letter", "comment", "correspondence", "erratum" 等',
+  {id:'editorial',
+   get name(){return LF.cr_edit_name}, get desc(){return LF.cr_edit_desc},
    patterns:[/\beditorial\b/i,/\bletter\b/i,/\bcorrespondence\b/i,/\bcomment\b/i,/\berratum\b/i,/\bcorrection\b/i,/\bresponse\s+to\b/i],
    conf:'certain'},
-  {id:'guideline',name:'ガイドライン・教科書',
-   desc:'"guideline", "consensus", "recommendation", "textbook" 等',
+  {id:'guideline',
+   get name(){return LF.cr_guide_name}, get desc(){return LF.cr_guide_desc},
    patterns:[/\bguideline/i,/\bconsensus\b/i,/\brecommendation/i,/\bpractice\s+parameter/i],
    conf:'likely'},
-  {id:'protocol',name:'プロトコル・研究計画',
-   desc:'"protocol", "study design", "study protocol" 等',
+  {id:'protocol',
+   get name(){return LF.cr_proto_name}, get desc(){return LF.cr_proto_desc},
    patterns:[/\bprotocol\b/i,/\bstudy\s+design\b/i,/\bstudy\s+protocol\b/i],
    conf:'possible'},
 ];
 
 const LANG_OPTIONS=[
-  {code:'ja',label:'日本語',patterns:[/[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/]},
-  {code:'zh',label:'中国語',patterns:[/[\u4e00-\u9fff]{10,}/]},
-  {code:'de',label:'ドイツ語',patterns:[/\b(und|die|der|das|ist|mit|für)\b/i]},
-  {code:'fr',label:'フランス語',patterns:[/\b(et|le|la|les|des|une|dans)\b/i]},
-  {code:'es',label:'スペイン語',patterns:[/\b(los|las|del|para|con|una)\b/i]},
-  {code:'pt',label:'ポルトガル語',patterns:[/\b(dos|das|para|com|uma)\b/i]},
+  {code:'ja',get label(){return LF.langJa},_label:'日本語',patterns:[/[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/]},
+  {code:'zh',get label(){return LF.langZh},_label:'中国語',patterns:[/[\u4e00-\u9fff]{10,}/]},
+  {code:'de',get label(){return LF.langDe},_label:'ドイツ語',patterns:[/\b(und|die|der|das|ist|mit|für)\b/i]},
+  {code:'fr',get label(){return LF.langFr},_label:'フランス語',patterns:[/\b(et|le|la|les|des|une|dans)\b/i]},
+  {code:'es',get label(){return LF.langEs},_label:'スペイン語',patterns:[/\b(los|las|del|para|con|una)\b/i]},
+  {code:'pt',get label(){return LF.langPt},_label:'ポルトガル語',patterns:[/\b(dos|das|para|com|uma)\b/i]},
 ];
 
 // criteria UI build
@@ -1107,17 +1128,17 @@ const langBox=$('langBox');
 LANG_OPTIONS.forEach(lang=>{
   const lbl=document.createElement('label');
   lbl.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer';
-  lbl.innerHTML=`<input type="checkbox" id="lang_${lang.code}" style="accent-color:var(--accent)"> ${lang.label}を除外`;
+  lbl.innerHTML=`<input type="checkbox" id="lang_${lang.code}" style="accent-color:var(--accent)"> ${lang.label}${LF.langExclSuffix}`;
   langBox.appendChild(lbl);
 });
 
 function updateS3Note(){
   S.screenSrc=S.dedupRecs.length>0?S.dedupRecs:[];
-  $('s3srcNote').textContent=S.screenSrc.length+' 件';
+  $('s3srcNote').textContent=S.screenSrc.length+(LF.unit||' 件');
 }
 
 $('runScreen').addEventListener('click',()=>{
-  if(!S.screenSrc.length){ alert('先にStep1で重複除去を実行してください'); return; }
+  if(!S.screenSrc.length){ alert(LF.alertNoSrc); return; }
   const pb=$('pb3');
   pb.style.width='10%';
 
@@ -1144,7 +1165,7 @@ $('runScreen').addEventListener('click',()=>{
     activeCr.forEach(cr=>{
       if(cr.id==='no_abstract'){
         if((rec._abstract||'').trim().length<50){
-          reasons.push({label:cr.name,conf:cr.conf,src:'title/ab'});
+          reasons.push({label:cr.name,conf:cr.conf,src:LF.srcTitleAb});
           maxConf=maxConf?rankConf(maxConf,cr.conf):cr.conf;
         }
         return;
@@ -1154,7 +1175,7 @@ $('runScreen').addEventListener('click',()=>{
       let hitAbs=!hitTitle&&cr.patterns.some(p=>p.test(rec._abstract||''));
       if(hitTitle||hitAbs){
         const conf=hitTitle?cr.conf:(cr.conf==='certain'?'likely':cr.conf==='likely'?'possible':'possible');
-        reasons.push({label:cr.name,conf,src:hitTitle?'タイトル':'抄録'});
+        reasons.push({label:cr.name,conf,src:hitTitle?LF.srcTitle:LF.srcAbs});
         maxConf=maxConf?rankConf(maxConf,conf):conf;
       }
     });
@@ -1162,7 +1183,7 @@ $('runScreen').addEventListener('click',()=>{
     // 言語除外
     activeLangs.forEach(lang=>{
       if(lang.patterns.some(p=>p.test(fullStr))){
-        reasons.push({label:lang.label+'の文献',conf:'likely',src:'タイトル/抄録'});
+        reasons.push({label:lang.label+LF.langSuffix,conf:'likely',src:LF.srcTitleAb});
         maxConf=maxConf?rankConf(maxConf,'likely'):'likely';
       }
     });
@@ -1170,7 +1191,7 @@ $('runScreen').addEventListener('click',()=>{
     // カスタムキーワード
     customKws.forEach(kw=>{
       if(fullStr.includes(kw.toLowerCase())){
-        reasons.push({label:'カスタム: '+kw,conf:'possible',src:'タイトル/抄録'});
+        reasons.push({label:LF.customPrefix+kw,conf:'possible',src:LF.srcTitleAb});
         maxConf=maxConf?rankConf(maxConf,'possible'):'possible';
       }
     });
@@ -1191,9 +1212,9 @@ $('runScreen').addEventListener('click',()=>{
   $('s3keep').textContent=keep.length;
   const cfCounts={certain:0,likely:0,possible:0};
   excl.forEach(r=>cfCounts[r._conf]++);
-  $('s3exclsub').textContent=`確実 ${cfCounts.certain} / ほぼ確実 ${cfCounts.likely} / 可能性 ${cfCounts.possible}`;
-  $('s3keeppct').textContent=S.screenSrc.length>0?Math.round(keep.length/S.screenSrc.length*100)+'% 残存':'';
-  $('s3exclCount').textContent=excl.length+'件';
+  $('s3exclsub').textContent=LF.exclSubFmt(cfCounts.certain,cfCounts.likely,cfCounts.possible);
+  $('s3keeppct').textContent=S.screenSrc.length>0?LF.pctFmt(Math.round(keep.length/S.screenSrc.length*100)):'';
+  $('s3exclCount').textContent=excl.length+(LF.unit||'件');
 
   // reason breakdown
   const rBreak={};
@@ -1203,7 +1224,7 @@ $('runScreen').addEventListener('click',()=>{
   $('s3reasonBreak').innerHTML=Object.entries(rBreak).sort((a,b)=>b[1]-a[1])
     .map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:13px">
       <span>${escH(k)}</span><span style="font-family:var(--mono);font-weight:500">${v} 件</span>
-    </div>`).join('')||'<div style="color:var(--text3);font-size:13px">なし</div>';
+    </div>`).join('')||'<div style="color:var(--text3);font-size:13px">'+LF.none+'</div>';
 
   renderScreenList('all','');
   pb.style.width='100%';
@@ -1232,7 +1253,7 @@ function renderScreenList(cf,q){
     if(ql&&!(r._title||'').toLowerCase().includes(ql)&&!(r._doi||'').toLowerCase().includes(ql)) return false;
     return true;
   });
-  if(!filtered.length){el.innerHTML='<div class="empty">該当なし</div>';return;}
+  if(!filtered.length){el.innerHTML='<div class="empty">'+LF.noResults+'</div>';return;}
   el.innerHTML=filtered.map((r,ri)=>{
     const ci=CONF_INFO[r._conf];
     const reasonHtml=r._reasons.map(rs=>{
@@ -1243,11 +1264,11 @@ function renderScreenList(cf,q){
     return `<div class="screen-item">
       <div class="screen-header" onclick="toggleAb(this)">
         <div style="flex:1">
-          <div class="rec-row"><span class="rec-title">${escH(r._title||'(タイトル不明)')}</span><span class="conf-badge ${ci.cls}">${ci.icon} ${ci.label}</span></div>
+          <div class="rec-row"><span class="rec-title">${escH(r._title||LF.noTitle)}</span><span class="conf-badge ${ci.cls}">${ci.icon} ${ci.label}</span></div>
           <div class="rec-meta">${(r._source||'').toUpperCase()}${r._doi?' · '+escH(r._doi):''}</div>
           <div style="margin-top:4px">${reasonHtml}</div>
         </div>
-        <span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px;font-family:var(--mono)">${hasAb?'▼ 抄録':''}</span>
+        <span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px;font-family:var(--mono)">${hasAb?LF.showAbs:''}</span>
       </div>
       ${hasAb?`<div class="screen-body" id="ab${ri}"><div class="abstract-text">${escH(r._abstract)}</div></div>`:''}
     </div>`;
@@ -1275,31 +1296,37 @@ $('dlExclTsv').addEventListener('click',()=>{
   dlFile(bom+header+rows.join('\n'),'excluded.tsv','text/tab-separated-values');
 });
 $('dlScreenReport').addEventListener('click',()=>{
-  const now=new Date().toLocaleString('ja-JP');
-  const lines=['=== LitFlow Step3: 一次スクリーニングレポート ===','生成日時: '+now,'',
-    '■ サマリー',
-    '  スクリーニング対象 : '+S.screenSrc.length+' 件',
-    '  除外数             : '+S.exclRecs.length+' 件',
-    '  残存数             : '+S.keepRecs.length+' 件','',
-    '■ 確信度別内訳'];
+  const now=new Date().toLocaleString(currentLang==='ja'?'ja-JP':'en-US');
+  const lines=[LF.r3Title,LF.rDate+now,'',LF.rSum,
+    LF.r3Src+S.screenSrc.length+LF.rUnit,
+    LF.r3Excl+S.exclRecs.length+LF.rUnit,
+    LF.r3Keep+S.keepRecs.length+LF.rUnit,'',
+    LF.r3Conf];
   const cfC={certain:0,likely:0,possible:0};
   S.exclRecs.forEach(r=>cfC[r._conf]++);
-  lines.push('  確実     : '+cfC.certain+' 件');
-  lines.push('  ほぼ確実 : '+cfC.likely+' 件');
-  lines.push('  可能性   : '+cfC.possible+' 件');
-  lines.push('','■ 除外理由別内訳');
+  lines.push('  '+LF.confCertain+': '+cfC.certain+LF.rUnit);
+  lines.push('  '+LF.confLikely+': '+cfC.likely+LF.rUnit);
+  lines.push('  '+LF.confPossible+': '+cfC.possible+LF.rUnit);
+  lines.push('',LF.r3Reasons);
   const rBreak={};
   S.exclRecs.forEach(r=>r._reasons.forEach(rs=>{rBreak[rs.label]=(rBreak[rs.label]||0)+1;}));
   Object.entries(rBreak).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>lines.push('  '+k+' : '+v+' 件'));
-  lines.push('','■ 除外文献一覧');
+  lines.push('',LF.r3ExclList);
   S.exclRecs.forEach((r,i)=>{
     lines.push('\n['+(i+1)+'] '+CONF_INFO[r._conf].label);
-    lines.push('  タイトル : '+(r._title||''));
-    lines.push('  DOI      : '+(r._doi||'なし'));
-    lines.push('  除外理由 : '+r._reasons.map(x=>x.src+': '+x.label).join(' / '));
+    lines.push('  '+LF.rRptTitle+': '+(r._title||''));
+    lines.push('  DOI: '+(r._doi||LF.noDoi));
+    lines.push('  '+LF.rRptReasons+': '+r._reasons.map(x=>x.src+': '+x.label).join(' / '));
   });
   dlFile(lines.join('\n'),'screen_report.txt','text/plain;charset=utf-8');
 });
+
+// 初期表示を currentLang に同期
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setLang(currentLang));
+} else {
+  setLang(currentLang);
+}
 
 // ============================================================
 //  PIPELINE NAV
@@ -1346,6 +1373,360 @@ $('fabPrev').addEventListener('click',()=>{
   const prev=rev.find(el=>el.getBoundingClientRect().top+window.scrollY<sy-10);
   if(prev) prev.scrollIntoView({behavior:'smooth',block:'start'});
 });
+
+// ============================================================
+//  i18n
+// ============================================================
+const LFDICT = {
+  ja: {
+    // meta
+    title:        'LitFlow — 文献管理統合ツール',
+    tagline:      '// 文献管理統合ツール — 重複除去 → Rayyan比較 → 一次スクリーニング',
+    // pipeline
+    pill1:        '取込・重複除去',
+    pill2:        'Rayyan比較',
+    pill3:        '一次スクリーニング',
+    // step1
+    s1dzTitle:    'RIS・TXTファイルをドロップ、またはクリックして選択',
+    s1dzSub:      'PubMed / Scopus / Cochrane のエクスポートファイルに対応（複数可）',
+    optDoiLbl:    'DOI照合', optDoiTag:'推奨',
+    optTitleLbl:  'タイトル正規化', optFuzzyLbl:'あいまい照合',
+    runDedupTxt:  '重複を検出する',
+    lblS1Total:   '取り込み合計', lblS1Dup:'重複数', lblS1Dedup:'重複除去後',
+    lblDupGrp:    '重複グループ', lblDlDedup:'ダウンロード（重複除去後）',
+    btnToS2:      '次へ → Rayyan比較',
+    btnSkipS2:    '比較をスキップして一次スクリーニングへ',
+    // step2
+    s2note:       '💡 Rayyanでの目視除去済みファイルをアップロードして、RefSieveの自動除去結果と比較します。CSV・RIS両対応。',
+    s2dzTitle:    'Rayyan エクスポートファイルをドロップ',
+    s2dzSub:      'CSV（Rayyan標準）または RIS',
+    runCompareTxt:'比較する',
+    btnSkipS3:    'スキップして一次スクリーニングへ',
+    lblS2Unit1:   '件', lblS2Unit2:'件',
+    lblS2Match:   '一致', lblS2Diff:'不一致',
+    tabMatch:     '✓ 一致', tabOnlyA:'RefSieveのみ', tabOnlyB:'Rayyanのみ',
+    noteOnlyA:    'RefSieveが残したが Rayyan では除去された文献（RefSieveの取り逃した重複候補）',
+    noteOnlyB:    'Rayyanが残したが RefSieve では除去された文献（Rayyanの取り逃した重複候補）',
+    lblDlCmp:     'ダウンロード（比較結果）',
+    btnToS3:      '次へ → 一次スクリーニング',
+    // step3
+    s3notePre:    '重複除去後の', s3notePost:'を対象にスクリーニングします。',
+    cardCriteriaTitle:'除外基準（タイトル＋抄録で判定）',
+    lblCustomKw:  '追加キーワード（除外したいフレーズ、1行1語句）',
+    lblLangExcl:  '除外ターゲット言語（英語以外を除外する場合）',
+    runScreenTxt: 'スクリーニング実行',
+    lblS3Total:   'スクリーニング対象', lblS3Excl:'除外', lblS3Keep:'残存（次ステップへ）',
+    lblReasonBreak:'除外理由別内訳', lblExclList:'除外文献リスト',
+    s3cfLabel:    '絞り込み：',
+    s3cfAll:'すべて', s3cfCertain:'🔵 確実', s3cfLikely:'🟢 ほぼ確実', s3cfPossible:'🟡 可能性',
+    lblDlScreen:  'ダウンロード',
+    lblScreenRisSub:'（残存）', lblExclTsvSub:'（除外一覧）',
+    phSearch:     'タイトル・DOI で絞り込み…',
+    // footer
+    lfFooter:     'ローカル処理のみ・データは外部送信されません',
+    // confidence
+    confCertain:'確実', confLikely:'ほぼ確実', confPossible:'可能性',
+    // JS runtime
+    nodup:        '重複は検出されませんでした',
+    nogroup:      '該当するグループがありません',
+    noResults:    '該当なし',
+    noTitle:      '(タイトル不明)',
+    none:         'なし',
+    noDoi:        'なし',
+    kept:'保持', doiMatch:'DOI一致', titleMatch:'タイトル一致', fuzzyMatch:'あいまい',
+    grpSuffix:    ' グループ',
+    unit:         ' 件',
+    matched:      '一致',
+    onlyA:        'RefSieveのみ', onlyB:'Rayyanのみ',
+    matchedParen: '一致（',
+    alertNoSrc:   '先にStep1で重複除去を実行してください',
+    pctFmt:       (p) => p+'% 残存',
+    pctMatchFmt:  (p) => p+'% 一致',
+    statDupFmt:   (g,c,l,p) => `${g}グループ（確実 ${c} / ほぼ確実 ${l} / 可能性 ${p}）`,
+    exclSubFmt:   (c,l,p) => `確実 ${c} / ほぼ確実 ${l} / 可能性 ${p}`,
+    showAbs:      '▼ 抄録',
+    srcTitle:     'タイトル', srcAbs:'抄録', srcTitleAb:'タイトル/抄録',
+    customPrefix: 'カスタム: ',
+    langSuffix:   'の文献', langExclSuffix:'を除外',
+    langJa:'日本語', langZh:'中国語', langDe:'ドイツ語',
+    langFr:'フランス語', langEs:'スペイン語', langPt:'ポルトガル語',
+    // criteria
+    cr_case_name:'症例報告・症例シリーズ', cr_case_desc:'タイトルに "case report", "case series", "a case of" 等を含む',
+    cr_review_name:'レビュー論文（SR/MA含む）', cr_review_desc:'"review", "meta-analysis", "systematic review", "scoping review" 等',
+    cr_animal_name:'動物実験・in vitro', cr_animal_desc:'"mouse", "rat", "murine", "in vitro", "in vivo" 等（動物・細胞実験）',
+    cr_noab_name:'抄録なし（会議録等）', cr_noab_desc:'ABフィールドが空白または極端に短い（50字未満）',
+    cr_edit_name:'社説・レター・コメント', cr_edit_desc:'"editorial", "letter", "comment", "correspondence", "erratum" 等',
+    cr_guide_name:'ガイドライン・教科書', cr_guide_desc:'"guideline", "consensus", "recommendation", "textbook" 等',
+    cr_proto_name:'プロトコル・研究計画', cr_proto_desc:'"protocol", "study design", "study protocol" 等',
+    // reports
+    r1Title:'=== LitFlow Step1: 重複検出レポート ===',
+    r2Title:'=== LitFlow Step2: Rayyan比較レポート ===',
+    r3Title:'=== LitFlow Step3: 一次スクリーニングレポート ===',
+    rDate:'生成日時: ', rSum:'■ サマリー',
+    rTotal:'  取り込み合計 : ', rDup:'  重複数       : ', rDedup:'  重複除去後   : ',
+    rUnit:' 件',
+    r1Methods:'■ 照合方法別内訳',
+    rDOI:'  DOI照合（確実）          : ', rTitle2:'  タイトル照合（ほぼ確実） : ', rFuzzy:'  あいまい照合（可能性）   : ',
+    rArrow:' 件 → ', rGrp:' グループ',
+    rGrpDetail:'■ 重複グループ詳細 (', rGrpDetailClose:' グループ)',
+    rGrpLabel:'[グループ ', rGrpConf:'] 確信度: ',
+    rKept:'  [保持] ', rExcl:'  [除外:',
+    r2OnlyANote:'（RefSieveが取り逃した重複の可能性）', r2OnlyBNote:'（Rayyanが取り逃した重複の可能性）',
+    r3Src:'  スクリーニング対象 : ', r3Excl:'  除外数             : ', r3Keep:'  残存数             : ',
+    r3Conf:'■ 確信度別内訳', r3Reasons:'■ 除外理由別内訳', r3ExclList:'■ 除外文献一覧',
+    rRptTitle:'タイトル', rRptReasons:'除外理由',
+  },
+  en: {
+    title:        'LitFlow — Literature Management Pipeline',
+    tagline:      '// Deduplication → Rayyan comparison → Title/abstract screening',
+    pill1:        'Import & Dedup',
+    pill2:        'Rayyan compare',
+    pill3:        'Screening',
+    s1dzTitle:    'Drop RIS / TXT files here, or click to select',
+    s1dzSub:      'Supports export files from PubMed, Scopus, and Cochrane (multiple files)',
+    optDoiLbl:    'DOI matching', optDoiTag:'Recommended',
+    optTitleLbl:  'Title normalization', optFuzzyLbl:'Fuzzy matching',
+    runDedupTxt:  'Detect duplicates',
+    lblS1Total:   'Total imported', lblS1Dup:'Duplicates', lblS1Dedup:'After deduplication',
+    lblDupGrp:    'Duplicate groups', lblDlDedup:'Download (deduplicated)',
+    btnToS2:      'Next → Rayyan comparison',
+    btnSkipS2:    'Skip comparison, go to screening',
+    s2note:       '💡 Upload your Rayyan export file to compare it with the automated deduplication result. Supports CSV and RIS.',
+    s2dzTitle:    'Drop Rayyan export file here',
+    s2dzSub:      'CSV (Rayyan default) or RIS',
+    runCompareTxt:'Compare',
+    btnSkipS3:    'Skip, go to screening',
+    lblS2Unit1:   '', lblS2Unit2:'',
+    lblS2Match:   'Matched', lblS2Diff:'Discrepancies',
+    tabMatch:     '✓ Matched', tabOnlyA:'RefSieve only', tabOnlyB:'Rayyan only',
+    noteOnlyA:    'In RefSieve but removed by Rayyan — possible missed duplicates in RefSieve',
+    noteOnlyB:    'In Rayyan but removed by RefSieve — possible missed duplicates in Rayyan',
+    lblDlCmp:     'Download (comparison)',
+    btnToS3:      'Next → Screening',
+    s3notePre:    'Screening', s3notePost:'records from deduplication.',
+    cardCriteriaTitle:'Exclusion criteria (title + abstract)',
+    lblCustomKw:  'Additional keywords (one phrase per line)',
+    lblLangExcl:  'Language exclusion (exclude non-English)',
+    runScreenTxt: 'Run screening',
+    lblS3Total:   'Records screened', lblS3Excl:'Excluded', lblS3Keep:'Remaining',
+    lblReasonBreak:'Exclusion reasons breakdown', lblExclList:'Excluded references',
+    s3cfLabel:    'Filter: ',
+    s3cfAll:'All', s3cfCertain:'🔵 Certain', s3cfLikely:'🟢 Likely', s3cfPossible:'🟡 Possible',
+    lblDlScreen:  'Download',
+    lblScreenRisSub:' (remaining)', lblExclTsvSub:' (exclusion list)',
+    phSearch:     'Filter by title or DOI…',
+    lfFooter:     'Local processing only — no data is transmitted',
+    confCertain:'Certain', confLikely:'Likely', confPossible:'Possible',
+    nodup:        'No duplicates detected',
+    nogroup:      'No groups match the filter',
+    noResults:    'No results',
+    noTitle:      '(No title)',
+    none:         'None',
+    noDoi:        'N/A',
+    kept:'Kept', doiMatch:'DOI match', titleMatch:'Title match', fuzzyMatch:'Fuzzy',
+    grpSuffix:    ' groups',
+    unit:         '',
+    matched:      'Matched',
+    onlyA:        'RefSieve only', onlyB:'Rayyan only',
+    matchedParen: 'Matched (',
+    alertNoSrc:   'Please run deduplication in Step 1 first.',
+    pctFmt:       (p) => p+'% remaining',
+    pctMatchFmt:  (p) => p+'% matched',
+    statDupFmt:   (g,c,l,p) => `${g} groups (Certain: ${c} / Likely: ${l} / Possible: ${p})`,
+    exclSubFmt:   (c,l,p) => `Certain: ${c} / Likely: ${l} / Possible: ${p}`,
+    showAbs:      '▼ Abstract',
+    srcTitle:     'Title', srcAbs:'Abstract', srcTitleAb:'Title/Abstract',
+    customPrefix: 'Custom: ',
+    langSuffix:   ' references', langExclSuffix:' — exclude',
+    langJa:'Japanese', langZh:'Chinese', langDe:'German',
+    langFr:'French', langEs:'Spanish', langPt:'Portuguese',
+    cr_case_name:'Case reports / case series', cr_case_desc:'Matches "case report", "case series", "a case of", "case presentation"',
+    cr_review_name:'Review articles (incl. SR/MA)', cr_review_desc:'Matches "review", "meta-analysis", "systematic review", "scoping review"',
+    cr_animal_name:'Animal / in vitro studies', cr_animal_desc:'Matches "mouse", "rat", "murine", "in vitro", "in vivo", "animal model"',
+    cr_noab_name:'No abstract (conference abstracts etc.)', cr_noab_desc:'AB field is empty or very short (< 50 characters)',
+    cr_edit_name:'Editorials / letters / comments', cr_edit_desc:'Matches "editorial", "letter", "correspondence", "comment", "erratum"',
+    cr_guide_name:'Guidelines / textbooks', cr_guide_desc:'Matches "guideline", "consensus", "recommendation", "practice parameter"',
+    cr_proto_name:'Protocols / study designs', cr_proto_desc:'Matches "protocol", "study design", "study protocol"',
+    r1Title:'=== LitFlow Step1: Deduplication Report ===',
+    r2Title:'=== LitFlow Step2: Rayyan Comparison Report ===',
+    r3Title:'=== LitFlow Step3: Screening Report ===',
+    rDate:'Generated: ', rSum:'■ Summary',
+    rTotal:'  Total imported  : ', rDup:'  Duplicates      : ', rDedup:'  After dedup     : ',
+    rUnit:'',
+    r1Methods:'■ Breakdown by method',
+    rDOI:'  DOI match (Certain)        : ', rTitle2:'  Title match (Likely)        : ', rFuzzy:'  Fuzzy match (Possible)      : ',
+    rArrow:' → ', rGrp:' groups',
+    rGrpDetail:'■ Duplicate group details (', rGrpDetailClose:' groups)',
+    rGrpLabel:'[Group ', rGrpConf:'] Confidence: ',
+    rKept:'  [Kept] ', rExcl:'  [Excluded:',
+    r2OnlyANote:' (possible missed duplicates in RefSieve)', r2OnlyBNote:' (possible missed duplicates in Rayyan)',
+    r3Src:'  Records screened : ', r3Excl:'  Excluded         : ', r3Keep:'  Remaining        : ',
+    r3Conf:'■ Breakdown by confidence', r3Reasons:'■ Breakdown by exclusion reason', r3ExclList:'■ Excluded references',
+    rRptTitle:'Title', rRptReasons:'Exclusion reason',
+  }
+};
+
+currentLang = 'ja';
+LF = LFDICT.ja;
+
+function setLang(lang) {
+  currentLang = lang;
+  LF = LFDICT[lang];
+  document.getElementById('htmlRoot').lang = lang;
+  document.getElementById('pageTitle').textContent = LF.title;
+
+  // lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === lang);
+  });
+
+  // id → 辞書キー マップ
+  const textMap = {
+    'lf-tagline': 'tagline',
+    'pill1txt': 'pill1',
+    'pill2txt': 'pill2',
+    'pill3txt': 'pill3',
+    's1dzTitle': 's1dzTitle',
+    's1dzSub': 's1dzSub',
+    'optDoiLbl': 'optDoiLbl',
+    'optDoiTag': 'optDoiTag',
+    'optTitleLbl': 'optTitleLbl',
+    'optFuzzyLbl': 'optFuzzyLbl',
+    'runDedupTxt': 'runDedupTxt',
+    'lblS1Total': 'lblS1Total',
+    'lblS1Dup': 'lblS1Dup',
+    'lblS1Dedup': 'lblS1Dedup',
+    'lblDupGrp': 'lblDupGrp',
+    'lblDlDedup': 'lblDlDedup',
+    'btnToS2': 'btnToS2',
+    'btnSkipS2': 'btnSkipS2',
+    's2dzTitle': 's2dzTitle',
+    's2dzSub': 's2dzSub',
+    'runCompareTxt': 'runCompareTxt',
+    'btnSkipS3': 'btnSkipS3',
+    'lblS2Unit1': 'lblS2Unit1',
+    'lblS2Unit2': 'lblS2Unit2',
+    'lblS2Match': 'lblS2Match',
+    'lblS2Diff': 'lblS2Diff',
+    'tabMatch': 'tabMatch',
+    'tabOnlyA': 'tabOnlyA',
+    'tabOnlyB': 'tabOnlyB',
+    'noteOnlyA': 'noteOnlyA',
+    'noteOnlyB': 'noteOnlyB',
+    'lblDlCmp': 'lblDlCmp',
+    'btnToS3': 'btnToS3',
+    's3notePre': 's3notePre',
+    's3notePost': 's3notePost',
+    'cardCriteriaTitle': 'cardCriteriaTitle',
+    'lblCustomKw': 'lblCustomKw',
+    'lblLangExcl': 'lblLangExcl',
+    'runScreenTxt': 'runScreenTxt',
+    'lblS3Total': 'lblS3Total',
+    'lblS3Excl': 'lblS3Excl',
+    'lblS3Keep': 'lblS3Keep',
+    'lblReasonBreak': 'lblReasonBreak',
+    'lblExclList': 'lblExclList',
+    's3cfLabel': 's3cfLabel',
+    's3cfAll': 's3cfAll',
+    's3cfCertain': 's3cfCertain',
+    's3cfLikely': 's3cfLikely',
+    's3cfPossible': 's3cfPossible',
+    'lblDlScreen': 'lblDlScreen',
+    'lblScreenRisSub': 'lblScreenRisSub',
+    'lblExclTsvSub': 'lblExclTsvSub',
+    'lfFooter': 'lfFooter'
+  };
+  Object.entries(textMap).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && LF[key] !== undefined) el.textContent = LF[key];
+  });
+
+  // s2note は innerHTML（絵文字含む）
+  const s2n = document.getElementById('s2note');
+  if (s2n) s2n.textContent = LF.s2note;
+
+  // search placeholders
+  document.querySelectorAll('[data-ph="phSearch"]').forEach(el => {
+    el.placeholder = LF.phSearch;
+  });
+
+  // criteria box 再描画
+  rebuildCriteria();
+
+  // lang box 再描画
+  rebuildLangBox();
+
+  // 結果が表示中なら動的テキストも更新
+  refreshDynamicTexts();
+}
+
+function rebuildCriteria() {
+  const box = document.getElementById('criteriaBox');
+  if (!box) return;
+  const checked = {};
+  CRITERIA.forEach(cr => {
+    const el = document.getElementById('cr_' + cr.id);
+    checked[cr.id] = el ? el.checked : true;
+  });
+  box.innerHTML = '';
+  CRITERIA.forEach(cr => {
+    const row = document.createElement('label');
+    row.className = 'criteria-row';
+    row.innerHTML = `<input type="checkbox" id="cr_${cr.id}" ${checked[cr.id]?'checked':''}>
+      <span class="criteria-name">${cr.name}</span>
+      <span class="criteria-desc">${cr.desc}</span>
+      <span class="criteria-badge">${CONF_INFO[cr.conf].icon} ${CONF_INFO[cr.conf].label}</span>`;
+    box.appendChild(row);
+  });
+}
+
+function rebuildLangBox() {
+  const box = document.getElementById('langBox');
+  if (!box) return;
+  const checked = {};
+  LANG_OPTIONS.forEach(l => {
+    const el = document.getElementById('lang_' + l.code);
+    checked[l.code] = el ? el.checked : false;
+  });
+  box.innerHTML = '';
+  LANG_OPTIONS.forEach(lang => {
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer';
+    lbl.innerHTML = `<input type="checkbox" id="lang_${lang.code}" ${checked[lang.code]?'checked':''} style="accent-color:var(--accent)"> ${lang.label}${LF.langExclSuffix}`;
+    box.appendChild(lbl);
+  });
+}
+
+function refreshDynamicTexts() {
+  // Step1 stats（結果表示中のみ）
+  if ($('s1results') && $('s1results').style.display !== 'none' && S.dupGroups.length > 0) {
+    const cfC = {certain:0,likely:0,possible:0};
+    S.dupGroups.forEach(g => { cfC[calcConfidence(g)]++; });
+    const total = S.records.length, dedup = S.dedupRecs.length;
+    $('s1dupsub').textContent = LF.statDupFmt(S.dupGroups.length, cfC.certain, cfC.likely, cfC.possible);
+    $('s1deduppct').textContent = total > 0 ? LF.pctFmt(Math.round(dedup/total*100)) : '';
+    $('s1grpCount').textContent = S.dupGroups.length + LF.grpSuffix;
+    renderDupGroups(s1filter);
+  }
+  // Step2 stats
+  if ($('s2results') && $('s2results').style.display !== 'none') {
+    $('s2matchpct').textContent = S.dedupRecs.length > 0 ?
+      LF.pctMatchFmt(Math.round(S.cmpMatched.length/S.dedupRecs.length*100)) : '';
+    $('s2diffsub').textContent = LF.onlyA+' '+S.cmpOnlyA.length+' / '+LF.onlyB+' '+S.cmpOnlyB.length;
+    renderCompareList('s2list0', S.cmpMatched.map(x=>({...x.ref,_mtype:x.mtype})), 'match');
+    renderCompareList('s2list1', S.cmpOnlyA, 'refsieve');
+    renderCompareList('s2list2', S.cmpOnlyB, 'rayyan');
+  }
+  // Step3 stats
+  if ($('s3results') && $('s3results').style.display !== 'none') {
+    const cfC = {certain:0,likely:0,possible:0};
+    S.exclRecs.forEach(r => cfC[r._conf]++);
+    $('s3exclsub').textContent = LF.exclSubFmt(cfC.certain, cfC.likely, cfC.possible);
+    const pct = S.screenSrc.length > 0 ? Math.round(S.keepRecs.length/S.screenSrc.length*100) : 0;
+    $('s3keeppct').textContent = S.screenSrc.length > 0 ? LF.pctFmt(pct) : '';
+    renderScreenList(s3filter, $('s3q').value);
+  }
+}
 </script>
 </body>
 </html>
