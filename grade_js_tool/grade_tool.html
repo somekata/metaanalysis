@@ -844,7 +844,7 @@ select[multiple] option:checked{
     <div style="display:flex;flex-direction:column;gap:14px;">
       <label class="field">
         <span class="field-label" data-i18n="reviewTitle">レビュータイトル</span>
-        <input type="text" id="reviewTitle" placeholder="Candida auris mortality…"/>
+        <input type="text" id="reviewTitle" placeholder="例：C. auris mortality meta-analysis…"/>
       </label>
       <label class="field">
         <span class="field-label" data-i18n="reviewAuthor">作成者</span>
@@ -892,7 +892,8 @@ const LANGS = {
     // outcome form
     outcomeName:'アウトカム名',studyDesign:'研究デザイン（GRADE）',comparison:'比較様式',
     importantLevel:'重要度',nStudies:'研究数',nParticipants:'総参加者数',
-    mortalityDef:'死亡定義',citations:'引用論文（筆頭著者 年）',
+    intervention:'介入群',control:'対照群',
+    outcomeDetail:'アウトカム詳細',citations:'引用論文（筆頭著者 年）',
     relEffect:'相対効果（プール推定値）',absEffect:'絶対効果',
     i2:'I²（%）',pHet:'p for heterogeneity',
     judgNote:'GRADE判定理由',evidNote:'引用・根拠メモ',
@@ -909,8 +910,8 @@ const LANGS = {
     impCrit:'Critical',impImp:'Important',impNot:'Not important',
     // design
     rct:'RCT（開始: High）',obs:'Observational（開始: Low）',
-    compLabel:'Comparative（auris vs non-auris）',
-    saLabel:'Single arm',
+    compLabel:'Comparative（介入 vs 対照）',
+    saLabel:'Single arm（単群）',
     // result
     startGrade:'開始GRADE',downgrade:'Downgrade',upgrade:'Upgrade',finalGrade:'最終GRADE',
     // summary table headers
@@ -932,7 +933,8 @@ const LANGS = {
     sofNote:'Copy this table and paste into Word',
     outcomeName:'Outcome Name',studyDesign:'Study Design (GRADE)',comparison:'Comparison Type',
     importantLevel:'Importance',nStudies:'No. of Studies',nParticipants:'No. of Participants',
-    mortalityDef:'Mortality Definition',citations:'Citations (First Author Year)',
+    intervention:'Intervention',control:'Control/Comparator',
+    outcomeDetail:'Outcome Detail',citations:'Citations (First Author Year)',
     relEffect:'Relative Effect (Pooled)',absEffect:'Absolute Effect',
     i2:'I² (%)',pHet:'p for heterogeneity',
     judgNote:'GRADE Rationale',evidNote:'Evidence Notes',
@@ -944,7 +946,7 @@ const LANGS = {
     u1dr:'Dose-response (+1)',u1rc:'Residual confounding opposes effect (+1)',
     impCrit:'Critical',impImp:'Important',impNot:'Not important',
     rct:'RCT (Start: High)',obs:'Observational (Start: Low)',
-    compLabel:'Comparative (auris vs non-auris)',saLabel:'Single arm',
+    compLabel:'Comparative (intervention vs control)',saLabel:'Single arm',
     startGrade:'Start',downgrade:'Downgrade',upgrade:'Upgrade',finalGrade:'Final GRADE',
     sOutcome:'Outcome',sDesign:'Design',sN:'Studies',sPart:'Participants',
     sEffect:'Effect',sAbsEff:'Absolute Effect',sGrade:'GRADE',sReason:'Reason',
@@ -983,6 +985,9 @@ function createEmptyOutcome(){
     nStudies:'',
     nParticipants:'',
     mortalityDef:'',
+    intervention:'',
+    control:'',
+    outcomeDetail:'',
     relEffect:'',absEffect:'',
     i2:'',pHet:'',
     studies:[],  // [{authorYear:'', note:''}]
@@ -1172,6 +1177,16 @@ function renderDetail(){
         </select>
       </label>
     </div>
+    <div class="field-group cols-2" id="interventionRow" style="${oc.comparison==='SingleArm'?'display:none':''}">
+      <label class="field">
+        <span class="field-label">${t('intervention')}</span>
+        <input type="text" id="oc-intervention" value="${escHtml(oc.intervention)}" placeholder="例：C. auris感染、新薬A投与…"/>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('control')}</span>
+        <input type="text" id="oc-control" value="${escHtml(oc.control)}" placeholder="例：non-C. auris感染、プラセボ…"/>
+      </label>
+    </div>
     <div class="field-group cols-3">
       <label class="field">
         <span class="field-label">${t('nStudies')}</span>
@@ -1182,8 +1197,8 @@ function renderDetail(){
         <input type="number" min="0" id="oc-npart" value="${escHtml(oc.nParticipants)}" placeholder="1240"/>
       </label>
       <label class="field">
-        <span class="field-label">${t('mortalityDef')}</span>
-        <input type="text" id="oc-mortdef" value="${escHtml(oc.mortalityDef)}" placeholder="30-day, 28-day, in-hospital…"/>
+        <span class="field-label">${t('outcomeDetail')}</span>
+        <input type="text" id="oc-mortdef" value="${escHtml(oc.outcomeDetail||oc.mortalityDef)}" placeholder="例：30-day mortality, HbA1c change…"/>
       </label>
     </div>
 
@@ -1293,7 +1308,21 @@ function renderDetail(){
   bind('oc-importance','importance',true);
   bind('oc-nstudies','nStudies');
   bind('oc-npart','nParticipants');
-  bind('oc-mortdef','mortalityDef');
+  bind('oc-intervention','intervention');
+  bind('oc-control','control');
+  // oc-mortdef now saves to outcomeDetail (mortalityDef kept for legacy)
+  const mortEl=document.getElementById('oc-mortdef');
+  if(mortEl) mortEl.addEventListener('input',()=>{
+    oc.outcomeDetail=mortEl.value; oc.mortalityDef=mortEl.value; persist();
+  });
+  // Show/hide intervention row based on comparison
+  const compSel=document.getElementById('oc-comparison');
+  const intRow=document.getElementById('interventionRow');
+  if(compSel&&intRow){
+    compSel.addEventListener('change',()=>{
+      intRow.style.display=compSel.value==='SingleArm'?'none':'';
+    });
+  }
   bind('oc-releff','relEffect');
   bind('oc-abseff','absEffect');
   bind('oc-i2','i2',false);
@@ -1382,8 +1411,9 @@ function makeHint(oc){
   if(oc.nStudies!==''&&Number(oc.nStudies)<10){
     hints.push('研究数が少ない場合、Publication biasの評価は慎重に。');
   }
-  if(oc.mortalityDef&&/[,/]/.test(oc.mortalityDef)){
-    hints.push('死亡定義が混在している場合、Indirectness downgradeを検討してください。');
+  const detail=oc.outcomeDetail||oc.mortalityDef||'';
+  if(detail&&/[,/]/.test(detail)){
+    hints.push('アウトカム定義が複数混在している場合、Indirectness downgradeを検討してください。');
   }
   return hints.join('　');
 }
@@ -1486,7 +1516,9 @@ function buildSofHtml(){
     return `
       <tr>
         <td><strong>${escHtml(oc.outcomeName||'—')}</strong><br/><small>${oc.importance||'Critical'}</small>
-          ${oc.mortalityDef?`<br/><small style="color:#666">${escHtml(oc.mortalityDef)}</small>`:''}
+          ${(oc.outcomeDetail||oc.mortalityDef)?`<br/><small style="color:#666">${escHtml(oc.outcomeDetail||oc.mortalityDef)}</small>`:''}
+          ${oc.intervention?`<br/><small style="color:#555">Intervention: ${escHtml(oc.intervention)}</small>`:''}
+          ${oc.control?`<br/><small style="color:#555">Control: ${escHtml(oc.control)}</small>`:''}
         </td>
         <td style="text-align:center">${oc.nStudies||'—'}</td>
         <td style="text-align:center">${oc.nParticipants||'—'}</td>
