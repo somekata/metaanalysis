@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRADE支援ツール</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-logo">
+        <div class="hero-emblem">G↑</div>
+        <div>
+          <h1>GRADE 支援ツール</h1>
+          <div class="hero-sub">Evidence Quality Assessment</div>
+        </div>
+      </div>
+      <div class="hero-spacer"></div>
+      <div class="hero-meta">
+        <div class="hero-pill" id="heroPill">Outcomes: <strong>1</strong></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+
+      <section class="card">
+        <div class="section-label">Review Info</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <label>
+            レビュータイトル
+            <input type="text" id="reviewTitle" placeholder="Candida auris mortality…" />
+          </label>
+          <label>
+            作成者
+            <input type="text" id="reviewAuthor" placeholder="例：Yukihiro Kaneko" />
+          </label>
+          <label>
+            メモ
+            <textarea id="reviewNotes" rows="4" placeholder="レビューの背景、判断方針…"></textarea>
+          </label>
+        </div>
+        <div class="toolbar">
+          <button id="saveReviewBtn" class="btn-primary" style="width:100%;">保存</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-label">Export / Import</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button id="exportJsonBtn" class="btn-ghost">📤 JSONを書き出し</button>
+          <label class="file-label">
+            📥 JSONを読み込む
+            <input type="file" id="importJsonInput" accept="application/json" />
+          </label>
+          <button id="downloadCsvBtn" class="btn-ghost">📊 SummaryをCSV保存</button>
+          <button id="printBtn" class="btn-ghost">🖨 印刷</button>
+          <button id="resetBtn" class="danger" style="margin-top:4px;">⚠ 全データを初期化</button>
+        </div>
+        <p class="small-note" style="margin-top:12px;">このツールはGRADEを完全自動判定するものではなく、判断を整理・記録するための支援ツールです。</p>
+      </section>
+
+    </aside>
+
+    <!-- ── Main area ── -->
+    <div class="main-area">
+
+      <!-- Outcomes -->
+      <section class="card">
+        <div class="outcomes-header">
+          <div class="section-label" style="margin-bottom:0;flex:1;">Outcomes</div>
+          <span class="outcomes-count" id="outcomesCount">1 outcome</span>
+        </div>
+        <p class="help">各Outcomeごとに研究デザイン、GRADEの5領域、upgrade要素、効果量を記録します。</p>
+
+        <div id="outcomesContainer"></div>
+
+        <button id="addOutcomeBtn" class="btn-teal" style="margin-top:8px;width:100%;">
+          ＋ Outcomeを追加
+        </button>
+      </section>
+
+      <!-- Summary -->
+      <section class="card">
+        <div class="outcomes-header">
+          <div class="section-label" style="margin-bottom:0;flex:1;">Summary of Findings</div>
+          <button id="refreshSummaryBtn" class="btn-ghost" style="margin-bottom:0;padding:5px 12px;font-size:12px;">再集計</button>
+        </div>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table id="summaryTable">
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Study design</th>
+                <th>Studies</th>
+                <th>Participants</th>
+                <th>Relative effect</th>
+                <th>Absolute effect</th>
+                <th>GRADE</th>
+                <th>Reasons</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ── Outcome template ── -->
+  <template id="outcomeTemplate">
+    <article class="outcome card-sub">
+      <div class="outcome-top">
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
+          <div class="outcome-number">Outcome #<span class="outcome-num">1</span></div>
+          <div class="outcome-title-input-wrap">
+            <input type="text" class="outcome-name" placeholder="例：30日死亡率" />
+          </div>
+        </div>
+        <div class="outcome-actions">
+          <button class="duplicate-outcome btn-ghost" title="複製">⊕</button>
+          <button class="delete-outcome danger" title="削除">✕</button>
+        </div>
+      </div>
+
+      <!-- Basic info -->
+      <div class="grid four">
+        <label>
+          研究デザイン
+          <select class="study-design">
+            <option value="RCT">RCT</option>
+            <option value="Observational">Observational</option>
+          </select>
+        </label>
+        <label>
+          研究数
+          <input type="number" min="0" class="study-count" placeholder="例：8" />
+        </label>
+        <label>
+          参加者数
+          <input type="number" min="0" class="participant-count" placeholder="例：1240" />
+        </label>
+        <label>
+          相対効果
+          <input type="text" class="relative-effect" placeholder="OR 1.24 (95% CI…)" />
+        </label>
+      </div>
+      <div class="grid two">
+        <label>
+          絶対効果
+          <input type="text" class="absolute-effect" placeholder="例：1000人あたり25人増加" />
+        </label>
+        <div></div>
+      </div>
+
+      <!-- Domains -->
+      <div class="section-label" style="margin-top:4px;">Downgrade Domains</div>
+      <div class="domain-bars">
+        <div class="domain-bar-wrap">
+          <div class="domain-bar-name">Risk of bias</div>
+          <div class="domain-bar-select">
+            <select class="domain domain-rob" data-domain="rob"></select>
+          </div>
+        </div>
+        <div class="domain-bar-wrap">
+          <div class="domain-bar-name">Inconsistency</div>
+          <div class="domain-bar-select">
+            <select class="domain domain-inconsistency" data-domain="inconsistency"></select>
+          </div>
+        </div>
+        <div class="domain-bar-wrap">
+          <div class="domain-bar-name">Indirectness</div>
+          <div class="domain-bar-select">
+            <select class="domain domain-indirectness" data-domain="indirectness"></select>
+          </div>
+        </div>
+        <div class="domain-bar-wrap">
+          <div class="domain-bar-name">Imprecision</div>
+          <div class="domain-bar-select">
+            <select class="domain domain-imprecision" data-domain="imprecision"></select>
+          </div>
+        </div>
+        <div class="domain-bar-wrap">
+          <div class="domain-bar-name">Publication bias</div>
+          <div class="domain-bar-select">
+            <select class="domain domain-pubbias" data-domain="pubbias"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upgrade -->
+      <div class="section-label" style="margin-top:14px;">Upgrade Factors</div>
+      <label>
+        該当する項目を選択（複数選択可）
+        <select class="upgrade-select" multiple size="4">
+          <option value="1_large_effect">大きな効果量（+1）</option>
+          <option value="2_very_large_effect">非常に大きな効果量（+2）</option>
+          <option value="1_dose_response">用量反応関係（+1）</option>
+          <option value="1_residual_confounding">残余交絡が効果を弱める方向（+1）</option>
+        </select>
+      </label>
+
+      <!-- Assist -->
+      <details class="assist-box" style="margin-top:14px;">
+        <summary>補助メモ（I²・CIの考え方）</summary>
+        <div class="assist-content">
+          <div class="grid three">
+            <label>I² (%)<input type="number" min="0" max="100" class="i2" placeholder="62" /></label>
+            <label>p値<input type="text" class="pvalue" placeholder="0.04" /></label>
+            <label>備考<input type="text" class="assist-note" placeholder="異質性の原因候補など" /></label>
+          </div>
+          <div class="hint"></div>
+        </div>
+      </details>
+
+      <!-- Notes -->
+      <div class="section-label" style="margin-top:14px;">Notes</div>
+      <div class="grid two">
+        <label>
+          判定理由メモ
+          <textarea class="judgement-note" rows="4" placeholder="なぜdowngrade / upgradeしたのか"></textarea>
+        </label>
+        <label>
+          引用・根拠メモ
+          <textarea class="evidence-note" rows="4" placeholder="主要論文、RoB、サブグループ解析など"></textarea>
+        </label>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box">
+        <div class="result-cell">
+          <div class="result-cell-label">Start</div>
+          <div class="result-cell-value start-grade">—</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-cell-label">Downgrade</div>
+          <div class="result-cell-value" style="color:var(--grade-low);">−<span class="downgrade-total">0</span></div>
+        </div>
+        <div class="result-cell">
+          <div class="result-cell-label">Upgrade</div>
+          <div class="result-cell-value" style="color:var(--grade-high);">+<span class="upgrade-total">0</span></div>
+        </div>
+        <div class="result-cell">
+          <div class="result-cell-label">Final GRADE</div>
+          <div class="final-grade-wrap"></div>
+        </div>
+      </div>
+
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
