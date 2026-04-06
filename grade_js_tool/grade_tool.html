@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GRADE支援ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   GRADE Tool — v3 — Light/Dark + i18n
+═══════════════════════════════════════════ */
+:root{
+  --bg:#f7f6f2;
+  --bg2:#efeee9;
+  --surface:#ffffff;
+  --surface2:#fafaf8;
+  --border:#ddd9d0;
+  --border2:#c8c3b8;
+  --text:#1a1916;
+  --text2:#5a5750;
+  --text3:#9a9590;
+  --accent:#2d6a4f;
+  --accent-soft:rgba(45,106,79,.1);
+  --accent-border:rgba(45,106,79,.25);
+  --gold:#b5860d;
+  --gold-soft:rgba(181,134,13,.1);
+  --red:#c0392b;
+  --red-soft:rgba(192,57,43,.1);
+  --red-border:rgba(192,57,43,.25);
+  --grade-h:#2d6a4f;--grade-h-bg:rgba(45,106,79,.1);
+  --grade-m:#8a6d00;--grade-m-bg:rgba(138,109,0,.1);
+  --grade-l:#b34a00;--grade-l-bg:rgba(179,74,0,.1);
+  --grade-v:#8b1a1a;--grade-v-bg:rgba(139,26,26,.1);
+  --shadow:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.1);
+  --r:10px;
+  --font-serif:'Lora',Georgia,serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --font-sans:'Noto Sans JP',-apple-system,sans-serif;
+  --list-w:280px;
+  --header-h:54px;
+}
+[data-theme="dark"]{
+  --bg:#0f1117;
+  --bg2:#161b24;
+  --surface:#1a2030;
+  --surface2:#1e2538;
+  --border:#2a3348;
+  --border2:#364060;
+  --text:#dde3ed;
+  --text2:#8a93a8;
+  --text3:#4a5570;
+  --accent:#52b788;
+  --accent-soft:rgba(82,183,136,.12);
+  --accent-border:rgba(82,183,136,.3);
+  --gold:#d4a017;
+  --gold-soft:rgba(212,160,23,.12);
+  --red:#e55c4a;
+  --red-soft:rgba(229,92,74,.12);
+  --red-border:rgba(229,92,74,.3);
+  --grade-h:#52b788;--grade-h-bg:rgba(82,183,136,.12);
+  --grade-m:#d4a017;--grade-m-bg:rgba(212,160,23,.12);
+  --grade-l:#e07040;--grade-l-bg:rgba(224,112,64,.12);
+  --grade-v:#e55c4a;--grade-v-bg:rgba(229,92,74,.12);
+  --shadow:0 2px 8px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--text);
+  font-size:13px;
+  line-height:1.65;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+/* ════════════════════════════
+   HEADER
+════════════════════════════ */
+.app-header{
+  height:var(--header-h);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  gap:16px;
+  flex-shrink:0;
+  position:sticky;
+  top:0;
+  z-index:200;
+}
+.header-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+}
+.header-emblem{
+  width:32px;height:32px;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);
+  font-size:11px;font-weight:500;
+  color:#fff;
+  flex-shrink:0;
+}
+.header-title{
+  font-family:var(--font-serif);
+  font-size:1.1rem;
+  font-weight:500;
+  letter-spacing:-.01em;
+  color:var(--text);
+}
+.header-subtitle{
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--text3);
+  letter-spacing:.06em;
+}
+.header-spacer{flex:1}
+.header-actions{display:flex;gap:8px;align-items:center}
+
+/* Header review info pills */
+.review-pills{
+  display:flex;gap:6px;align-items:center;
+  font-family:var(--font-mono);font-size:11px;
+}
+.review-pill{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:99px;
+  padding:3px 10px;
+  color:var(--text2);
+  max-width:200px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.review-pill strong{color:var(--accent)}
+
+/* ════════════════════════════
+   LAYOUT
+════════════════════════════ */
+.app-body{
+  flex:1;
+  display:flex;
+  overflow:hidden;
+}
+
+/* ── Outcome list (left) ── */
+.outcome-list{
+  width:var(--list-w);
+  flex-shrink:0;
+  border-right:1px solid var(--border);
+  background:var(--bg2);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.list-header{
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.list-header-label{
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--text3);
+  flex:1;
+}
+.outcome-list-items{
+  flex:1;
+  overflow-y:auto;
+  padding:8px;
+}
+.outcome-list-item{
+  padding:10px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-bottom:3px;
+  border:1px solid transparent;
+  transition:all .15s;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.outcome-list-item:hover{
+  background:var(--surface);
+  border-color:var(--border);
+}
+.outcome-list-item.active{
+  background:var(--surface);
+  border-color:var(--accent-border);
+  box-shadow:var(--shadow);
+}
+.item-num{
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--text3);
+  width:18px;
+  flex-shrink:0;
+}
+.item-name{
+  flex:1;
+  font-size:13px;
+  font-weight:500;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  color:var(--text);
+}
+.item-grade{
+  flex-shrink:0;
+}
+.list-footer{
+  padding:10px 8px;
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+
+/* ── Detail panel (right) ── */
+.detail-panel{
+  flex:1;
+  overflow-y:auto;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+}
+.detail-inner{
+  max-width:860px;
+  margin:0 auto;
+  padding:28px 32px 60px;
+  width:100%;
+}
+.no-selection{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text3);
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:.06em;
+}
+
+/* ── Summary view ── */
+.summary-panel{
+  flex:1;
+  overflow-y:auto;
+  background:var(--bg);
+  padding:28px 32px 60px;
+  display:none;
+}
+.summary-panel.active{display:block}
+
+/* ── SoF table modal ── */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:var(--shadow-lg);
+  width:100%;
+  max-width:980px;
+  max-height:90vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.modal-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+.modal-title{
+  font-family:var(--font-serif);
+  font-size:1.05rem;
+  font-weight:500;
+  flex:1;
+}
+.modal-body{
+  flex:1;overflow-y:auto;
+  padding:20px;
+}
+.modal-footer{
+  padding:14px 20px;
+  border-top:1px solid var(--border);
+  display:flex;gap:8px;
+  justify-content:flex-end;
+  flex-shrink:0;
+}
+
+/* ════════════════════════════
+   FORM ELEMENTS
+════════════════════════════ */
+.field-group{
+  display:grid;
+  gap:14px;
+  margin-bottom:20px;
+}
+.cols-2{grid-template-columns:1fr 1fr}
+.cols-3{grid-template-columns:1fr 1fr 1fr}
+.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+
+label.field{
+  display:flex;flex-direction:column;gap:5px;
+}
+.field-label{
+  font-size:11px;
+  font-weight:600;
+  color:var(--text2);
+  letter-spacing:.04em;
+}
+.field-hint{
+  font-size:10px;
+  color:var(--text3);
+  font-family:var(--font-mono);
+}
+input[type=text],input[type=number],select,textarea{
+  font-family:var(--font-sans);
+  font-size:13px;
+  padding:8px 10px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:7px;
+  color:var(--text);
+  width:100%;
+  transition:border-color .15s,box-shadow .15s;
+  appearance:none;-webkit-appearance:none;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft);
+}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+textarea{resize:vertical}
+select[multiple]{padding:6px 8px;min-height:100px}
+select[multiple] option{
+  padding:5px 6px;
+  border-radius:4px;
+  margin-bottom:2px;
+}
+select[multiple] option:checked{
+  background:var(--accent-soft);
+  color:var(--accent);
+}
+
+/* ════════════════════════════
+   BUTTONS
+════════════════════════════ */
+.btn{
+  font-family:var(--font-sans);
+  font-size:12px;font-weight:600;
+  border:none;border-radius:7px;
+  padding:8px 14px;
+  cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  transition:all .15s;
+  white-space:nowrap;
+  text-decoration:none;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 0 0 3px var(--accent-soft)}
+.btn-ghost{
+  background:var(--surface);
+  color:var(--text2);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover{background:var(--bg2);color:var(--text);border-color:var(--border2)}
+.btn-danger{
+  background:var(--red-soft);
+  color:var(--red);
+  border:1px solid var(--red-border);
+}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-icon{padding:7px;border-radius:6px;font-size:14px}
+
+/* File label button */
+.btn-file{
+  background:var(--surface);
+  color:var(--text2);
+  border:1px solid var(--border);
+  font-family:var(--font-sans);font-size:12px;font-weight:600;
+  border-radius:7px;padding:8px 14px;
+  cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  transition:all .15s;
+}
+.btn-file:hover{background:var(--bg2);color:var(--text);border-color:var(--border2)}
+.btn-file input{display:none}
+
+/* ════════════════════════════
+   SECTION LABELS
+════════════════════════════ */
+.section-label{
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-label::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ════════════════════════════
+   DETAIL SECTIONS
+════════════════════════════ */
+.detail-top{
+  display:flex;align-items:flex-start;gap:14px;
+  margin-bottom:28px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.detail-top-main{flex:1}
+.outcome-index-label{
+  font-family:var(--font-mono);
+  font-size:10px;color:var(--text3);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.outcome-name-input{
+  font-family:var(--font-serif);
+  font-size:1.4rem;
+  font-weight:500;
+  background:transparent;
+  border:none;
+  border-bottom:2px solid var(--border);
+  border-radius:0;
+  padding:4px 0;
+  color:var(--text);
+  width:100%;
+}
+.outcome-name-input:focus{
+  border-bottom-color:var(--accent);
+  box-shadow:none;
+}
+.outcome-name-input::placeholder{color:var(--text3)}
+.detail-top-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── GRADE result box ── */
+.result-strip{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin:20px 0;
+}
+.result-cell{
+  background:var(--surface2);
+  padding:12px 14px;
+  display:flex;flex-direction:column;gap:3px;
+}
+.result-cell-label{
+  font-family:var(--font-mono);
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);
+}
+.result-cell-val{
+  font-family:var(--font-mono);
+  font-size:1rem;font-weight:500;
+  color:var(--text);
+}
+.result-cell-val.down{color:var(--red)}
+.result-cell-val.up{color:var(--grade-h)}
+
+/* ── GRADE badge ── */
+.grade-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px 3px 6px;
+  border-radius:99px;
+  font-family:var(--font-mono);
+  font-size:11px;font-weight:500;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.grade-badge::before{
+  content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+.gb-High{background:var(--grade-h-bg);color:var(--grade-h);border-color:rgba(45,106,79,.25)}
+.gb-High::before{background:var(--grade-h);box-shadow:0 0 5px var(--grade-h)}
+.gb-Moderate{background:var(--grade-m-bg);color:var(--grade-m);border-color:rgba(138,109,0,.25)}
+.gb-Moderate::before{background:var(--grade-m);box-shadow:0 0 5px var(--grade-m)}
+.gb-Low{background:var(--grade-l-bg);color:var(--grade-l);border-color:rgba(179,74,0,.25)}
+.gb-Low::before{background:var(--grade-l);box-shadow:0 0 5px var(--grade-l)}
+.gb-Verylow{background:var(--grade-v-bg);color:var(--grade-v);border-color:rgba(139,26,26,.25)}
+.gb-Verylow::before{background:var(--grade-v);box-shadow:0 0 5px var(--grade-v)}
+
+/* ── Domain rows ── */
+.domain-rows{
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.domain-row{
+  display:flex;align-items:center;
+  padding:8px 12px;
+  border-bottom:1px solid var(--border);
+  gap:12px;
+}
+.domain-row:last-child{border-bottom:none}
+.domain-row-name{
+  width:130px;flex-shrink:0;
+  font-size:12px;font-weight:500;
+  color:var(--text2);
+  font-family:var(--font-mono);
+  font-size:11px;
+}
+.domain-row select{
+  flex:1;padding:6px 10px;font-size:12px;
+  font-family:var(--font-mono);
+}
+.domain-score-badge{
+  font-family:var(--font-mono);
+  font-size:11px;
+  width:26px;text-align:center;
+  flex-shrink:0;
+  color:var(--text3);
+}
+.domain-score-badge.has-score{color:var(--red);font-weight:600}
+
+/* ── Collapsible section ── */
+.collapsible{
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.collapsible-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  cursor:pointer;
+  background:var(--surface2);
+  user-select:none;
+  font-size:12px;font-weight:600;
+  color:var(--text2);
+}
+.collapsible-header:hover{background:var(--bg2)}
+.collapsible-arrow{
+  font-family:var(--font-mono);
+  font-size:10px;color:var(--accent);
+  transition:transform .2s;
+  margin-left:auto;
+}
+.collapsible.open .collapsible-arrow{transform:rotate(90deg)}
+.collapsible-body{
+  display:none;
+  padding:14px;
+  border-top:1px solid var(--border);
+}
+.collapsible.open .collapsible-body{display:block}
+
+/* ── Hint box ── */
+.hint-box{
+  background:var(--accent-soft);
+  border:1px solid var(--accent-border);
+  border-left:3px solid var(--accent);
+  border-radius:6px;
+  padding:8px 12px;
+  font-size:11px;
+  font-family:var(--font-mono);
+  color:var(--accent);
+  line-height:1.7;
+  margin-top:10px;
+}
+.hint-box:empty{display:none}
+
+/* ── Study info table ── */
+.study-table{
+  width:100%;border-collapse:collapse;
+  margin-bottom:6px;
+}
+.study-table th{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);
+  padding:6px 10px;text-align:left;
+  border-bottom:1px solid var(--border);
+}
+.study-table td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  vertical-align:top;
+}
+.study-table tr:last-child td{border-bottom:none}
+.study-table input{border:none;background:transparent;padding:2px 0;width:100%}
+.study-table input:focus{outline:none;background:var(--accent-soft);border-radius:4px;padding:2px 6px}
+.add-study-btn{
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--accent);cursor:pointer;
+  padding:6px 10px;display:inline-flex;align-items:center;gap:4px;
+  background:none;border:none;
+}
+.add-study-btn:hover{text-decoration:underline}
+.del-study-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--text3);font-size:13px;padding:0 4px;
+  line-height:1;
+}
+.del-study-btn:hover{color:var(--red)}
+
+/* ── Summary page ── */
+.sof-table{
+  width:100%;border-collapse:collapse;font-size:12px;
+}
+.sof-table th{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);padding:8px 12px;text-align:left;
+  background:var(--surface2);
+  border-bottom:2px solid var(--border);
+  white-space:nowrap;
+}
+.sof-table td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.sof-table tbody tr:hover{background:var(--surface2)}
+.sof-table .mono{font-family:var(--font-mono);font-size:11px}
+
+/* ── SoF paper table (for export) ── */
+.paper-sof{
+  width:100%;border-collapse:collapse;
+  font-family:var(--font-sans);font-size:12px;
+  border:2px solid #333;
+}
+.paper-sof th{
+  background:#2d4a3e;color:#fff;
+  padding:8px 10px;text-align:left;
+  font-weight:600;font-size:11px;letter-spacing:.04em;
+  border:1px solid #1a2e27;
+}
+.paper-sof td{
+  padding:8px 10px;
+  border:1px solid #ddd;
+  vertical-align:top;
+}
+.paper-sof tr:nth-child(even) td{background:#f5faf7}
+.paper-sof .grade-cell{text-align:center;font-weight:700}
+.paper-sof .grade-H{color:#2d6a4f}
+.paper-sof .grade-M{color:#8a6d00}
+.paper-sof .grade-L{color:#b34a00}
+.paper-sof .grade-V{color:#8b1a1a}
+
+/* ── Nav tabs ── */
+.nav-tabs{
+  display:flex;gap:4px;
+  padding:6px 16px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.nav-tab{
+  font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.04em;
+  padding:5px 12px;border-radius:6px;
+  cursor:pointer;border:none;background:none;
+  color:var(--text3);transition:all .15s;
+}
+.nav-tab:hover{color:var(--text);background:var(--surface)}
+.nav-tab.active{background:var(--surface);color:var(--accent);font-weight:600;box-shadow:var(--shadow)}
+
+/* ── Sidebar for review info ── */
+.sidebar-drawer{
+  width:300px;flex-shrink:0;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  overflow-y:auto;
+  padding:20px;
+  display:none;
+}
+.sidebar-drawer.open{display:block}
+
+/* ── Import/Export toolbar at bottom of list ── */
+.io-bar{
+  border-top:1px solid var(--border);
+  padding:10px 12px;
+  display:flex;flex-direction:column;gap:6px;
+  flex-shrink:0;
+}
+
+/* responsive */
+@media(max-width:900px){
+  .cols-4{grid-template-columns:1fr 1fr}
+  .cols-3{grid-template-columns:1fr 1fr}
+  .result-strip{grid-template-columns:1fr 1fr}
+  :root{--list-w:220px}
+}
+@media(max-width:640px){
+  .outcome-list{display:none}
+  .cols-2,.cols-3,.cols-4{grid-template-columns:1fr}
+  .detail-inner{padding:16px}
+}
+
+/* print */
+@media print{
+  .app-header,.outcome-list,.nav-tabs,.sidebar-drawer,
+  .btn,.btn-file,.add-study-btn,.del-study-btn,
+  .detail-top-actions{display:none!important}
+  body,.detail-panel,.summary-panel{background:#fff;color:#000}
+  .result-strip,.domain-rows,.collapsible{border-color:#ccc}
+  .result-cell{background:#f5f5f5}
+  .paper-sof th{background:#2d4a3e;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* ── Toggle switch (theme) ── */
+.toggle-switch{
+  position:relative;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  font-family:var(--font-mono);font-size:10px;color:var(--text3);
+}
+.toggle-switch input{position:absolute;opacity:0;width:0;height:0}
+.toggle-track{
+  width:32px;height:18px;background:var(--border2);border-radius:99px;
+  transition:background .2s;position:relative;
+}
+.toggle-track::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:12px;height:12px;border-radius:50%;
+  background:#fff;transition:transform .2s;
+}
+.toggle-switch input:checked + .toggle-track{background:var(--accent)}
+.toggle-switch input:checked + .toggle-track::after{transform:translateX(14px)}
+</style>
+</head>
+<body data-theme="light">
+
+<!-- ══════════════════════════ HEADER ══════════════════════════ -->
+<header class="app-header">
+  <div class="header-brand">
+    <div class="header-emblem">G↑</div>
+    <div>
+      <div class="header-title" data-i18n="appTitle">GRADE 支援ツール</div>
+      <div class="header-subtitle" data-i18n="appSub">Evidence Quality Assessment</div>
+    </div>
+  </div>
+  <div class="review-pills">
+    <div class="review-pill" id="headerTitle" style="display:none"></div>
+    <div class="review-pill" id="headerAuthor" style="display:none"></div>
+  </div>
+  <div class="header-spacer"></div>
+  <div class="header-actions">
+    <!-- Lang toggle -->
+    <label class="toggle-switch" title="EN / JA">
+      <input type="checkbox" id="langToggle"/>
+      <div class="toggle-track"></div>
+      <span id="langLabel">EN</span>
+    </label>
+    <!-- Theme toggle -->
+    <label class="toggle-switch" title="Dark mode">
+      <input type="checkbox" id="themeToggle"/>
+      <div class="toggle-track"></div>
+      <span>🌙</span>
+    </label>
+    <!-- Review info -->
+    <button class="btn btn-ghost btn-sm" id="reviewInfoBtn">⚙ <span data-i18n="reviewInfo">レビュー情報</span></button>
+    <!-- SoF table -->
+    <button class="btn btn-primary btn-sm" id="sofBtn">📋 <span data-i18n="sofTable">SoFテーブル</span></button>
+  </div>
+</header>
+
+<!-- ══════════════════════════ BODY ══════════════════════════ -->
+<div class="app-body">
+
+  <!-- ── Outcome list (left) ── -->
+  <div class="outcome-list">
+    <div class="list-header">
+      <div class="list-header-label" data-i18n="outcomes">Outcomes</div>
+      <button class="btn btn-ghost btn-sm" id="addOutcomeBtn">＋</button>
+    </div>
+    <div class="outcome-list-items" id="outcomeListItems"></div>
+    <div class="list-footer">
+      <div class="io-bar">
+        <button class="btn btn-ghost btn-sm" id="exportJsonBtn" style="width:100%;justify-content:center">📤 JSON</button>
+        <label class="btn-file btn-sm" style="width:100%;justify-content:center">
+          📥 JSON <input type="file" id="importJsonInput" accept="application/json"/>
+        </label>
+        <button class="btn btn-ghost btn-sm" id="downloadCsvBtn" style="width:100%;justify-content:center">📊 CSV</button>
+        <button class="btn btn-danger btn-sm" id="resetBtn" style="width:100%;justify-content:center" data-i18n="resetAll">⚠ 初期化</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main area ── -->
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+    <!-- Nav tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="detail" data-i18n="tabDetail">詳細入力</button>
+      <button class="nav-tab" data-tab="summary" data-i18n="tabSummary">サマリー</button>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="no-selection" id="noSelection" data-i18n="selectOutcome">← Outcomeを選択してください</div>
+      <div class="detail-inner" id="detailInner" style="display:none"></div>
+    </div>
+
+    <!-- Summary panel -->
+    <div class="summary-panel" id="summaryPanel"></div>
+
+  </div>
+
+  <!-- ── Review info sidebar ── -->
+  <div class="sidebar-drawer" id="reviewDrawer">
+    <div class="section-label" data-i18n="reviewInfo">レビュー情報</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <label class="field">
+        <span class="field-label" data-i18n="reviewTitle">レビュータイトル</span>
+        <input type="text" id="reviewTitle" placeholder="Candida auris mortality…"/>
+      </label>
+      <label class="field">
+        <span class="field-label" data-i18n="reviewAuthor">作成者</span>
+        <input type="text" id="reviewAuthor" placeholder="Yukihiro Kaneko"/>
+      </label>
+      <label class="field">
+        <span class="field-label" data-i18n="reviewNotes">メモ</span>
+        <textarea id="reviewNotes" rows="5" placeholder="背景・判断方針…"></textarea>
+      </label>
+      <button class="btn btn-primary" id="saveReviewBtn" data-i18n="save">保存</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════ SoF MODAL ══════════════════════════ -->
+<div class="modal-overlay" id="sofModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="sofTitle">Summary of Findings テーブル</div>
+      <button class="btn btn-ghost btn-sm" id="copySofBtn">📋 <span data-i18n="copy">コピー</span></button>
+      <button class="btn btn-ghost btn-sm" id="printSofBtn">🖨 <span data-i18n="print">印刷</span></button>
+      <button class="btn btn-ghost btn-sm btn-icon" id="closeSofBtn">✕</button>
+    </div>
+    <div class="modal-body" id="sofModalBody"></div>
+    <div class="modal-footer">
+      <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)" data-i18n="sofNote">このテーブルをコピーしてWordに貼り付けできます</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   i18n
+═══════════════════════════════════════════ */
+const LANGS = {
+  ja:{
+    appTitle:'GRADE 支援ツール',appSub:'エビデンスの質の評価',
+    outcomes:'Outcomes',reviewInfo:'レビュー情報',sofTable:'SoFテーブル',
+    tabDetail:'詳細入力',tabSummary:'サマリー',
+    reviewTitle:'レビュータイトル',reviewAuthor:'作成者',reviewNotes:'メモ',
+    save:'保存',resetAll:'全データ初期化',selectOutcome:'← Outcomeを選択してください',
+    sofTitle:'Summary of Findings テーブル',copy:'コピー',print:'印刷',
+    sofNote:'このテーブルをコピーしてWordに貼り付けできます',
+    // outcome form
+    outcomeName:'アウトカム名',studyDesign:'研究デザイン（GRADE）',comparison:'比較様式',
+    importantLevel:'重要度',nStudies:'研究数',nParticipants:'総参加者数',
+    mortalityDef:'死亡定義',citations:'引用論文（筆頭著者 年）',
+    relEffect:'相対効果（プール推定値）',absEffect:'絶対効果',
+    i2:'I²（%）',pHet:'p for heterogeneity',
+    judgNote:'GRADE判定理由',evidNote:'引用・根拠メモ',
+    // domains
+    rob:'Risk of bias',inconsistency:'Inconsistency',
+    indirectness:'Indirectness',imprecision:'Imprecision',pubbias:'Publication bias',
+    // domain options
+    d0:'問題なし（0）',d1:'やや問題あり（−1）',d2:'深刻な問題あり（−2）',d3:'非常に深刻（−3）',dNA:'N/A（1研究・単群）',
+    // upgrade
+    upgradeFactors:'Upgradeファクター',
+    u1le:'大きな効果量（+1）',u2le:'非常に大きな効果量（+2）',
+    u1dr:'用量反応関係（+1）',u1rc:'残余交絡が効果を弱める方向（+1）',
+    // importance
+    impCrit:'Critical',impImp:'Important',impNot:'Not important',
+    // design
+    rct:'RCT（開始: High）',obs:'Observational（開始: Low）',
+    compLabel:'Comparative（auris vs non-auris）',
+    saLabel:'Single arm',
+    // result
+    startGrade:'開始GRADE',downgrade:'Downgrade',upgrade:'Upgrade',finalGrade:'最終GRADE',
+    // summary table headers
+    sOutcome:'Outcome',sDesign:'デザイン',sN:'研究数',sPart:'参加者',
+    sEffect:'効果量',sAbsEff:'絶対効果',sGrade:'GRADE',sReason:'判定理由',
+    // studies
+    addStudy:'＋ 研究を追加',authorYear:'筆頭著者 年',studyNote:'備考',
+    // misc
+    duplicate:'複製',delete:'削除',noOutcome:'未入力',naLabel:'N/A',
+    copyDone:'コピーしました！',
+  },
+  en:{
+    appTitle:'GRADE Assessment Tool',appSub:'Evidence Quality Assessment',
+    outcomes:'Outcomes',reviewInfo:'Review Info',sofTable:'SoF Table',
+    tabDetail:'Detail',tabSummary:'Summary',
+    reviewTitle:'Review Title',reviewAuthor:'Author',reviewNotes:'Notes',
+    save:'Save',resetAll:'Reset All',selectOutcome:'← Select an Outcome',
+    sofTitle:'Summary of Findings Table',copy:'Copy',print:'Print',
+    sofNote:'Copy this table and paste into Word',
+    outcomeName:'Outcome Name',studyDesign:'Study Design (GRADE)',comparison:'Comparison Type',
+    importantLevel:'Importance',nStudies:'No. of Studies',nParticipants:'No. of Participants',
+    mortalityDef:'Mortality Definition',citations:'Citations (First Author Year)',
+    relEffect:'Relative Effect (Pooled)',absEffect:'Absolute Effect',
+    i2:'I² (%)',pHet:'p for heterogeneity',
+    judgNote:'GRADE Rationale',evidNote:'Evidence Notes',
+    rob:'Risk of bias',inconsistency:'Inconsistency',
+    indirectness:'Indirectness',imprecision:'Imprecision',pubbias:'Publication bias',
+    d0:'Not serious (0)',d1:'Serious (−1)',d2:'Very serious (−2)',d3:'Extremely serious (−3)',dNA:'N/A',
+    upgradeFactors:'Upgrade Factors',
+    u1le:'Large effect (+1)',u2le:'Very large effect (+2)',
+    u1dr:'Dose-response (+1)',u1rc:'Residual confounding opposes effect (+1)',
+    impCrit:'Critical',impImp:'Important',impNot:'Not important',
+    rct:'RCT (Start: High)',obs:'Observational (Start: Low)',
+    compLabel:'Comparative (auris vs non-auris)',saLabel:'Single arm',
+    startGrade:'Start',downgrade:'Downgrade',upgrade:'Upgrade',finalGrade:'Final GRADE',
+    sOutcome:'Outcome',sDesign:'Design',sN:'Studies',sPart:'Participants',
+    sEffect:'Effect',sAbsEff:'Absolute Effect',sGrade:'GRADE',sReason:'Reason',
+    addStudy:'＋ Add Study',authorYear:'First Author Year',studyNote:'Note',
+    duplicate:'Duplicate',delete:'Delete',noOutcome:'(unnamed)',naLabel:'N/A',
+    copyDone:'Copied!',
+  }
+};
+let lang = 'ja';
+function t(k){return (LANGS[lang]||LANGS.ja)[k]||k}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.dataset.i18n);
+  });
+  renderDetail();
+  renderSummary();
+}
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const STORAGE_KEY='grade-tool-v3';
+const state={
+  reviewTitle:'',reviewAuthor:'',reviewNotes:'',
+  outcomes:[],
+  selectedId:null
+};
+
+function createEmptyOutcome(){
+  return {
+    id:crypto.randomUUID(),
+    outcomeName:'',
+    studyDesign:'Observational',
+    comparison:'Comparative',
+    importance:'Critical',
+    nStudies:'',
+    nParticipants:'',
+    mortalityDef:'',
+    relEffect:'',absEffect:'',
+    i2:'',pHet:'',
+    studies:[],  // [{authorYear:'', note:''}]
+    domains:{rob:'0',inconsistency:'0',indirectness:'0',imprecision:'0',pubbias:'0'},
+    upgrades:[],
+    judgNote:'',evidNote:''
+  };
+}
+
+/* ═══════════════════════════════════════════
+   GRADE CALC
+═══════════════════════════════════════════ */
+const GRADE_LEVELS=['Very low','Low','Moderate','High'];
+const GRADE_KEYS  =['Verylow','Low','Moderate','High'];
+
+function calcGrade(outcome){
+  const start = outcome.studyDesign==='RCT' ? 3 : 1;
+  const downgrade = Object.entries(outcome.domains).reduce((s,[,v])=>{
+    if(v==='NA') return s;
+    return s+Number(v);
+  },0);
+  const upgrade = outcome.upgrades.reduce((s,u)=>s+(u.startsWith('2_')?2:1),0);
+  let score = Math.max(0,Math.min(3,start-downgrade+upgrade));
+  return {
+    start,startLabel:GRADE_LEVELS[start],
+    downgrade,upgrade,score,
+    label:GRADE_LEVELS[score],key:GRADE_KEYS[score]
+  };
+}
+
+function gradeBadge(key,label){
+  return `<span class="grade-badge gb-${key}">${label}</span>`;
+}
+
+/* ═══════════════════════════════════════════
+   PERSIST
+═══════════════════════════════════════════ */
+function persist(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem('grade-support-tool-v2')||localStorage.getItem('grade-support-tool-v1');
+    if(raw){
+      const p=JSON.parse(raw);
+      state.reviewTitle=p.reviewTitle||'';
+      state.reviewAuthor=p.reviewAuthor||'';
+      state.reviewNotes=p.reviewNotes||'';
+      if(Array.isArray(p.outcomes)&&p.outcomes.length>0){
+        state.outcomes=p.outcomes.map(o=>({...createEmptyOutcome(),...o,
+          domains:{rob:'0',inconsistency:'0',indirectness:'0',imprecision:'0',pubbias:'0',...(o.domains||{})},
+          studies:Array.isArray(o.studies)?o.studies:[],
+          upgrades:Array.isArray(o.upgrades)?o.upgrades:[]
+        }));
+      }
+    }
+  }catch(e){}
+  if(!state.outcomes.length) state.outcomes=[createEmptyOutcome()];
+  if(!state.selectedId) state.selectedId=state.outcomes[0].id;
+}
+
+/* ═══════════════════════════════════════════
+   RENDER LIST
+═══════════════════════════════════════════ */
+function renderList(){
+  const container=document.getElementById('outcomeListItems');
+  container.innerHTML='';
+  state.outcomes.forEach((oc,i)=>{
+    const g=calcGrade(oc);
+    const div=document.createElement('div');
+    div.className='outcome-list-item'+(oc.id===state.selectedId?' active':'');
+    div.dataset.id=oc.id;
+    div.innerHTML=`
+      <div class="item-num">${i+1}</div>
+      <div class="item-name">${escHtml(oc.outcomeName)||'<span style="color:var(--text3)">('+t('noOutcome')+')</span>'}</div>
+      <div class="item-grade">${gradeBadge(g.key,g.label)}</div>
+    `;
+    div.addEventListener('click',()=>{
+      state.selectedId=oc.id;
+      renderList();
+      renderDetail();
+      // switch to detail tab
+      switchTab('detail');
+    });
+    container.appendChild(div);
+  });
+  updateHeaderPills();
+}
+
+function updateHeaderPills(){
+  const t1=document.getElementById('headerTitle');
+  const t2=document.getElementById('headerAuthor');
+  if(state.reviewTitle){t1.textContent=state.reviewTitle;t1.style.display=''}
+  else t1.style.display='none';
+  if(state.reviewAuthor){t2.textContent=state.reviewAuthor;t2.style.display=''}
+  else t2.style.display='none';
+}
+
+/* ═══════════════════════════════════════════
+   RENDER DETAIL
+═══════════════════════════════════════════ */
+const DOMAINS=['rob','inconsistency','indirectness','imprecision','pubbias'];
+const DOMAIN_OPTIONS_VALS=['0','1','2','3','NA'];
+
+function domainOptions(currentVal){
+  const opts=[
+    {v:'0',l:()=>t('d0')},{v:'1',l:()=>t('d1')},{v:'2',l:()=>t('d2')},
+    {v:'3',l:()=>t('d3')},{v:'NA',l:()=>t('dNA')}
+  ];
+  return opts.map(o=>`<option value="${o.v}"${currentVal===o.v?' selected':''}>${o.l()}</option>`).join('');
+}
+
+function renderDetail(){
+  const noSel=document.getElementById('noSelection');
+  const inner=document.getElementById('detailInner');
+  const oc=state.outcomes.find(o=>o.id===state.selectedId);
+  if(!oc){noSel.style.display='flex';inner.style.display='none';return;}
+  noSel.style.display='none';inner.style.display='block';
+  const idx=state.outcomes.indexOf(oc);
+  const g=calcGrade(oc);
+
+  // Studies HTML
+  const studiesRows=(oc.studies||[]).map((s,si)=>`
+    <tr>
+      <td><input type="text" class="study-author" data-si="${si}" value="${escHtml(s.authorYear)}" placeholder="Smith 2021"/></td>
+      <td><input type="text" class="study-note" data-si="${si}" value="${escHtml(s.note)}" placeholder="…"/></td>
+      <td><button class="del-study-btn" data-si="${si}">✕</button></td>
+    </tr>
+  `).join('');
+
+  inner.innerHTML=`
+    <!-- Top -->
+    <div class="detail-top">
+      <div class="detail-top-main">
+        <div class="outcome-index-label">Outcome ${idx+1} / ${state.outcomes.length}</div>
+        <input type="text" class="outcome-name-input" id="oc-name" value="${escHtml(oc.outcomeName)}" placeholder="${t('outcomeName')}"/>
+      </div>
+      <div class="detail-top-actions">
+        <button class="btn btn-ghost btn-sm" id="dupBtn">⊕ ${t('duplicate')}</button>
+        <button class="btn btn-danger btn-sm" id="delBtn">✕ ${t('delete')}</button>
+      </div>
+    </div>
+
+    <!-- Result strip -->
+    <div class="result-strip">
+      <div class="result-cell">
+        <div class="result-cell-label">${t('startGrade')}</div>
+        <div class="result-cell-val">${g.startLabel}</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-cell-label">${t('downgrade')}</div>
+        <div class="result-cell-val down">−${g.downgrade}</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-cell-label">${t('upgrade')}</div>
+        <div class="result-cell-val up">+${g.upgrade}</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-cell-label">${t('finalGrade')}</div>
+        <div class="result-cell-val">${gradeBadge(g.key,g.label)}</div>
+      </div>
+    </div>
+
+    <!-- Basic info -->
+    <div class="section-label">Study Information</div>
+    <div class="field-group cols-3">
+      <label class="field">
+        <span class="field-label">${t('studyDesign')}</span>
+        <select id="oc-design">
+          <option value="RCT"${oc.studyDesign==='RCT'?' selected':''}>${t('rct')}</option>
+          <option value="Observational"${oc.studyDesign==='Observational'?' selected':''}>${t('obs')}</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('comparison')}</span>
+        <select id="oc-comparison">
+          <option value="Comparative"${oc.comparison==='Comparative'?' selected':''}>${t('compLabel')}</option>
+          <option value="SingleArm"${oc.comparison==='SingleArm'?' selected':''}>${t('saLabel')}</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('importantLevel')}</span>
+        <select id="oc-importance">
+          <option value="Critical"${oc.importance==='Critical'?' selected':''}>${t('impCrit')}</option>
+          <option value="Important"${oc.importance==='Important'?' selected':''}>${t('impImp')}</option>
+          <option value="Not important"${oc.importance==='Not important'?' selected':''}>${t('impNot')}</option>
+        </select>
+      </label>
+    </div>
+    <div class="field-group cols-3">
+      <label class="field">
+        <span class="field-label">${t('nStudies')}</span>
+        <input type="number" min="0" id="oc-nstudies" value="${escHtml(oc.nStudies)}" placeholder="20"/>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('nParticipants')}</span>
+        <input type="number" min="0" id="oc-npart" value="${escHtml(oc.nParticipants)}" placeholder="1240"/>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('mortalityDef')}</span>
+        <input type="text" id="oc-mortdef" value="${escHtml(oc.mortalityDef)}" placeholder="30-day, 28-day, in-hospital…"/>
+      </label>
+    </div>
+
+    <!-- Effect -->
+    <div class="section-label">Effect Estimates</div>
+    <div class="field-group cols-2">
+      <label class="field">
+        <span class="field-label">${t('relEffect')}</span>
+        <span class="field-hint">OR / RR / HR (95% CI) — Rで計算済みの値</span>
+        <input type="text" id="oc-releff" value="${escHtml(oc.relEffect)}" placeholder="OR 2.34 (95% CI 1.67–3.28)"/>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('absEffect')}</span>
+        <span class="field-hint">per 1,000 patients</span>
+        <input type="text" id="oc-abseff" value="${escHtml(oc.absEffect)}" placeholder="1000人あたり180人増加"/>
+      </label>
+    </div>
+    <div class="field-group cols-2">
+      <label class="field">
+        <span class="field-label">${t('i2')}</span>
+        <input type="number" min="0" max="100" id="oc-i2" value="${escHtml(oc.i2)}" placeholder="62"/>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('pHet')}</span>
+        <input type="text" id="oc-phet" value="${escHtml(oc.pHet)}" placeholder="0.04"/>
+      </label>
+    </div>
+
+    <!-- GRADE 5 domains -->
+    <div class="section-label">GRADE 5 Domains (Downgrade)</div>
+    <div class="domain-rows">
+      ${DOMAINS.map(d=>{
+        const score=oc.domains[d];
+        const hasScore=score!=='0'&&score!=='NA';
+        return `
+        <div class="domain-row">
+          <div class="domain-row-name">${t(d)}</div>
+          <div style="flex:1">
+            <select class="domain-sel" data-domain="${d}">
+              ${domainOptions(score)}
+            </select>
+          </div>
+          <div class="domain-score-badge ${hasScore?'has-score':''}" data-badge="${d}">
+            ${score==='NA'?'N/A':score==='0'?'':'-'+score}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div id="hintBox" class="hint-box">${makeHint(oc)}</div>
+
+    <!-- Upgrade -->
+    <div class="section-label" style="margin-top:16px">${t('upgradeFactors')}</div>
+    <label class="field" style="margin-bottom:20px">
+      <select id="oc-upgrade" multiple>
+        <option value="1_large_effect"${oc.upgrades.includes('1_large_effect')?' selected':''}>${t('u1le')}</option>
+        <option value="2_very_large_effect"${oc.upgrades.includes('2_very_large_effect')?' selected':''}>${t('u2le')}</option>
+        <option value="1_dose_response"${oc.upgrades.includes('1_dose_response')?' selected':''}>${t('u1dr')}</option>
+        <option value="1_residual_confounding"${oc.upgrades.includes('1_residual_confounding')?' selected':''}>${t('u1rc')}</option>
+      </select>
+    </label>
+
+    <!-- Citations -->
+    <div class="section-label">${t('citations')}</div>
+    <div style="margin-bottom:20px">
+      <table class="study-table">
+        <thead>
+          <tr>
+            <th style="width:45%">${t('authorYear')}</th>
+            <th>${t('studyNote')}</th>
+            <th style="width:30px"></th>
+          </tr>
+        </thead>
+        <tbody id="studyRows">${studiesRows}</tbody>
+      </table>
+      <button class="add-study-btn" id="addStudyBtn">＋ ${t('addStudy')}</button>
+    </div>
+
+    <!-- Notes -->
+    <div class="section-label">Notes</div>
+    <div class="field-group cols-2">
+      <label class="field">
+        <span class="field-label">${t('judgNote')}</span>
+        <textarea id="oc-judg" rows="5" placeholder="なぜdowngrade/upgradeしたのか…">${escHtml(oc.judgNote)}</textarea>
+      </label>
+      <label class="field">
+        <span class="field-label">${t('evidNote')}</span>
+        <textarea id="oc-evid" rows="5" placeholder="主要論文、RoB結果、I²の解釈…">${escHtml(oc.evidNote)}</textarea>
+      </label>
+    </div>
+  `;
+
+  // Bind events
+  const bind=(id,key,isSelect)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener(isSelect?'change':'input',()=>{
+      oc[key]=el.value;
+      persist();
+      if(id==='oc-name'||id==='oc-design'){renderList();renderDetail();}
+      else if(id==='oc-design'){renderDetail();}
+      else updateResultStrip(oc);
+    });
+  };
+  bind('oc-name','outcomeName');
+  bind('oc-design','studyDesign',true);
+  bind('oc-comparison','comparison',true);
+  bind('oc-importance','importance',true);
+  bind('oc-nstudies','nStudies');
+  bind('oc-npart','nParticipants');
+  bind('oc-mortdef','mortalityDef');
+  bind('oc-releff','relEffect');
+  bind('oc-abseff','absEffect');
+  bind('oc-i2','i2',false);
+  bind('oc-phet','pHet');
+  bind('oc-judg','judgNote');
+  bind('oc-evid','evidNote');
+
+  // Domain selects
+  inner.querySelectorAll('.domain-sel').forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      oc.domains[sel.dataset.domain]=sel.value;
+      persist();
+      updateResultStrip(oc);
+      // update badge
+      const badge=inner.querySelector(`[data-badge="${sel.dataset.domain}"]`);
+      if(badge){
+        const v=sel.value;
+        badge.textContent=v==='NA'?'N/A':v==='0'?'':'-'+v;
+        badge.className='domain-score-badge'+(v!=='0'&&v!=='NA'?' has-score':'');
+      }
+      document.getElementById('hintBox').textContent=makeHint(oc);
+    });
+  });
+
+  // Upgrade
+  document.getElementById('oc-upgrade').addEventListener('change',e=>{
+    oc.upgrades=[...e.target.selectedOptions].map(o=>o.value);
+    persist();
+    updateResultStrip(oc);
+  });
+
+  // Studies
+  document.getElementById('addStudyBtn').addEventListener('click',()=>{
+    oc.studies.push({authorYear:'',note:''});
+    persist();
+    renderDetail();
+  });
+  inner.querySelectorAll('.del-study-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      oc.studies.splice(Number(btn.dataset.si),1);
+      persist();
+      renderDetail();
+    });
+  });
+  inner.querySelectorAll('.study-author').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      oc.studies[Number(inp.dataset.si)].authorYear=inp.value;
+      persist();
+    });
+  });
+  inner.querySelectorAll('.study-note').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      oc.studies[Number(inp.dataset.si)].note=inp.value;
+      persist();
+    });
+  });
+
+  // Top buttons
+  document.getElementById('dupBtn').addEventListener('click',()=>duplicateOutcome(oc.id));
+  document.getElementById('delBtn').addEventListener('click',()=>deleteOutcome(oc.id));
+}
+
+function updateResultStrip(oc){
+  const g=calcGrade(oc);
+  const strip=document.querySelector('.result-strip');
+  if(!strip)return;
+  const cells=strip.querySelectorAll('.result-cell-val');
+  if(cells[0])cells[0].textContent=g.startLabel;
+  if(cells[1])cells[1].textContent='−'+g.downgrade;
+  if(cells[2])cells[2].textContent='+'+g.upgrade;
+  if(cells[3])cells[3].innerHTML=gradeBadge(g.key,g.label);
+  renderList();
+}
+
+function makeHint(oc){
+  const hints=[];
+  const i2=Number(oc.i2);
+  if(oc.i2!==''){
+    if(i2<30) hints.push('I² < 30%: 異質性は低め。Inconsistency downgradeは不要な可能性。');
+    else if(i2<60) hints.push('I² 30–60%: 中等度の異質性。解釈に注意。');
+    else hints.push('I² ≥ 60%: 高い異質性。Inconsistency downgrade（−1）を検討。');
+  }
+  if(oc.relEffect&&/95%\s*CI/i.test(oc.relEffect)){
+    hints.push('95% CIの幅が臨床的意思決定に影響するかImprecisionで確認。');
+  }
+  if(oc.nStudies!==''&&Number(oc.nStudies)<10){
+    hints.push('研究数が少ない場合、Publication biasの評価は慎重に。');
+  }
+  if(oc.mortalityDef&&/[,/]/.test(oc.mortalityDef)){
+    hints.push('死亡定義が混在している場合、Indirectness downgradeを検討してください。');
+  }
+  return hints.join('　');
+}
+
+/* ═══════════════════════════════════════════
+   RENDER SUMMARY
+═══════════════════════════════════════════ */
+function renderSummary(){
+  const panel=document.getElementById('summaryPanel');
+  const rows=state.outcomes.map((oc,i)=>{
+    const g=calcGrade(oc);
+    const reason=buildReason(oc,g);
+    const cites=(oc.studies||[]).map(s=>s.authorYear).filter(Boolean).join(', ')||'—';
+    return `
+      <tr>
+        <td>${escHtml(oc.outcomeName||t('noOutcome'))}</td>
+        <td class="mono">${oc.studyDesign==='RCT'?'RCT':'Obs'}</td>
+        <td class="mono">${oc.nStudies||'—'}</td>
+        <td class="mono">${oc.nParticipants||'—'}</td>
+        <td class="mono">${escHtml(oc.relEffect||'—')}</td>
+        <td>${escHtml(oc.absEffect||'—')}</td>
+        <td>${gradeBadge(g.key,g.label)}</td>
+        <td style="color:var(--text2);font-size:11px">${escHtml(reason)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  panel.innerHTML=`
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="section-label" style="margin-bottom:16px">Summary of Findings</div>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px">
+        <table class="sof-table">
+          <thead>
+            <tr>
+              <th>${t('sOutcome')}</th>
+              <th>${t('sDesign')}</th>
+              <th>${t('sN')}</th>
+              <th>${t('sPart')}</th>
+              <th>${t('sEffect')}</th>
+              <th>${t('sAbsEff')}</th>
+              <th>${t('sGrade')}</th>
+              <th>${t('sReason')}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function buildReason(oc,g){
+  const dNames={rob:'RoB',inconsistency:'Inconsistency',indirectness:'Indirectness',imprecision:'Imprecision',pubbias:'Pub.bias'};
+  const downs=Object.entries(oc.domains)
+    .filter(([,v])=>v!=='0'&&v!=='NA'&&Number(v)>0)
+    .map(([k,v])=>`${dNames[k]} −${v}`);
+  const up=oc.upgrades.length>0?`Upgrade +${g.upgrade}`:'';
+  const note=oc.judgNote?.trim()?` / ${oc.judgNote.trim().slice(0,60)}`:'';
+  return [...downs,up].filter(Boolean).join('; ')+note;
+}
+
+/* ═══════════════════════════════════════════
+   SoF TABLE (for paper)
+═══════════════════════════════════════════ */
+function buildSofHtml(){
+  const hdr=`
+    <table class="paper-sof" id="paperSofTable">
+      <thead>
+        <tr>
+          <th rowspan="2">Outcome<br/><small>(Importance)</small></th>
+          <th rowspan="2">No. of<br/>Studies</th>
+          <th rowspan="2">No. of<br/>Participants</th>
+          <th rowspan="2">Study<br/>Design</th>
+          <th colspan="5" style="text-align:center;border-bottom:1px solid #1a2e27">Certainty assessment</th>
+          <th rowspan="2">Effect<br/>(95% CI)</th>
+          <th rowspan="2">Absolute<br/>Effect</th>
+          <th rowspan="2">Certainty<br/>(GRADE)</th>
+        </tr>
+        <tr>
+          <th>Risk of<br/>bias</th>
+          <th>Inconsistency</th>
+          <th>Indirectness</th>
+          <th>Imprecision</th>
+          <th>Publication<br/>bias</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  const domLabel={
+    '0':'Not serious','1':'Serious','2':'Very serious','3':'Extremely serious','NA':'N/A'
+  };
+  const gradeStars={'High':'⊕⊕⊕⊕','Moderate':'⊕⊕⊕○','Low':'⊕⊕○○','Very low':'⊕○○○'};
+  const gradeClass={'High':'H','Moderate':'M','Low':'L','Very low':'V'};
+
+  const rows=state.outcomes.map(oc=>{
+    const g=calcGrade(oc);
+    const stars=gradeStars[g.label]||'';
+    const gc=gradeClass[g.label]||'';
+    const d=oc.domains;
+    return `
+      <tr>
+        <td><strong>${escHtml(oc.outcomeName||'—')}</strong><br/><small>${oc.importance||'Critical'}</small>
+          ${oc.mortalityDef?`<br/><small style="color:#666">${escHtml(oc.mortalityDef)}</small>`:''}
+        </td>
+        <td style="text-align:center">${oc.nStudies||'—'}</td>
+        <td style="text-align:center">${oc.nParticipants||'—'}</td>
+        <td>${oc.studyDesign==='RCT'?'RCT':'Observational'}</td>
+        <td>${domLabel[d.rob]||'Not serious'}</td>
+        <td>${domLabel[d.inconsistency]||'Not serious'}</td>
+        <td>${domLabel[d.indirectness]||'Not serious'}</td>
+        <td>${domLabel[d.imprecision]||'Not serious'}</td>
+        <td>${domLabel[d.pubbias]||'Not serious'}</td>
+        <td>${escHtml(oc.relEffect||'—')}</td>
+        <td>${escHtml(oc.absEffect||'—')}</td>
+        <td class="grade-cell grade-${gc}"><strong>${g.label}</strong><br/><span style="font-size:14px">${stars}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  const foot=`
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:#666;margin-top:8px;font-family:serif">
+      CI: confidence interval; OR: odds ratio; RR: risk ratio<br/>
+      GRADE certainty: ⊕⊕⊕⊕ High; ⊕⊕⊕○ Moderate; ⊕⊕○○ Low; ⊕○○○ Very low
+      ${state.reviewTitle?`<br/>Review: ${escHtml(state.reviewTitle)}`:''}
+      ${state.reviewAuthor?` — ${escHtml(state.reviewAuthor)}`:''}
+    </p>
+  `;
+  return hdr+rows+foot;
+}
+
+/* ═══════════════════════════════════════════
+   OUTCOME CRUD
+═══════════════════════════════════════════ */
+function deleteOutcome(id){
+  if(state.outcomes.length===1){alert('最低1つのOutcomeは残してください。');return;}
+  state.outcomes=state.outcomes.filter(o=>o.id!==id);
+  if(state.selectedId===id) state.selectedId=state.outcomes[0].id;
+  persist();renderList();renderDetail();renderSummary();
+}
+function duplicateOutcome(id){
+  const orig=state.outcomes.find(o=>o.id===id);
+  if(!orig)return;
+  const copy=JSON.parse(JSON.stringify(orig));
+  copy.id=crypto.randomUUID();
+  copy.outcomeName=orig.outcomeName?orig.outcomeName+'（複製）':'複製';
+  state.outcomes.push(copy);
+  state.selectedId=copy.id;
+  persist();renderList();renderDetail();renderSummary();
+}
+
+/* ═══════════════════════════════════════════
+   EXPORT / IMPORT / CSV
+═══════════════════════════════════════════ */
+function escHtml(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function dlBlob(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+}
+function fileName(pre,ext){return `${pre}_${new Date().toISOString().slice(0,10)}.${ext}`}
+
+function exportJson(){
+  dlBlob(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),fileName('grade_review','json'));
+}
+function importJson(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const p=JSON.parse(r.result);
+      if(!p||!Array.isArray(p.outcomes))throw new Error();
+      state.reviewTitle=p.reviewTitle||'';
+      state.reviewAuthor=p.reviewAuthor||'';
+      state.reviewNotes=p.reviewNotes||'';
+      state.outcomes=p.outcomes.map(o=>({...createEmptyOutcome(),...o,
+        domains:{rob:'0',inconsistency:'0',indirectness:'0',imprecision:'0',pubbias:'0',...(o.domains||{})},
+        studies:Array.isArray(o.studies)?o.studies:[],
+        upgrades:Array.isArray(o.upgrades)?o.upgrades:[]
+      }));
+      if(!state.outcomes.length)state.outcomes=[createEmptyOutcome()];
+      state.selectedId=state.outcomes[0].id;
+      persist();renderList();renderDetail();renderSummary();
+      document.getElementById('reviewTitle').value=state.reviewTitle;
+      document.getElementById('reviewAuthor').value=state.reviewAuthor;
+      document.getElementById('reviewNotes').value=state.reviewNotes;
+    }catch(e){alert('JSONの読み込みに失敗しました。');}
+  };
+  r.readAsText(file);
+}
+function downloadCsv(){
+  const cols=[t('sOutcome'),t('sDesign'),t('sN'),t('sPart'),t('sEffect'),t('sAbsEff'),t('sGrade'),'Reason'];
+  const rows=state.outcomes.map(oc=>{
+    const g=calcGrade(oc);
+    return [oc.outcomeName,oc.studyDesign,oc.nStudies,oc.nParticipants,oc.relEffect,oc.absEffect,g.label,buildReason(oc,g)];
+  });
+  const csv=[cols,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  dlBlob(new Blob([csv],{type:'text/csv;charset=utf-8;'}),fileName('grade_summary','csv'));
+}
+
+/* ═══════════════════════════════════════════
+   TAB SWITCH
+═══════════════════════════════════════════ */
+function switchTab(tab){
+  document.querySelectorAll('.nav-tab').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.tab===tab);
+  });
+  const dp=document.getElementById('detailPanel');
+  const sp=document.getElementById('summaryPanel');
+  if(tab==='detail'){dp.style.display='flex';sp.style.display='none';}
+  else{dp.style.display='none';sp.style.display='block';renderSummary();}
+}
+
+/* ═══════════════════════════════════════════
+   INIT & EVENTS
+═══════════════════════════════════════════ */
+load();
+
+// Theme
+document.getElementById('themeToggle').addEventListener('change',e=>{
+  document.body.dataset.theme=e.target.checked?'dark':'light';
+  try{localStorage.setItem('grade-theme',e.target.checked?'dark':'light')}catch(e){}
+});
+try{
+  const savedTheme=localStorage.getItem('grade-theme');
+  if(savedTheme==='dark'){
+    document.body.dataset.theme='dark';
+    document.getElementById('themeToggle').checked=true;
+  }
+}catch(e){}
+
+// Lang
+document.getElementById('langToggle').addEventListener('change',e=>{
+  lang=e.target.checked?'en':'ja';
+  document.getElementById('langLabel').textContent=e.target.checked?'JA':'EN';
+  applyI18n();
+});
+
+// Tabs
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+});
+
+// Add outcome
+document.getElementById('addOutcomeBtn').addEventListener('click',()=>{
+  const oc=createEmptyOutcome();
+  state.outcomes.push(oc);
+  state.selectedId=oc.id;
+  persist();renderList();renderDetail();
+  switchTab('detail');
+});
+
+// Review info drawer
+document.getElementById('reviewInfoBtn').addEventListener('click',()=>{
+  document.getElementById('reviewDrawer').classList.toggle('open');
+});
+document.getElementById('reviewTitle').value=state.reviewTitle;
+document.getElementById('reviewAuthor').value=state.reviewAuthor;
+document.getElementById('reviewNotes').value=state.reviewNotes;
+
+document.getElementById('saveReviewBtn').addEventListener('click',()=>{
+  state.reviewTitle=document.getElementById('reviewTitle').value;
+  state.reviewAuthor=document.getElementById('reviewAuthor').value;
+  state.reviewNotes=document.getElementById('reviewNotes').value;
+  persist();updateHeaderPills();
+  const btn=document.getElementById('saveReviewBtn');
+  btn.textContent='✓ '+t('save');
+  setTimeout(()=>{btn.textContent=t('save')},1500);
+});
+
+// IO
+document.getElementById('exportJsonBtn').addEventListener('click',exportJson);
+document.getElementById('importJsonInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(f)importJson(f);e.target.value='';
+});
+document.getElementById('downloadCsvBtn').addEventListener('click',downloadCsv);
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(!confirm('全データを初期化しますか？'))return;
+  ['grade-tool-v3','grade-support-tool-v2','grade-support-tool-v1'].forEach(k=>{
+    try{localStorage.removeItem(k)}catch(e){}
+  });
+  state.reviewTitle='';state.reviewAuthor='';state.reviewNotes='';
+  state.outcomes=[createEmptyOutcome()];state.selectedId=state.outcomes[0].id;
+  persist();renderList();renderDetail();renderSummary();
+  document.getElementById('reviewTitle').value='';
+  document.getElementById('reviewAuthor').value='';
+  document.getElementById('reviewNotes').value='';
+  updateHeaderPills();
+});
+
+// SoF modal
+document.getElementById('sofBtn').addEventListener('click',()=>{
+  document.getElementById('sofModalBody').innerHTML=buildSofHtml();
+  document.getElementById('sofModal').classList.add('open');
+});
+document.getElementById('closeSofBtn').addEventListener('click',()=>{
+  document.getElementById('sofModal').classList.remove('open');
+});
+document.getElementById('sofModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('sofModal'))
+    document.getElementById('sofModal').classList.remove('open');
+});
+document.getElementById('copySofBtn').addEventListener('click',()=>{
+  const el=document.getElementById('paperSofTable');
+  if(!el)return;
+  // Copy as HTML for Word
+  const blob=new Blob([el.outerHTML],{type:'text/html'});
+  const cp=new ClipboardItem({'text/html':blob,'text/plain':new Blob([el.innerText],{type:'text/plain'})});
+  navigator.clipboard.write([cp]).then(()=>{
+    const btn=document.getElementById('copySofBtn');
+    btn.textContent='✓ '+t('copyDone');
+    setTimeout(()=>{btn.innerHTML='📋 <span>'+t('copy')+'</span>'},2000);
+  }).catch(()=>{
+    // Fallback
+    const range=document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    alert(t('copyDone'));
+  });
+});
+document.getElementById('printSofBtn').addEventListener('click',()=>window.print());
+
+// Initial render
+renderList();renderDetail();renderSummary();
+</script>
+</body>
+</html>
