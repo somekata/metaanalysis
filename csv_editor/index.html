@@ -1,1 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV Editor Pro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<!-- ========== HEADER ========== -->
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="1" width="8" height="8" rx="1" fill="var(--accent)"/>
+        <rect x="13" y="1" width="8" height="8" rx="1" fill="var(--accent)" opacity="0.5"/>
+        <rect x="1" y="13" width="8" height="8" rx="1" fill="var(--accent)" opacity="0.5"/>
+        <rect x="13" y="13" width="8" height="8" rx="1" fill="var(--accent)"/>
+      </svg>
+      <span>CSV Editor Pro</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="file-name-display" class="file-name-badge">ファイル未読込</span>
+    <span id="row-count-badge" class="row-count-badge hidden"></span>
+    <button class="btn btn-ghost btn-icon" id="btn-theme-toggle" title="ダーク/ライト切替">
+      <svg id="theme-icon-dark" width="15" height="15" viewBox="0 0 15 15"><path d="M7.5 1v1M7.5 13v1M1 7.5H0M15 7.5h-1M2.5 2.5l-.7-.7M13.2 13.2l-.7-.7M2.5 12.5l-.7.7M13.2 2.8l-.7.7M10.5 7.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+      <svg id="theme-icon-light" width="15" height="15" viewBox="0 0 15 15" style="display:none"><path d="M13 8.5A5.5 5.5 0 0 1 7 2a5.5 5.5 0 1 0 6 6.5z" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ========== TOOLBAR ========== -->
+<div class="toolbar">
+  <div class="toolbar-group">
+    <button class="btn btn-ghost" id="btn-new">
+      <svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 4v6M4 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      新規作成
+    </button>
+    <label class="btn btn-primary" for="csv-upload">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v8M3 5l4-4 4 4M1 11h12v2H1z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      CSV読込
+      <input type="file" id="csv-upload" accept=".csv,.tsv,.txt" style="display:none">
+    </label>
+    <button class="btn btn-secondary" id="btn-download" disabled>
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v8M3 9l4 4 4-4M1 13h12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      CSVダウンロード
+    </button>
+    <button class="btn btn-secondary" id="btn-save-local" disabled>
+      <svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="4" y="1" width="6" height="4" rx="0.5" stroke="currentColor" stroke-width="1" fill="none"/><rect x="3" y="7" width="8" height="5" rx="0.5" stroke="currentColor" stroke-width="1" fill="none"/></svg>
+      保存
+    </button>
+    <button class="btn btn-secondary" id="btn-restore-local">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7a5 5 0 1 0 1-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M2 2v3h3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      復元
+    </button>
+  </div>
+  <div class="toolbar-group">
+    <button class="btn btn-ghost" id="btn-add-row" disabled>
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      行追加
+    </button>
+    <button class="btn btn-ghost" id="btn-add-col" disabled>
+      <svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="3" width="5" height="8" rx="0.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 3v8M8 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      列追加
+    </button>
+    <button class="btn btn-ghost" id="btn-col-visibility" disabled>
+      <svg width="14" height="14" viewBox="0 0 14 14"><ellipse cx="7" cy="7" rx="6" ry="4" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="7" cy="7" r="2" fill="currentColor"/></svg>
+      列表示設定
+    </button>
+  </div>
+  <div class="toolbar-group search-group">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="13" height="13" viewBox="0 0 13 13"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M9 9l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" class="search-input" placeholder="全列検索..." disabled>
+    </div>
+    <button class="btn btn-ghost" id="btn-clear-filters" disabled>フィルタ解除</button>
+  </div>
+</div>
+
+<!-- ========== MAIN CONTENT ========== -->
+<main class="main-content">
+  <!-- Welcome screen -->
+  <div id="welcome-screen" class="welcome-screen">
+    <div class="welcome-inner">
+      <div class="welcome-icon">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect x="4" y="4" width="48" height="48" rx="8" stroke="var(--accent)" stroke-width="2"/>
+          <path d="M14 20h28M14 28h28M14 36h18" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+          <rect x="8" y="8" width="12" height="8" rx="2" fill="var(--accent)" opacity="0.2"/>
+        </svg>
+      </div>
+      <h2>CSVファイルを読み込んでください</h2>
+      <p>ツールバーの「CSV読込」ボタン、またはここにファイルをドロップ</p>
+      <div class="welcome-btns">
+        <label class="btn btn-primary btn-large" for="csv-upload">ファイルを選択</label>
+        <button class="btn btn-secondary btn-large" id="btn-new-welcome">新規作成</button>
+      </div>
+      <p class="welcome-note">対応形式: .csv / .tsv / .txt（UTF-8, Shift-JIS）</p>
+    </div>
+  </div>
+
+  <!-- Table wrapper -->
+  <div id="table-wrapper" class="table-wrapper hidden">
+    <div class="table-scroll">
+      <table id="data-table">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div id="status-bar" class="status-bar">
+      <span id="status-text">0行表示</span>
+      <span id="filter-status"></span>
+    </div>
+  </div>
+</main>
+
+<!-- ========== MODAL: Row Edit ========== -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal" id="edit-modal">
+    <div class="modal-header">
+      <h3 id="modal-title">行を編集</h3>
+      <button class="modal-close" id="modal-close-btn">✕</button>
+    </div>
+    <div class="modal-body" id="modal-form-container"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="modal-cancel-btn">キャンセル</button>
+      <button class="btn btn-danger" id="modal-delete-btn">この行を削除</button>
+      <button class="btn btn-primary" id="modal-save-btn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: Column Visibility ========== -->
+<div id="col-vis-overlay" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>列の表示設定</h3>
+      <button class="modal-close" id="col-vis-close">✕</button>
+    </div>
+    <div class="modal-body" id="col-vis-list"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="col-vis-all">すべて表示</button>
+      <button class="btn btn-primary" id="col-vis-apply">適用</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: Add Column ========== -->
+<div id="add-col-overlay" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>列を追加</h3>
+      <button class="modal-close" id="add-col-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">列名</label>
+        <input type="text" id="new-col-name" class="form-input" placeholder="列名を入力...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">挿入位置</label>
+        <select id="new-col-position" class="form-input"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="add-col-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="add-col-confirm">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: New File ========== -->
+<div id="new-overlay" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>新規CSVを作成</h3>
+      <button class="modal-close" id="new-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">列名（カンマ区切りで入力）</label>
+        <input type="text" id="new-col-labels" class="form-input" placeholder="例: ID, 名前, メール, 備考">
+        <p class="form-hint">カンマで区切って複数列を一括定義できます</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">初期行数</label>
+        <input type="number" id="new-row-count" class="form-input" value="1" min="0" max="500">
+        <p class="form-hint">0 でも作成可能です（後から行追加できます）</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ファイル名（任意）</label>
+        <div class="export-filename-row">
+          <input type="text" id="new-file-name" class="form-input" placeholder="例: 患者リスト">
+          <span class="export-ext">.csv</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="new-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="new-confirm">
+        <svg width="13" height="13" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 4v6M4 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        作成
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: Export Filename ========== -->
+<div id="export-overlay" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>CSVをダウンロード</h3>
+      <button class="modal-close" id="export-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">ファイル名</label>
+        <div class="export-filename-row">
+          <input type="text" id="export-filename-input" class="form-input" placeholder="ファイル名を入力...">
+          <span class="export-ext">.csv</span>
+        </div>
+        <p class="form-hint">拡張子 .csv は自動で付加されます</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="export-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="export-confirm">
+        <svg width="13" height="13" viewBox="0 0 14 14"><path d="M7 1v8M3 9l4 4 4-4M1 13h12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        ダウンロード
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div id="toast-container" class="toast-container"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
