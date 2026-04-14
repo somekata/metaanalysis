@@ -1,1 +1,626 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meta-Analysis Data Extractor v1.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
+      .tail-container * {
+        font-family: "Inter", system_ui, sans-serif;
+      }
+
+      .modal {
+        animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes modalPop {
+        0% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      table tr:hover {
+        background-color: #f8fafc;
+        transform: translateX(4px);
+      }
+      .dark table tr:hover {
+        background-color: #1e2937;
+      }
+    </style>
+  </head>
+  <body
+    class="tail-container bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100"
+  >
+    <div class="max-w-7xl mx-auto min-h-screen">
+      <!-- HEADER -->
+      <div
+        class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-8 py-6 flex items-center justify-between sticky top-0 z-50 shadow-sm"
+      >
+        <div class="flex items-center gap-x-4">
+          <div
+            class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl"
+          >
+            📊
+          </div>
+          <div>
+            <h1 class="text-2xl font-semibold tracking-tight">
+              Meta-Analysis Extractor
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">
+              Candida auris メタ解析データ編集ツール v1.1
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-x-4">
+          <label
+            onclick="triggerImport()"
+            class="cursor-pointer flex items-center gap-x-2 px-6 py-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-3xl text-sm font-medium shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16v-4m0 0l4 4m-4-4l4-4m12 0v4m0 0l-4-4m4 4l-4 4"
+              />
+            </svg>
+            JSONをインポート
+          </label>
+          <input
+            type="file"
+            id="fileInput"
+            accept=".json"
+            class="hidden"
+            onchange="handleFileImport(event)"
+          />
+
+          <button
+            onclick="showExportModal()"
+            class="flex items-center gap-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2 2 2 0 01-2 2v-2m14-2V9a2 2 0 00-2-2h-3m-4 0v-2a2 2 0 012-2"
+              />
+            </svg>
+            エクスポート
+          </button>
+
+          <button
+            onclick="toggleDarkMode()"
+            class="w-11 h-11 flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-3xl text-slate-700 dark:text-slate-300"
+          >
+            <span id="theme-icon" class="text-xl">☀️</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="px-8 py-8">
+        <div class="flex items-center gap-x-4 mb-8">
+          <div class="relative flex-1 max-w-lg">
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Study ID、著者、または国名で検索..."
+              onkeyup="if (event.key === 'Enter') filterTable();"
+              class="w-full pl-14 pr-6 py-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div class="absolute left-6 top-4 text-slate-400">🔍</div>
+          </div>
+          <button
+            onclick="filterTable()"
+            class="px-8 py-4 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-3xl"
+          >
+            検索
+          </button>
+          <div class="flex-1"></div>
+          <div id="table-info" class="text-sm text-slate-500">
+            0 / 0 件を表示
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-900 rounded-3xl shadow border border-slate-200 dark:border-slate-700 overflow-hidden"
+        >
+          <table class="w-full" id="studiesTable">
+            <thead>
+              <tr
+                class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700"
+              >
+                <th
+                  class="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                  Study ID
+                </th>
+                <th
+                  class="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                  著者 (年)
+                </th>
+                <th
+                  class="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                  国・地域
+                </th>
+                <th
+                  class="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                  サンプルサイズ
+                </th>
+                <th
+                  class="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                  判定
+                </th>
+                <th
+                  class="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                >
+                  主要アウトカム
+                </th>
+                <th class="px-8 py-5 text-center w-32">操作</th>
+              </tr>
+            </thead>
+            <tbody
+              id="tableBody"
+              class="divide-y divide-slate-100 dark:divide-slate-700"
+            ></tbody>
+          </table>
+        </div>
+
+        <div id="empty-state" class="hidden text-center py-24">
+          <div
+            class="mx-auto w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mb-6 text-5xl"
+          >
+            📂
+          </div>
+          <p class="text-xl text-slate-400">データがありません</p>
+          <p class="text-slate-500 mt-2">
+            「JSONをインポート」から combined_meta_data.json
+            を読み込んでください
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div
+      id="editModal"
+      onclick="if (event.target.id === 'editModal') closeModal();"
+      class="hidden fixed inset-0 bg-black/70 backdrop-blur-xl z-[9999] flex items-center justify-center"
+    >
+      <div
+        onclick="event.stopImmediatePropagation()"
+        class="modal bg-white dark:bg-slate-900 w-[96%] max-w-6xl max-h-[94vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+      >
+        <div
+          class="px-8 py-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800"
+        >
+          <div class="flex items-center gap-x-4">
+            <span
+              id="modal-study-id"
+              class="font-mono px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl text-sm"
+            ></span>
+            <h2 id="modal-title" class="text-2xl font-semibold"></h2>
+          </div>
+          <div class="flex gap-x-4">
+            <button
+              onclick="saveAndCloseModal()"
+              class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-3xl"
+            >
+              保存して閉じる
+            </button>
+            <button
+              onclick="closeModal()"
+              class="px-6 py-3 text-slate-500 hover:text-slate-600"
+            >
+              キャンセル
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="flex border-b border-slate-200 dark:border-slate-700 px-8 bg-white dark:bg-slate-900"
+          id="tab-container"
+        ></div>
+        <div class="flex-1 overflow-auto p-8" id="tab-content"></div>
+
+        <div
+          class="px-8 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-400 flex justify-between"
+        >
+          <div>深いネスト構造も完全に維持されます</div>
+          <button
+            onclick="saveCurrentStudy()"
+            class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-3xl text-sm"
+          >
+            一時保存
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div
+      id="exportModal"
+      onclick="if (event.target.id === 'exportModal') hideExportModal();"
+      class="hidden fixed inset-0 bg-black/70 backdrop-blur-xl z-[10000] flex items-center justify-center"
+    >
+      <div
+        onclick="event.stopImmediatePropagation()"
+        class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md p-8"
+      >
+        <h3 class="text-2xl font-semibold mb-6">JSONをエクスポート</h3>
+        <input
+          id="exportFilename"
+          value="combined_meta_data_edited.json"
+          class="w-full px-6 py-4 border border-slate-300 dark:border-slate-600 rounded-3xl"
+        />
+        <div class="flex gap-3 mt-8">
+          <button
+            onclick="hideExportModal()"
+            class="flex-1 py-4 text-slate-500"
+          >
+            キャンセル
+          </button>
+          <button
+            onclick="performExport()"
+            class="flex-1 py-4 bg-blue-600 text-white font-semibold rounded-3xl"
+          >
+            ダウンロード
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentData = null;
+      let filteredData = null;
+      let currentEditIndex = -1;
+      let editedStudy = null;
+      let activeTabIndex = 0;
+
+      const defaultTabs = [
+        { id: "study", label: "Study情報", key: "study" },
+        { id: "screening", label: "スクリーニング", key: "screening_decision" },
+        { id: "outcomes", label: "アウトカム", key: "outcomes" },
+        { id: "risk_of_bias", label: "バイアス評価", key: "risk_of_bias" },
+        { id: "required_footer", label: "フッター", key: "required_footer" },
+      ];
+
+      // パス指定で値を設定（深いネスト対応）
+      function setValueByPath(obj, path, value) {
+        let current = obj;
+        for (let i = 0; i < path.length - 1; i++) {
+          if (current[path[i]] === undefined) {
+            current[path[i]] = typeof path[i + 1] === "number" ? [] : {};
+          }
+          current = current[path[i]];
+        }
+        current[path[path.length - 1]] = value;
+      }
+
+      // 再帰的にフォームを生成（修正版）
+      function renderRecursive(container, data, path = [], onChange) {
+        container.innerHTML = "";
+
+        if (data === null || data === undefined) {
+          container.innerHTML = `<div class="italic text-slate-400 p-8 border border-dashed rounded-3xl text-center">null / 未設定</div>`;
+          return;
+        }
+
+        if (typeof data === "object" && !Array.isArray(data)) {
+          const grid = document.createElement("div");
+          grid.className = "grid grid-cols-1 gap-6";
+          Object.keys(data).forEach((key) => {
+            const value = data[key];
+            const fullPath = [...path, key];
+            const field = document.createElement("div");
+            field.className =
+              "bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6";
+            field.innerHTML = `<div class="text-xs font-semibold text-slate-500 mb-3 tracking-widest">${key.replace(/_/g, " ").toUpperCase()}</div>`;
+
+            const subContainer = document.createElement("div");
+            renderRecursive(subContainer, value, fullPath, onChange);
+            field.appendChild(subContainer);
+            grid.appendChild(field);
+          });
+          container.appendChild(grid);
+          return;
+        }
+
+        if (Array.isArray(data)) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "space-y-6";
+          data.forEach((item, idx) => {
+            const card = document.createElement("div");
+            card.className =
+              "border border-slate-200 dark:border-slate-700 rounded-3xl p-6 bg-white dark:bg-slate-900";
+            card.innerHTML = `
+                        <div class="flex justify-between mb-4 pb-3 border-b">
+                            <span class="font-medium">項目 ${idx + 1}</span>
+                            <button onclick="removeArrayItem(${idx});" class="text-red-500 text-sm hover:text-red-600">削除</button>
+                        </div>`;
+            const content = document.createElement("div");
+            renderRecursive(content, item, [...path, idx], onChange);
+            card.appendChild(content);
+            wrapper.appendChild(card);
+          });
+
+          const addBtn = document.createElement("button");
+          addBtn.className =
+            "w-full py-5 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-3xl text-slate-500 hover:text-slate-700 font-medium";
+          addBtn.textContent = "+ 新しい項目を追加";
+          addBtn.onclick = () => {
+            data.push(typeof data[0] === "object" ? {} : "");
+            onChange();
+          };
+          wrapper.appendChild(addBtn);
+          container.appendChild(wrapper);
+          return;
+        }
+
+        // プリミティブ値（ここが修正のメイン）
+        const isBool = typeof data === "boolean";
+        const input = document.createElement(isBool ? "input" : "textarea");
+
+        if (isBool) {
+          input.type = "checkbox";
+          input.checked = data;
+          input.className = "w-5 h-5 accent-blue-600";
+          input.onchange = () => onChange(path, input.checked);
+          container.innerHTML = `<label class="flex items-center gap-3 cursor-pointer"><span class="text-sm font-medium">${data ? "True" : "False"}</span></label>`;
+          container.firstChild.prepend(input);
+        } else {
+          input.value = String(data);
+          input.rows = String(data).length > 80 ? 5 : 2;
+          input.className =
+            "w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y";
+          input.oninput = () => onChange(path, input.value);
+          container.appendChild(input);
+        }
+      }
+
+      window.removeArrayItem = function (idx) {
+        if (!editedStudy) return;
+        const tab = defaultTabs[activeTabIndex];
+        let section = editedStudy[tab.key];
+        if (Array.isArray(section)) {
+          section.splice(idx, 1);
+          renderCurrentTab();
+        }
+      };
+
+      function renderCurrentTab() {
+        const content = document.getElementById("tab-content");
+        content.innerHTML = "";
+        const tab = defaultTabs[activeTabIndex];
+        if (!tab || !editedStudy) return;
+
+        if (!editedStudy[tab.key]) editedStudy[tab.key] = {};
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "max-w-5xl mx-auto";
+        renderRecursive(
+          wrapper,
+          editedStudy[tab.key],
+          [tab.key],
+          (path, value) => {
+            setValueByPath(editedStudy, path, value);
+          },
+        );
+        content.appendChild(wrapper);
+      }
+
+      function renderTabs() {
+        const container = document.getElementById("tab-container");
+        container.innerHTML = "";
+        defaultTabs.forEach((tab, i) => {
+          const btn = document.createElement("button");
+          btn.className = `px-10 py-5 text-sm font-medium border-b-2 transition-all ${
+            i === activeTabIndex
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent hover:border-slate-300 dark:hover:border-slate-600"
+          }`;
+          btn.textContent = tab.label;
+          btn.onclick = () => {
+            activeTabIndex = i;
+            renderTabs();
+            renderCurrentTab();
+          };
+          container.appendChild(btn);
+        });
+      }
+
+      function openEditModal(index) {
+        currentEditIndex = index;
+        editedStudy = JSON.parse(JSON.stringify(currentData.studies[index]));
+
+        const cit = editedStudy.study?.citation || {};
+        document.getElementById("modal-study-id").textContent =
+          editedStudy.study_id || "NO-ID";
+        document.getElementById("modal-title").textContent =
+          `${cit.first_author || ""} (${cit.year || ""})`;
+
+        document.getElementById("editModal").classList.remove("hidden");
+        document.getElementById("editModal").classList.add("flex");
+
+        activeTabIndex = 0;
+        renderTabs();
+        renderCurrentTab();
+      }
+
+      function closeModal() {
+        document.getElementById("editModal").classList.add("hidden");
+        document.getElementById("editModal").classList.remove("flex");
+      }
+
+      function saveCurrentStudy() {
+        if (currentEditIndex < 0 || !editedStudy) return;
+        currentData.studies[currentEditIndex] = JSON.parse(
+          JSON.stringify(editedStudy),
+        );
+        localStorage.setItem("metaDataExtractor", JSON.stringify(currentData));
+      }
+
+      function saveAndCloseModal() {
+        saveCurrentStudy();
+        renderTable();
+        closeModal();
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        const list = filteredData || (currentData ? currentData.studies : []);
+
+        document.getElementById("table-info").innerHTML =
+          `${list.length} / ${currentData ? currentData.studies.length : 0} 件を表示`;
+
+        if (list.length === 0) {
+          document.getElementById("empty-state").classList.remove("hidden");
+          return;
+        }
+        document.getElementById("empty-state").classList.add("hidden");
+
+        list.forEach((studyObj) => {
+          const s = studyObj.study || {};
+          const c = s.citation || {};
+          const scr = studyObj.screening_decision || {};
+          const out =
+            studyObj.outcomes?.primary_mortality_for_meta_analysis || {};
+
+          const tr = document.createElement("tr");
+          tr.className =
+            "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800";
+          tr.innerHTML = `
+                    <td class="px-8 py-6 font-mono text-sm">${studyObj.study_id || "—"}</td>
+                    <td class="px-8 py-6">${c.first_author || ""} <span class="text-slate-400">(${c.year || ""})</span></td>
+                    <td class="px-8 py-6">${c.country_region ? c.country_region.join(", ") : "—"}</td>
+                    <td class="px-8 py-6">${s.sample_size ? `${s.sample_size.auris_n} / ${s.sample_size.non_auris_n}` : "—"}</td>
+                    <td class="px-8 py-6">
+                        <span class="px-5 py-1.5 text-xs font-medium rounded-3xl ${scr.recommendation === "include" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}">
+                            ${scr.recommendation || "—"}
+                        </span>
+                    </td>
+                    <td class="px-8 py-6 text-sm text-slate-600 dark:text-slate-400">${out.selected_outcome_name ? out.selected_outcome_name.substring(0, 32) + "…" : "—"}</td>
+                    <td class="px-8 py-6 text-center">
+                        <button onclick="event.stopImmediatePropagation(); openEditModal(${currentData.studies.indexOf(studyObj)})" 
+                                class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-3xl transition">編集</button>
+                    </td>
+                `;
+          tr.onclick = () =>
+            openEditModal(currentData.studies.indexOf(studyObj));
+          tbody.appendChild(tr);
+        });
+      }
+
+      function filterTable() {
+        const q = (
+          document.getElementById("searchInput").value || ""
+        ).toLowerCase();
+        if (!currentData) return;
+        filteredData = currentData.studies.filter((s) => {
+          const c = s.study?.citation || {};
+          return (
+            (s.study_id || "").toLowerCase().includes(q) ||
+            (c.first_author || "").toLowerCase().includes(q) ||
+            (c.country_region || []).some((r) => r.toLowerCase().includes(q))
+          );
+        });
+        renderTable();
+      }
+
+      function triggerImport() {
+        document.getElementById("fileInput").click();
+      }
+
+      window.handleFileImport = function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            currentData = JSON.parse(ev.target.result);
+            filteredData = null;
+            localStorage.setItem(
+              "metaDataExtractor",
+              JSON.stringify(currentData),
+            );
+            renderTable();
+          } catch (err) {
+            alert("JSON解析エラー: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      function showExportModal() {
+        if (!currentData) return alert("先にJSONをインポートしてください。");
+        document.getElementById("exportModal").classList.remove("hidden");
+        document.getElementById("exportModal").classList.add("flex");
+      }
+
+      function hideExportModal() {
+        document.getElementById("exportModal").classList.add("hidden");
+        document.getElementById("exportModal").classList.remove("flex");
+      }
+
+      window.performExport = function () {
+        if (!currentData) return;
+        const filename =
+          document.getElementById("exportFilename").value ||
+          "combined_meta_data_edited.json";
+        const blob = new Blob([JSON.stringify(currentData, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        localStorage.removeItem("metaDataExtractor");
+        hideExportModal();
+        alert("エクスポート完了しました（localStorageをクリア）");
+      };
+
+      function toggleDarkMode() {
+        document.documentElement.classList.toggle("dark");
+        const isDark = document.documentElement.classList.contains("dark");
+        document.getElementById("theme-icon").textContent = isDark ? "☽" : "☀️";
+      }
+
+      function initialize() {
+        const saved = localStorage.getItem("metaDataExtractor");
+        if (saved) currentData = JSON.parse(saved);
+        if (localStorage.getItem("darkMode") === "1")
+          document.documentElement.classList.add("dark");
+        renderTable();
+      }
+
+      window.onload = initialize;
+    </script>
+  </body>
+</html>
