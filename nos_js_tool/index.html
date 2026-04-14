@@ -1,1 +1,414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NOS Manager - Auto-Calculator</title>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --bg: #f1f5f9;
+        --text: #1e293b;
+        --danger: #ef4444;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        border-right: 1px solid #f0f0f0;
+      }
+      tr:hover {
+        background: #f8fafc;
+      }
+      .clickable {
+        cursor: pointer;
+        color: var(--primary);
+        text-decoration: underline;
+      }
+      .score-detail {
+        font-family: monospace;
+        color: #475569;
+        font-size: 0.85rem;
+        display: block;
+        white-space: nowrap;
+      }
+      .badge {
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+      .cohort {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .case-control {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+      }
+      .modal-content {
+        background: white;
+        margin: 2% auto;
+        padding: 25px;
+        width: 90%;
+        max-width: 850px;
+        border-radius: 12px;
+        position: relative;
+      }
+      .close {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 24px;
+        cursor: pointer;
+      }
+      .type-switcher {
+        background: #fff7ed;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ffedd5;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .question-block {
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border-left: 4px solid var(--primary);
+      }
+      .reason-box {
+        width: 100%;
+        margin-top: 5px;
+        padding: 6px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+      }
+      .btn {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+      }
+      .btn-save {
+        background: #059669;
+      }
+      .btn-export {
+        background: #4f46e5;
+      }
+      .btn-danger {
+        background: var(--danger);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>NOS Assessment Manager</h1>
 
+      <div style="margin-bottom: 20px; display: flex; gap: 10px">
+        <button
+          class="btn"
+          style="background: var(--primary)"
+          onclick="addNewEmpty()"
+        >
+          + Add New Paper
+        </button>
+        <button class="btn btn-export" onclick="exportFullData()">
+          Export Data (JSON)
+        </button>
+        <button
+          class="btn"
+          style="background: #64748b"
+          onclick="document.getElementById('importFile').click()"
+        >
+          Import JSON
+        </button>
+        <input
+          type="file"
+          id="importFile"
+          style="display: none"
+          onchange="importData(event)"
+        />
+      </div>
+
+      <table id="paperTable">
+        <thead>
+          <tr>
+            <th>Author/Year</th>
+            <th>Type</th>
+            <th>Selection</th>
+            <th>Comparability</th>
+            <th>Outcome/Exp</th>
+            <th>Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="nosModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle" style="margin-top: 0">Assessment</h2>
+        <div class="type-switcher">
+          <strong>Study Type:</strong>
+          <select id="modalTypeSelector" onchange="switchModalType()">
+            <option value="cohort">Cohort Study</option>
+            <option value="case-control">Case-Control Study</option>
+          </select>
+        </div>
+        <div id="questionsArea"></div>
+        <div style="text-align: right; margin-top: 20px">
+          <button class="btn btn-save" onclick="saveCurrentAssessment()">
+            Save Assessment
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let papers = [];
+
+      const cohortConfig = [
+        {
+          cat: "Selection",
+          ids: ["s1", "s2", "s3", "s4"],
+          labels: [
+            "Representativeness",
+            "Non-exposed selection",
+            "Ascertainment of exposure",
+            "Outcome not present",
+          ],
+        },
+        {
+          cat: "Comparability",
+          ids: ["c1", "c2"],
+          labels: ["Primary factor control", "Secondary factor control"],
+        },
+        {
+          cat: "Outcome",
+          ids: ["o1", "o2", "o3"],
+          labels: [
+            "Outcome assessment",
+            "Follow-up length",
+            "Follow-up adequacy",
+          ],
+        },
+      ];
+
+      const caseControlConfig = [
+        {
+          cat: "Selection",
+          ids: ["s1", "s2", "s3", "s4"],
+          labels: [
+            "Case definition",
+            "Case representativeness",
+            "Control selection",
+            "Control definition",
+          ],
+        },
+        {
+          cat: "Comparability",
+          ids: ["c1", "c2"],
+          labels: ["Primary factor control", "Secondary factor control"],
+        },
+        {
+          cat: "Exposure",
+          ids: ["e1", "e2", "e3"],
+          labels: [
+            "Exposure ascertainment",
+            "Same method (Case/Control)",
+            "Non-response rate",
+          ],
+        },
+      ];
+
+      let currentPaperId = null;
+
+      // スコアの内訳文字列を生成する関数
+      function calculateDetails(paper) {
+        const config =
+          paper.type === "cohort" ? cohortConfig : caseControlConfig;
+        let total = 0;
+        const results = config.map((sec) => {
+          let secScore = 0;
+          let bits = sec.ids.map((id) => {
+            if (paper.answers && paper.answers[id]) {
+              secScore++;
+              total++;
+              return "1";
+            }
+            return "0";
+          });
+          return { str: `${secScore}/${sec.ids.length} (${bits.join(",")})` };
+        });
+        return {
+          score: total,
+          selection: results[0].str,
+          comparability: results[1].str,
+          outcome: results[2].str,
+        };
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = papers
+          .map((p) => {
+            // 表示時にリアルタイムで内訳を計算する（データにdetailsがなくても表示可能にする）
+            const det = calculateDetails(p);
+            return `
+        <tr>
+            <td class="clickable" onclick="openModal(${p.id})"><strong>${p.title}</strong></td>
+            <td><span class="badge ${p.type}">${p.type.toUpperCase()}</span></td>
+            <td><span class="score-detail">${det.selection}</span></td>
+            <td><span class="score-detail">${det.comparability}</span></td>
+            <td><span class="score-detail">${det.outcome}</span></td>
+            <td><strong>★ ${det.score}</strong></td>
+            <td><button class="btn btn-danger" style="padding:4px 8px; font-size:10px;" onclick="deletePaper(${p.id})">Delete</button></td>
+        </tr>`;
+          })
+          .join("");
+      }
+
+      function openModal(id) {
+        currentPaperId = id;
+        const paper = papers.find((p) => p.id === id);
+        document.getElementById("modalTitle").innerText = paper.title;
+        document.getElementById("modalTypeSelector").value = paper.type;
+        renderQuestions(paper.type);
+        document.getElementById("nosModal").style.display = "block";
+      }
+
+      function switchModalType() {
+        const newType = document.getElementById("modalTypeSelector").value;
+        renderQuestions(newType);
+      }
+
+      function renderQuestions(type) {
+        const paper = papers.find((p) => p.id === currentPaperId);
+        const config = type === "cohort" ? cohortConfig : caseControlConfig;
+        let html = "";
+        config.forEach((section) => {
+          html += `<h3>${section.cat}</h3>`;
+          section.ids.forEach((qid, index) => {
+            const isChecked = (paper.answers && paper.answers[qid]) || false;
+            const reason =
+              (paper.justifications && paper.justifications[qid]) || "";
+            html += `
+                <div class="question-block">
+                    <strong>${section.labels[index]}</strong><br>
+                    <input type="checkbox" class="modal-cb" data-qid="${qid}" ${isChecked ? "checked" : ""}> Star (★)
+                    <textarea class="reason-box" data-qid="${qid}" placeholder="Reasoning...">${reason}</textarea>
+                </div>`;
+          });
+        });
+        document.getElementById("questionsArea").innerHTML = html;
+      }
+
+      function saveCurrentAssessment() {
+        const paper = papers.find((p) => p.id === currentPaperId);
+        paper.type = document.getElementById("modalTypeSelector").value;
+        if (!paper.answers) paper.answers = {};
+        if (!paper.justifications) paper.justifications = {};
+
+        document.querySelectorAll(".modal-cb").forEach((cb) => {
+          paper.answers[cb.dataset.qid] = cb.checked;
+        });
+        document.querySelectorAll(".reason-box").forEach((tx) => {
+          paper.justifications[tx.dataset.qid] = tx.value;
+        });
+
+        const det = calculateDetails(paper);
+        paper.score = det.score;
+        paper.status = "Completed";
+        renderTable();
+        closeModal();
+      }
+
+      function importData(event) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            papers = JSON.parse(e.target.result);
+            renderTable(); // 読み込み直後に再描画
+          } catch (err) {
+            alert("Invalid JSON file");
+          }
+        };
+        reader.readAsText(event.target.files[0]);
+      }
+
+      function addNewEmpty() {
+        const title = prompt("Enter Author/Year:");
+        if (!title) return;
+        papers.push({
+          id: Date.now(),
+          title: title,
+          type: "cohort",
+          score: 0,
+          answers: {},
+          justifications: {},
+          status: "Pending",
+        });
+        renderTable();
+      }
+      function closeModal() {
+        document.getElementById("nosModal").style.display = "none";
+      }
+      function deletePaper(id) {
+        if (confirm("Delete?")) {
+          papers = papers.filter((p) => p.id !== id);
+          renderTable();
+        }
+      }
+      function exportFullData() {
+        const blob = new Blob([JSON.stringify(papers, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `NOS_Data_Export.json`;
+        a.click();
+      }
+      renderTable();
+    </script>
+  </body>
+</html>
