@@ -1,71 +1,365 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>NOS Manager - Auto-Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOS Assessment Manager</title>
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+JP:wght@300;400;500;600&display=swap");
+
       :root {
-        --primary: #2563eb;
-        --bg: #f1f5f9;
-        --text: #1e293b;
-        --danger: #ef4444;
+        --primary: #1d4ed8;
+        --primary-light: #dbeafe;
+        --primary-dark: #1e3a8a;
+        --accent: #0ea5e9;
+        --success: #059669;
+        --success-light: #d1fae5;
+        --danger: #dc2626;
+        --danger-light: #fee2e2;
+        --warning: #d97706;
+        --warning-light: #fef3c7;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --surface2: #f1f5f9;
+        --border: #e2e8f0;
+        --border2: #cbd5e1;
+        --text: #0f172a;
+        --text2: #475569;
+        --text3: #94a3b8;
+        --star: #f59e0b;
+        --star-empty: #cbd5e1;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "IBM Plex Sans JP", sans-serif;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+        --shadow-lg:
+          0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08);
       }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
-        font-family: "Segoe UI", sans-serif;
+        font-family: var(--sans);
         background: var(--bg);
         color: var(--text);
-        padding: 20px;
+        min-height: 100vh;
+        font-size: 14px;
+        line-height: 1.6;
       }
+
+      /* ── Top Header ── */
+      .app-header {
+        background: var(--primary-dark);
+        color: white;
+        padding: 0 32px;
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .app-header-left {
+        padding: 20px 32px 20px 0;
+        border-right: 1px solid rgba(255, 255, 255, 0.15);
+        margin-right: 32px;
+      }
+      .app-title {
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        font-family: var(--mono);
+        color: #e2e8f0;
+      }
+      .app-subtitle {
+        font-size: 0.72rem;
+        color: #93c5fd;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+      .header-meta {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        flex: 1;
+        padding: 14px 0;
+      }
+      .header-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        max-width: 320px;
+      }
+      .header-field label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #93c5fd;
+        font-weight: 500;
+      }
+      .header-field input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: white;
+        padding: 7px 12px;
+        font-size: 0.875rem;
+        font-family: var(--sans);
+        outline: none;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .header-field input::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .header-field input:focus {
+        border-color: #60a5fa;
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      /* ── Main Container ── */
       .container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
-        background: white;
-        padding: 25px;
+        padding: 28px 32px;
+      }
+
+      /* ── Toolbar ── */
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .toolbar-left {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+        flex-wrap: wrap;
+      }
+      .toolbar-right {
+        display: flex;
+        gap: 10px;
+      }
+
+      /* Drop Zone */
+      .drop-zone {
+        border: 2px dashed var(--border2);
+        border-radius: 10px;
+        padding: 16px 24px;
+        text-align: center;
+        background: var(--surface2);
+        transition: all 0.2s;
+        cursor: pointer;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: var(--text2);
+        font-size: 0.85rem;
+      }
+      .drop-zone.drag-over {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+      .drop-zone-icon {
+        font-size: 1.4rem;
+      }
+      .drop-zone-text strong {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--text);
+      }
+      .file-loaded-badge {
+        background: var(--success-light);
+        color: var(--success);
+        border: 1px solid #6ee7b7;
+        border-radius: 20px;
+        padding: 3px 12px;
+        font-size: 0.78rem;
+        font-family: var(--mono);
+        font-weight: 600;
+      }
+
+      /* ── Buttons ── */
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.83rem;
+        font-family: var(--sans);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-success {
+        background: var(--success);
+        color: white;
+      }
+      .btn-export {
+        background: #4f46e5;
+        color: white;
+      }
+      .btn-html {
+        background: #0891b2;
+        color: white;
+      }
+      .btn-muted {
+        background: #64748b;
+        color: white;
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+        padding: 5px 10px;
+        font-size: 0.75rem;
+      }
+      .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+      }
+
+      /* ── Table ── */
+      .table-wrapper {
+        background: var(--surface);
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow);
+        overflow: hidden;
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
-        font-size: 0.9rem;
       }
-      th,
-      td {
-        padding: 10px;
+      thead {
+        background: var(--primary-dark);
+        color: white;
+      }
+      th {
+        padding: 12px 14px;
         text-align: left;
-        border-bottom: 1px solid #ddd;
-        border-right: 1px solid #f0f0f0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        white-space: nowrap;
       }
-      tr:hover {
+      td {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      tbody tr:hover {
         background: #f8fafc;
       }
+      tbody tr.completed-row {
+        background: #f0fdf4;
+      }
+      tbody tr.completed-row:hover {
+        background: #dcfce7;
+      }
+
       .clickable {
         cursor: pointer;
         color: var(--primary);
+        font-weight: 500;
+        text-decoration: none;
+      }
+      .clickable:hover {
         text-decoration: underline;
       }
-      .score-detail {
-        font-family: monospace;
-        color: #475569;
-        font-size: 0.85rem;
-        display: block;
-        white-space: nowrap;
-      }
+
       .badge {
-        padding: 3px 6px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: bold;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
       .cohort {
         background: #dcfce7;
         color: #166534;
+        border: 1px solid #86efac;
       }
       .case-control {
         background: #fee2e2;
         color: #991b1b;
+        border: 1px solid #fca5a5;
       }
+
+      .score-detail {
+        font-family: var(--mono);
+        color: var(--text2);
+        font-size: 0.8rem;
+      }
+      .score-total {
+        font-family: var(--mono);
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--primary-dark);
+      }
+      .score-stars {
+        color: var(--star);
+        letter-spacing: -2px;
+      }
+
+      .date-cell {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--text3);
+      }
+
+      /* Complete checkbox */
+      .complete-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .complete-toggle input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--success);
+        cursor: pointer;
+      }
+      .complete-toggle span {
+        font-size: 0.75rem;
+        color: var(--text2);
+      }
+      .lock-icon {
+        color: var(--success);
+        font-size: 0.85rem;
+      }
+
+      /* ── Modal ── */
       .modal {
         display: none;
         position: fixed;
@@ -74,162 +368,549 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
         overflow-y: auto;
       }
       .modal-content {
-        background: white;
-        margin: 2% auto;
-        padding: 25px;
-        width: 90%;
-        max-width: 850px;
-        border-radius: 12px;
-        position: relative;
+        background: var(--surface);
+        margin: 24px auto;
+        padding: 0;
+        width: 92%;
+        max-width: 880px;
+        border-radius: 14px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+      }
+      .modal-header {
+        background: var(--primary-dark);
+        color: white;
+        padding: 20px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .modal-header h2 {
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+      .modal-header .meta-info {
+        font-size: 0.75rem;
+        color: #93c5fd;
+        margin-top: 3px;
+        font-family: var(--mono);
       }
       .close {
-        position: absolute;
-        right: 20px;
-        top: 20px;
-        font-size: 24px;
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
         cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
       }
-      .type-switcher {
-        background: #fff7ed;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        border: 1px solid #ffedd5;
+      .close:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      .modal-body {
+        padding: 24px 28px;
+      }
+
+      .edit-header {
+        background: var(--surface2);
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+      }
+      .form-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 10px;
+        align-items: center;
+      }
+      .form-row:last-child {
+        margin-bottom: 0;
+      }
+      .form-row label {
+        font-weight: 600;
+        font-size: 0.8rem;
+        min-width: 90px;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .form-row input[type="text"],
+      .form-row select {
+        flex: 1;
+        padding: 9px 12px;
+        border: 1px solid var(--border2);
+        border-radius: 7px;
+        font-size: 0.875rem;
+        font-family: var(--sans);
+        outline: none;
+        transition: border-color 0.15s;
+        background: white;
+      }
+      .form-row input[type="text"]:focus,
+      .form-row select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+
+      /* Section */
+      .section-header {
         display: flex;
         align-items: center;
         gap: 10px;
+        margin: 22px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--border);
       }
+      .section-header h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
+      .section-score {
+        background: var(--primary-light);
+        color: var(--primary);
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-family: var(--mono);
+        font-weight: 600;
+        margin-left: auto;
+      }
+
+      /* Question Block */
       .question-block {
-        background: #f8fafc;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        border-left: 4px solid var(--primary);
+        background: var(--surface2);
+        padding: 14px 16px;
+        border-radius: 9px;
+        margin-bottom: 9px;
+        border-left: 4px solid var(--border2);
+        transition: border-color 0.15s;
       }
+      .question-block.starred {
+        border-left-color: var(--star);
+      }
+      .question-block.locked {
+        opacity: 0.7;
+      }
+
+      .q-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .q-label {
+        font-size: 0.83rem;
+        font-weight: 500;
+        flex: 1;
+        line-height: 1.4;
+      }
+      .q-id {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--text3);
+        background: var(--border);
+        padding: 2px 6px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+
+      /* Star Toggle */
+      .star-toggle {
+        font-size: 1.6rem;
+        cursor: pointer;
+        line-height: 1;
+        transition: transform 0.15s;
+        user-select: none;
+        flex-shrink: 0;
+      }
+      .star-toggle:hover {
+        transform: scale(1.2);
+      }
+      .star-toggle.active {
+        color: var(--star);
+      }
+      .star-toggle.inactive {
+        color: var(--star-empty);
+      }
+      .star-toggle.disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+
       .reason-box {
         width: 100%;
-        margin-top: 5px;
-        padding: 6px;
-        border: 1px solid #cbd5e1;
-        border-radius: 4px;
-        box-sizing: border-box;
-        font-size: 0.85rem;
-      }
-      .btn {
-        padding: 8px 14px;
-        border: none;
+        padding: 8px 10px;
+        border: 1px solid var(--border2);
         border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
+        font-size: 0.8rem;
+        font-family: var(--sans);
+        resize: vertical;
+        min-height: 54px;
+        transition: border-color 0.15s;
+        outline: none;
+        color: var(--text);
+        background: white;
+        line-height: 1.5;
+      }
+      .reason-box:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
+      }
+      .reason-box:disabled {
+        background: var(--surface2);
+        color: var(--text3);
+      }
+
+      .modal-footer {
+        padding: 16px 28px;
+        background: var(--surface2);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .total-score-display {
+        font-family: var(--mono);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
+      .total-score-display span {
+        color: var(--star);
+      }
+
+      /* ── Notification Toast ── */
+      .toast {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        background: var(--text);
         color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        box-shadow: var(--shadow-lg);
+        z-index: 9999;
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      .btn-save {
-        background: #059669;
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
       }
-      .btn-export {
-        background: #4f46e5;
+      .toast.success {
+        background: var(--success);
       }
-      .btn-danger {
+      .toast.error {
         background: var(--danger);
+      }
+
+      /* ── Empty state ── */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text3);
+      }
+      .empty-state .icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+      }
+      .empty-state p {
+        font-size: 0.9rem;
+      }
+
+      /* Summary bar */
+      .summary-bar {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .summary-card {
+        background: var(--surface);
+        border-radius: 9px;
+        padding: 12px 18px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+      }
+      .summary-card .num {
+        font-family: var(--mono);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        line-height: 1;
+      }
+      .summary-card .lbl {
+        font-size: 0.72rem;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 3px;
+      }
+
+      /* Description area */
+      .desc-area {
+        margin-bottom: 16px;
+      }
+      .desc-area label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 5px;
+      }
+      .desc-area textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border2);
+        border-radius: 7px;
+        font-size: 0.85rem;
+        font-family: var(--sans);
+        resize: vertical;
+        min-height: 70px;
+        outline: none;
+        transition: border-color 0.15s;
+        background: white;
+      }
+      .desc-area textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+      .desc-area textarea:disabled {
+        background: var(--surface2);
+        color: var(--text3);
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>NOS Assessment Manager</h1>
+    <!-- App Header -->
+    <div class="app-header">
+      <div class="app-header-left">
+        <div class="app-title">NOS Assessment</div>
+        <div class="app-subtitle">Newcastle–Ottawa Scale Manager</div>
+      </div>
+      <div class="header-meta">
+        <div class="header-field">
+          <label>評価タイトル / Review Title</label>
+          <input
+            type="text"
+            id="globalTitle"
+            placeholder="例：系統的レビュー 2025 — 感染症コホート研究"
+          />
+        </div>
+        <div class="header-field" style="max-width: 220px">
+          <label>入力者名 / Reviewer</label>
+          <input type="text" id="globalReviewer" placeholder="氏名を入力" />
+        </div>
+      </div>
+    </div>
 
-      <div style="margin-bottom: 20px; display: flex; gap: 10px">
-        <button
-          class="btn"
-          style="background: var(--primary)"
-          onclick="addNewEmpty()"
-        >
-          + Add New Paper
-        </button>
-        <button class="btn btn-export" onclick="exportFullData()">
-          Export Data (JSON)
-        </button>
-        <button
-          class="btn"
-          style="background: #64748b"
-          onclick="document.getElementById('importFile').click()"
-        >
-          Import JSON
-        </button>
+    <!-- Main -->
+    <div class="container">
+      <!-- Drop Zone -->
+      <div
+        class="drop-zone"
+        id="dropZone"
+        onclick="document.getElementById('importFile').click()"
+      >
+        <span class="drop-zone-icon">📂</span>
+        <div class="drop-zone-text">
+          <strong>JSONファイルをドロップ、またはクリックして読み込む</strong>
+          <span>以前にエクスポートしたデータを復元できます</span>
+        </div>
+        <span id="loadedFileBadge" style="display: none"></span>
         <input
           type="file"
           id="importFile"
           style="display: none"
+          accept=".json"
           onchange="importData(event)"
         />
       </div>
 
-      <table id="paperTable">
-        <thead>
-          <tr>
-            <th>Author/Year</th>
-            <th>Type</th>
-            <th>Selection</th>
-            <th>Comparability</th>
-            <th>Outcome/Exp</th>
-            <th>Total</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+      <!-- Summary Bar -->
+      <div class="summary-bar" id="summaryBar"></div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-primary" onclick="addNewEmpty()">
+            ＋ 新規ペーパーを追加
+          </button>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-export" onclick="exportJSON()">
+            ⬇ JSON エクスポート
+          </button>
+          <button class="btn btn-html" onclick="exportHTML()">
+            ⬇ HTML ダウンロード
+          </button>
+          <button class="btn btn-muted" onclick="clearAll()">
+            🗑 全クリア
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table id="paperTable">
+          <thead>
+            <tr>
+              <th>著者/年</th>
+              <th>種別</th>
+              <th>Selection</th>
+              <th>Comparability</th>
+              <th>Outcome/Exp</th>
+              <th>合計</th>
+              <th>Complete</th>
+              <th>作成日</th>
+              <th>更新日</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display: none">
+          <div class="icon">📋</div>
+          <p>
+            ペーパーがありません。「新規ペーパーを追加」から登録してください。
+          </p>
+        </div>
+      </div>
     </div>
 
+    <!-- Modal -->
     <div id="nosModal" class="modal">
       <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle" style="margin-top: 0">Assessment</h2>
-        <div class="type-switcher">
-          <strong>Study Type:</strong>
-          <select id="modalTypeSelector" onchange="switchModalType()">
-            <option value="cohort">Cohort Study</option>
-            <option value="case-control">Case-Control Study</option>
-          </select>
+        <div class="modal-header">
+          <div>
+            <h2 id="modalHeading">NOS 評価</h2>
+            <div class="meta-info" id="modalMeta"></div>
+          </div>
+          <button class="close" onclick="closeModal()">×</button>
         </div>
-        <div id="questionsArea"></div>
-        <div style="text-align: right; margin-top: 20px">
-          <button class="btn btn-save" onclick="saveCurrentAssessment()">
-            Save Assessment
+        <div class="modal-body">
+          <div class="edit-header">
+            <div class="form-row">
+              <label>著者/年</label>
+              <input
+                type="text"
+                id="modalTitleInput"
+                placeholder="例: Smith J (2024)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Study Type</label>
+              <select id="modalTypeSelector" onchange="switchModalType()">
+                <option value="cohort">Cohort Study（コホート研究）</option>
+                <option value="case-control">
+                  Case-Control Study（ケースコントロール研究）
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="desc-area">
+            <label>Study Description（研究概要）</label>
+            <textarea
+              id="modalDescription"
+              rows="3"
+              placeholder="研究の概要を簡潔に記述..."
+            ></textarea>
+          </div>
+          <div id="questionsArea"></div>
+        </div>
+        <div class="modal-footer">
+          <div class="total-score-display" id="liveTotalScore">
+            合計: <span>0</span> / 9
+          </div>
+          <button class="btn btn-success" onclick="saveCurrentAssessment()">
+            ✓ 保存する
           </button>
         </div>
       </div>
     </div>
 
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
     <script>
+      // ─────────────────────────────────────────────
+      //  DATA
+      // ─────────────────────────────────────────────
       let papers = [];
+      let currentPaperId = null;
+      let loadedFileName = null;
 
       const cohortConfig = [
         {
           cat: "Selection",
-          ids: ["s1", "s2", "s3", "s4"],
-          labels: [
-            "Representativeness",
-            "Non-exposed selection",
-            "Ascertainment of exposure",
-            "Outcome not present",
+          max: 4,
+          color: "#1d4ed8",
+          items: [
+            {
+              id: "s1",
+              label:
+                "Representativeness of the exposed cohort（曝露コホートの代表性）",
+            },
+            {
+              id: "s2",
+              label:
+                "Selection of the non-exposed cohort（非曝露コホートの選択）",
+            },
+            { id: "s3", label: "Ascertainment of exposure（曝露の確認方法）" },
+            {
+              id: "s4",
+              label:
+                "Outcome not present at start of study（研究開始時にアウトカムが存在しないこと）",
+            },
           ],
         },
         {
           cat: "Comparability",
-          ids: ["c1", "c2"],
-          labels: ["Primary factor control", "Secondary factor control"],
+          max: 2,
+          color: "#7c3aed",
+          items: [
+            {
+              id: "c1",
+              label: "Comparability — primary factor（主要因子のコントロール）",
+            },
+            {
+              id: "c2",
+              label:
+                "Comparability — secondary factor（追加因子のコントロール）",
+            },
+          ],
         },
         {
           cat: "Outcome",
-          ids: ["o1", "o2", "o3"],
-          labels: [
-            "Outcome assessment",
-            "Follow-up length",
-            "Follow-up adequacy",
+          max: 3,
+          color: "#059669",
+          items: [
+            {
+              id: "o1",
+              label: "Assessment of outcome（アウトカムの評価方法）",
+            },
+            {
+              id: "o2",
+              label: "Follow-up length adequate（追跡期間の十分性）",
+            },
+            { id: "o3", label: "Adequacy of follow-up（追跡完了の適切性）" },
           ],
         },
       ];
@@ -237,177 +918,854 @@
       const caseControlConfig = [
         {
           cat: "Selection",
-          ids: ["s1", "s2", "s3", "s4"],
-          labels: [
-            "Case definition",
-            "Case representativeness",
-            "Control selection",
-            "Control definition",
+          max: 4,
+          color: "#1d4ed8",
+          items: [
+            { id: "s1", label: "Case definition adequate（症例定義の適切性）" },
+            {
+              id: "s2",
+              label: "Representativeness of the cases（症例の代表性）",
+            },
+            { id: "s3", label: "Selection of Controls（対照の選択）" },
+            { id: "s4", label: "Definition of Controls（対照の定義）" },
           ],
         },
         {
           cat: "Comparability",
-          ids: ["c1", "c2"],
-          labels: ["Primary factor control", "Secondary factor control"],
+          max: 2,
+          color: "#7c3aed",
+          items: [
+            {
+              id: "c1",
+              label: "Comparability — primary factor（主要因子のコントロール）",
+            },
+            {
+              id: "c2",
+              label:
+                "Comparability — secondary factor（追加因子のコントロール）",
+            },
+          ],
         },
         {
           cat: "Exposure",
-          ids: ["e1", "e2", "e3"],
-          labels: [
-            "Exposure ascertainment",
-            "Same method (Case/Control)",
-            "Non-response rate",
+          max: 3,
+          color: "#059669",
+          items: [
+            { id: "e1", label: "Ascertainment of exposure（曝露の確認方法）" },
+            {
+              id: "e2",
+              label:
+                "Same method of ascertainment for cases and controls（症例・対照で同一の確認方法）",
+            },
+            { id: "e3", label: "Non-response rate（非回答率）" },
           ],
         },
       ];
 
-      let currentPaperId = null;
-
-      // スコアの内訳文字列を生成する関数
-      function calculateDetails(paper) {
-        const config =
-          paper.type === "cohort" ? cohortConfig : caseControlConfig;
-        let total = 0;
-        const results = config.map((sec) => {
-          let secScore = 0;
-          let bits = sec.ids.map((id) => {
-            if (paper.answers && paper.answers[id]) {
-              secScore++;
-              total++;
-              return "1";
-            }
-            return "0";
-          });
-          return { str: `${secScore}/${sec.ids.length} (${bits.join(",")})` };
-        });
-        return {
-          score: total,
-          selection: results[0].str,
-          comparability: results[1].str,
-          outcome: results[2].str,
-        };
+      // ─────────────────────────────────────────────
+      //  HELPERS
+      // ─────────────────────────────────────────────
+      function now() {
+        return new Date().toISOString();
+      }
+      function fmtDate(iso) {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        return (
+          d.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }) +
+          " " +
+          d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })
+        );
       }
 
+      function getConfig(type) {
+        return type === "cohort" ? cohortConfig : caseControlConfig;
+      }
+
+      function calcScore(paper) {
+        const config = getConfig(paper.type);
+        let total = 0;
+        const sections = config.map((sec) => {
+          let sc = 0;
+          const bits = sec.items.map((q) => {
+            if (paper.answers?.[q.id]) {
+              sc++;
+              total++;
+              return 1;
+            }
+            return 0;
+          });
+          return { score: sc, max: sec.max, bits, cat: sec.cat };
+        });
+        return { total, sections };
+      }
+
+      function showToast(msg, type = "success") {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.className = "toast " + type + " show";
+        setTimeout(() => {
+          t.className = "toast " + type;
+        }, 2800);
+      }
+
+      // ─────────────────────────────────────────────
+      //  TABLE RENDER
+      // ─────────────────────────────────────────────
       function renderTable() {
         const tbody = document.getElementById("tableBody");
+        const empty = document.getElementById("emptyState");
+
+        if (papers.length === 0) {
+          tbody.innerHTML = "";
+          empty.style.display = "block";
+          renderSummary();
+          return;
+        }
+        empty.style.display = "none";
+
         tbody.innerHTML = papers
           .map((p) => {
-            // 表示時にリアルタイムで内訳を計算する（データにdetailsがなくても表示可能にする）
-            const det = calculateDetails(p);
-            return `
-        <tr>
-            <td class="clickable" onclick="openModal(${p.id})"><strong>${p.title}</strong></td>
-            <td><span class="badge ${p.type}">${p.type.toUpperCase()}</span></td>
-            <td><span class="score-detail">${det.selection}</span></td>
-            <td><span class="score-detail">${det.comparability}</span></td>
-            <td><span class="score-detail">${det.outcome}</span></td>
-            <td><strong>★ ${det.score}</strong></td>
-            <td><button class="btn btn-danger" style="padding:4px 8px; font-size:10px;" onclick="deletePaper(${p.id})">Delete</button></td>
-        </tr>`;
+            const det = calcScore(p);
+            const isComplete = !!p.complete;
+            const stars = "★".repeat(det.total) + "☆".repeat(9 - det.total);
+
+            function secLabel(s) {
+              if (!s) return "—";
+              return `${s.score}/${s.max} <span style="color:var(--text3);font-size:0.72rem;">(${s.bits.join(",")})</span>`;
+            }
+
+            return `<tr class="${isComplete ? "completed-row" : ""}">
+      <td>
+        <span class="clickable" onclick="openModal(${p.id})">${escHtml(p.title)}${isComplete ? ' <span style="font-size:0.7rem;color:var(--success);">🔒</span>' : ""}</span>
+      </td>
+      <td><span class="badge ${p.type === "cohort" ? "cohort" : "case-control"}">${p.type === "cohort" ? "Cohort" : "Case-Ctrl"}</span></td>
+      <td><span class="score-detail">${secLabel(det.sections[0])}</span></td>
+      <td><span class="score-detail">${secLabel(det.sections[1])}</span></td>
+      <td><span class="score-detail">${secLabel(det.sections[2])}</span></td>
+      <td>
+        <span class="score-total">★ ${det.total}</span>
+        <span class="score-stars" style="font-size:0.7rem;display:block;color:var(--star);letter-spacing:-1px;">${stars}</span>
+      </td>
+      <td>
+        <label class="complete-toggle">
+          <input type="checkbox" ${isComplete ? "checked" : ""} onchange="toggleComplete(${p.id}, this.checked)" />
+          <span>${isComplete ? '<span class="lock-icon">🔒</span> 完了' : "未完了"}</span>
+        </label>
+      </td>
+      <td class="date-cell">${fmtDate(p.createdAt)}</td>
+      <td class="date-cell">${fmtDate(p.updatedAt)}</td>
+      <td>
+        ${
+          isComplete
+            ? `<button class="btn btn-sm btn-muted" disabled style="opacity:0.4;cursor:not-allowed;">🔒 編集不可</button>`
+            : `<button class="btn btn-sm btn-danger" onclick="deletePaper(${p.id})">削除</button>`
+        }
+      </td>
+    </tr>`;
           })
           .join("");
+
+        renderSummary();
       }
 
+      function renderSummary() {
+        const bar = document.getElementById("summaryBar");
+        const total = papers.length;
+        const completed = papers.filter((p) => p.complete).length;
+        const cohorts = papers.filter((p) => p.type === "cohort").length;
+        const cc = papers.filter((p) => p.type === "case-control").length;
+        const avgScore =
+          total > 0
+            ? (
+                papers.reduce((s, p) => s + calcScore(p).total, 0) / total
+              ).toFixed(1)
+            : "—";
+
+        bar.innerHTML = `
+    <div class="summary-card"><div class="num">${total}</div><div class="lbl">Total Papers</div></div>
+    <div class="summary-card"><div class="num">${completed}</div><div class="lbl">Completed</div></div>
+    <div class="summary-card"><div class="num">${cohorts}</div><div class="lbl">Cohort</div></div>
+    <div class="summary-card"><div class="num">${cc}</div><div class="lbl">Case-Control</div></div>
+    <div class="summary-card"><div class="num">${avgScore}</div><div class="lbl">Avg Score / 9</div></div>
+  `;
+      }
+
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // ─────────────────────────────────────────────
+      //  MODAL
+      // ─────────────────────────────────────────────
+      // isReadOnly flag for locked papers
+      let isReadOnly = false;
+
       function openModal(id) {
-        currentPaperId = id;
         const paper = papers.find((p) => p.id === id);
-        document.getElementById("modalTitle").innerText = paper.title;
+        if (!paper) return;
+        isReadOnly = !!paper.complete;
+        currentPaperId = id;
+        document.getElementById("modalTitleInput").value = paper.title;
+        document.getElementById("modalTitleInput").disabled = isReadOnly;
         document.getElementById("modalTypeSelector").value = paper.type;
+        document.getElementById("modalTypeSelector").disabled = isReadOnly;
+        document.getElementById("modalDescription").value =
+          paper.description || "";
+        document.getElementById("modalDescription").disabled = isReadOnly;
+        document.getElementById("modalHeading").textContent =
+          paper.title || "NOS 評価";
+
+        const lockBadge = isReadOnly
+          ? ' <span style="background:#d1fae5;color:#065f46;font-size:0.7rem;padding:2px 8px;border-radius:10px;font-family:var(--mono);">🔒 閲覧モード</span>'
+          : "";
+        document.getElementById("modalHeading").innerHTML =
+          escHtml(paper.title || "NOS 評価") + lockBadge;
+        document.getElementById("modalMeta").textContent =
+          `作成: ${fmtDate(paper.createdAt)}　更新: ${fmtDate(paper.updatedAt)}`;
+
+        // Show/hide save button
+        const saveBtn = document.querySelector(".modal-footer .btn-success");
+        if (saveBtn) saveBtn.style.display = isReadOnly ? "none" : "";
+
         renderQuestions(paper.type);
         document.getElementById("nosModal").style.display = "block";
       }
 
+      function closeModal() {
+        document.getElementById("nosModal").style.display = "none";
+        currentPaperId = null;
+        isReadOnly = false;
+      }
+
       function switchModalType() {
-        const newType = document.getElementById("modalTypeSelector").value;
-        renderQuestions(newType);
+        renderQuestions(document.getElementById("modalTypeSelector").value);
       }
 
       function renderQuestions(type) {
         const paper = papers.find((p) => p.id === currentPaperId);
-        const config = type === "cohort" ? cohortConfig : caseControlConfig;
+        if (!paper) return;
+        const config = getConfig(type);
         let html = "";
-        config.forEach((section) => {
-          html += `<h3>${section.cat}</h3>`;
-          section.ids.forEach((qid, index) => {
-            const isChecked = (paper.answers && paper.answers[qid]) || false;
-            const reason =
-              (paper.justifications && paper.justifications[qid]) || "";
+        config.forEach((sec) => {
+          const secScore = sec.items.filter(
+            (q) => paper.answers?.[q.id],
+          ).length;
+          html += `<div class="section-header">
+      <h3>${sec.cat}</h3>
+      <span class="section-score" id="secScore_${sec.cat}">${secScore} / ${sec.max}</span>
+    </div>`;
+          sec.items.forEach((q) => {
+            const starred = !!paper.answers?.[q.id];
+            const reason = paper.justifications?.[q.id] || "";
+            const isC2 = q.id === "c2";
+            const c1val = !!paper.answers?.["c1"];
+            const starDisabled = isReadOnly || (isC2 && !c1val);
+            const taDisabled = isReadOnly || (isC2 && !c1val);
             html += `
-                <div class="question-block">
-                    <strong>${section.labels[index]}</strong><br>
-                    <input type="checkbox" class="modal-cb" data-qid="${qid}" ${isChecked ? "checked" : ""}> Star (★)
-                    <textarea class="reason-box" data-qid="${qid}" placeholder="Reasoning...">${reason}</textarea>
-                </div>`;
+        <div class="question-block ${starred ? "starred" : ""}" id="qblock_${q.id}">
+          <div class="q-top">
+            <span class="star-toggle ${starred ? "active" : "inactive"} ${starDisabled ? "disabled" : ""}"
+              data-qid="${q.id}" onclick="${starDisabled ? "" : `toggleStar('${q.id}')`}">★</span>
+            <span class="q-label">${q.label}</span>
+            <span class="q-id">${q.id.toUpperCase()}</span>
+          </div>
+          <textarea class="reason-box" data-qid="${q.id}"
+            placeholder="根拠・コメントを記述..." ${taDisabled ? "disabled" : ""}>${escHtml(reason)}</textarea>
+        </div>`;
           });
         });
         document.getElementById("questionsArea").innerHTML = html;
+        updateLiveScore();
+      }
+
+      function toggleStar(qid) {
+        if (isReadOnly) return;
+        const paper = papers.find((p) => p.id === currentPaperId);
+        if (!paper) return;
+        if (!paper.answers) paper.answers = {};
+
+        // c2 dependency
+        if (qid === "c2" && !paper.answers["c1"]) {
+          showToast("c1（主要因子）を先に選択してください", "error");
+          return;
+        }
+
+        paper.answers[qid] = !paper.answers[qid];
+
+        // If c1 turned off, force c2 off
+        if (qid === "c1" && !paper.answers["c1"]) {
+          paper.answers["c2"] = false;
+        }
+
+        // Re-render questions area preserving textarea values first
+        saveTextareas();
+        renderQuestions(document.getElementById("modalTypeSelector").value);
+      }
+
+      function saveTextareas() {
+        const paper = papers.find((p) => p.id === currentPaperId);
+        if (!paper) return;
+        if (!paper.justifications) paper.justifications = {};
+        document.querySelectorAll(".reason-box").forEach((tx) => {
+          paper.justifications[tx.dataset.qid] = tx.value;
+        });
+      }
+
+      function updateLiveScore() {
+        const paper = papers.find((p) => p.id === currentPaperId);
+        if (!paper) return;
+        const config = getConfig(
+          document.getElementById("modalTypeSelector").value,
+        );
+
+        // Sync current star state from DOM
+        let total = 0;
+        config.forEach((sec) => {
+          let sc = 0;
+          sec.items.forEach((q) => {
+            const starred = document
+              .querySelector(`.star-toggle[data-qid="${q.id}"]`)
+              ?.classList.contains("active");
+            if (starred) sc++;
+          });
+          total += sc;
+          const el = document.getElementById("secScore_" + sec.cat);
+          if (el) el.textContent = `${sc} / ${sec.max}`;
+        });
+
+        const el = document.getElementById("liveTotalScore");
+        if (el) el.innerHTML = `合計: <span>${total}</span> / 9`;
       }
 
       function saveCurrentAssessment() {
         const paper = papers.find((p) => p.id === currentPaperId);
+        if (!paper) return;
+
+        paper.title =
+          document.getElementById("modalTitleInput").value.trim() ||
+          paper.title;
         paper.type = document.getElementById("modalTypeSelector").value;
+        paper.description = document
+          .getElementById("modalDescription")
+          .value.trim();
         if (!paper.answers) paper.answers = {};
         if (!paper.justifications) paper.justifications = {};
 
-        document.querySelectorAll(".modal-cb").forEach((cb) => {
-          paper.answers[cb.dataset.qid] = cb.checked;
+        document.querySelectorAll(".star-toggle").forEach((el) => {
+          paper.answers[el.dataset.qid] = el.classList.contains("active");
         });
         document.querySelectorAll(".reason-box").forEach((tx) => {
           paper.justifications[tx.dataset.qid] = tx.value;
         });
 
-        const det = calculateDetails(paper);
-        paper.score = det.score;
+        // c2 dependency enforcement
+        if (!paper.answers["c1"]) paper.answers["c2"] = false;
+
+        paper.updatedAt = now();
         paper.status = "Completed";
+
         renderTable();
         closeModal();
+        showToast("✓ 保存しました");
       }
 
-      function importData(event) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            papers = JSON.parse(e.target.result);
-            renderTable(); // 読み込み直後に再描画
-          } catch (err) {
-            alert("Invalid JSON file");
+      // ─────────────────────────────────────────────
+      //  COMPLETE TOGGLE
+      // ─────────────────────────────────────────────
+      function toggleComplete(id, checked) {
+        const paper = papers.find((p) => p.id === id);
+        if (!paper) return;
+        if (checked) {
+          if (
+            !confirm(
+              `「${paper.title}」を完了済みにすると編集がロックされます。よろしいですか？`,
+            )
+          ) {
+            renderTable();
+            return;
           }
-        };
-        reader.readAsText(event.target.files[0]);
+          paper.complete = true;
+        } else {
+          if (!confirm(`「${paper.title}」の完了ロックを解除しますか？`)) {
+            renderTable();
+            return;
+          }
+          paper.complete = false;
+        }
+        paper.updatedAt = now();
+        renderTable();
+        showToast(
+          checked
+            ? "🔒 完了済みとしてロックしました"
+            : "🔓 ロックを解除しました",
+        );
       }
 
+      // ─────────────────────────────────────────────
+      //  CRUD
+      // ─────────────────────────────────────────────
       function addNewEmpty() {
-        const title = prompt("Enter Author/Year:");
+        const title = prompt(
+          "著者/年を入力してください（例: Smith J (2024)）:",
+        );
         if (!title) return;
+        const t = now();
         papers.push({
           id: Date.now(),
-          title: title,
+          title: title.trim(),
           type: "cohort",
-          score: 0,
+          description: "",
           answers: {},
           justifications: {},
           status: "Pending",
+          complete: false,
+          createdAt: t,
+          updatedAt: t,
         });
         renderTable();
+        showToast("✓ ペーパーを追加しました");
       }
-      function closeModal() {
-        document.getElementById("nosModal").style.display = "none";
-      }
+
       function deletePaper(id) {
-        if (confirm("Delete?")) {
-          papers = papers.filter((p) => p.id !== id);
-          renderTable();
-        }
+        const p = papers.find((x) => x.id === id);
+        if (!p) return;
+        if (
+          !confirm(`「${p.title}」を削除しますか？この操作は元に戻せません。`)
+        )
+          return;
+        papers = papers.filter((x) => x.id !== id);
+        renderTable();
+        showToast("削除しました", "error");
       }
-      function exportFullData() {
-        const blob = new Blob([JSON.stringify(papers, null, 2)], {
+
+      function clearAll() {
+        if (papers.length === 0) {
+          showToast("データがありません", "error");
+          return;
+        }
+        if (
+          !confirm("すべてのデータを削除しますか？この操作は元に戻せません。")
+        )
+          return;
+        papers = [];
+        loadedFileName = null;
+        document.getElementById("loadedFileBadge").style.display = "none";
+        renderTable();
+        showToast("全データをクリアしました");
+      }
+
+      // ─────────────────────────────────────────────
+      //  IMPORT / EXPORT
+      // ─────────────────────────────────────────────
+      function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            // Support both old format (array) and new format (object with meta)
+            if (Array.isArray(data)) {
+              papers = data.map(migrate);
+            } else if (data.papers && Array.isArray(data.papers)) {
+              papers = data.papers.map(migrate);
+              if (data.globalTitle)
+                document.getElementById("globalTitle").value = data.globalTitle;
+              if (data.globalReviewer)
+                document.getElementById("globalReviewer").value =
+                  data.globalReviewer;
+            } else {
+              throw new Error("Unknown format");
+            }
+            loadedFileName = file.name;
+            document.getElementById("loadedFileBadge").textContent =
+              "📄 " + file.name;
+            document.getElementById("loadedFileBadge").className =
+              "file-loaded-badge";
+            document.getElementById("loadedFileBadge").style.display =
+              "inline-block";
+            renderTable();
+            showToast(`✓ "${file.name}" を読み込みました`);
+          } catch (err) {
+            showToast("JSONファイルの読み込みに失敗しました", "error");
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = "";
+      }
+
+      function migrate(p) {
+        // Ensure new fields exist for backwards compatibility
+        const t = p.createdAt || now();
+        return {
+          id: p.id || Date.now() + Math.random(),
+          title: p.title || "Untitled",
+          type: p.type || "cohort",
+          description: p.description || "",
+          answers: p.answers || {},
+          justifications: p.justifications || {},
+          status: p.status || "Pending",
+          complete: !!p.complete,
+          createdAt: t,
+          updatedAt: p.updatedAt || t,
+        };
+      }
+
+      function exportJSON() {
+        const payload = {
+          globalTitle: document.getElementById("globalTitle").value,
+          globalReviewer: document.getElementById("globalReviewer").value,
+          exportedAt: now(),
+          papers: papers,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
           type: "application/json",
         });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `NOS_Data_Export.json`;
+        a.download = `NOS_Export_${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
+        showToast("✓ JSONをエクスポートしました");
+        setTimeout(() => {
+          if (confirm("エクスポート後、リストをクリア（初期化）しますか？")) {
+            papers = [];
+            loadedFileName = null;
+            document.getElementById("loadedFileBadge").style.display = "none";
+            renderTable();
+            showToast("リストをクリアしました");
+          }
+        }, 400);
       }
+
+      function exportHTML() {
+        const title =
+          document.getElementById("globalTitle").value || "NOS Assessment";
+        const reviewer = document.getElementById("globalReviewer").value || "";
+
+        // ── Summary table rows ──
+        const summaryRows = papers
+          .map((p) => {
+            const det = calcScore(p);
+            const stars = "★".repeat(det.total) + "☆".repeat(9 - det.total);
+            function sl(s) {
+              return s ? `${s.score}/${s.max} (${s.bits.join(",")})` : "—";
+            }
+            return `<tr>
+      <td><a href="#paper-${p.id}">${escHtml(p.title)}</a></td>
+      <td>${p.type === "cohort" ? "Cohort" : "Case-Control"}</td>
+      <td>${sl(det.sections[0])}</td>
+      <td>${sl(det.sections[1])}</td>
+      <td>${sl(det.sections[2])}</td>
+      <td style="font-weight:700;">${det.total} ${stars}</td>
+      <td>${p.complete ? "✓ 完了" : "—"}</td>
+    </tr>`;
+          })
+          .join("");
+
+        // ── Per-paper detail sections ──
+        const details = papers
+          .map((p) => {
+            const det = calcScore(p);
+            const config = getConfig(p.type);
+            const stars = "★".repeat(det.total) + "☆".repeat(9 - det.total);
+
+            const sectionsHtml = config
+              .map((sec, si) => {
+                const sd = det.sections[si];
+                const itemsHtml = sec.items
+                  .map((q, qi) => {
+                    const got = !!p.answers?.[q.id];
+                    const just = p.justifications?.[q.id] || "";
+                    return `<div class="item ${got ? "item-star" : "item-empty"}">
+          <div class="item-head">
+            <span class="item-star-icon">${got ? "★" : "☆"}</span>
+            <span class="item-id">${q.id.toUpperCase()}</span>
+            <span class="item-label">${q.label.replace(/（[^）]*）/g, "")}</span>
+          </div>
+          ${just ? `<div class="item-just">${escHtml(just)}</div>` : ""}
+        </div>`;
+                  })
+                  .join("");
+
+                return `<div class="section-block">
+        <div class="sec-header">
+          <span class="sec-name">${sec.cat}</span>
+          <span class="sec-score">${sd.score}/${sd.max} (${sd.bits.join(",")})</span>
+        </div>
+        ${itemsHtml}
+      </div>`;
+              })
+              .join("");
+
+            return `<div class="paper-card" id="paper-${p.id}">
+      <div class="paper-header">
+        <div>
+          <div class="paper-title">${escHtml(p.title)}</div>
+          <div class="paper-meta">${p.type === "cohort" ? "Cohort Study" : "Case-Control Study"} &nbsp;|&nbsp; 作成: ${fmtDate(p.createdAt)} &nbsp;|&nbsp; 更新: ${fmtDate(p.updatedAt)}</div>
+        </div>
+        <div class="paper-score">${det.total}<span class="paper-denom">/9</span><div class="paper-stars">${stars}</div></div>
+      </div>
+      ${p.description ? `<div class="paper-desc">${escHtml(p.description)}</div>` : ""}
+      <div class="sections-grid">${sectionsHtml}</div>
+    </div>`;
+          })
+          .join("");
+
+        const avgScore =
+          papers.length > 0
+            ? (
+                papers.reduce((s, p) => s + calcScore(p).total, 0) /
+                papers.length
+              ).toFixed(2)
+            : "—";
+
+        const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<title>${escHtml(title)}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap');
+  :root {
+    --primary: #1e3a8a; --accent: #2563eb; --star: #f59e0b;
+    --success: #059669; --border: #e2e8f0; --bg: #f8fafc;
+    --text: #0f172a; --text2: #475569; --text3: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace; --sans: 'Noto Sans JP', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.6; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 40px 32px; }
+  /* Report header */
+  .report-header { background: var(--primary); color: white; padding: 28px 36px; border-radius: 12px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .report-header h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 6px; }
+  .report-header .sub { font-size: 0.8rem; color: #93c5fd; }
+  .report-header .stats { text-align: right; font-family: var(--mono); }
+  .report-header .stats .big { font-size: 2rem; font-weight: 700; color: #f59e0b; }
+  .report-header .stats .lbl { font-size: 0.72rem; color: #93c5fd; text-transform: uppercase; }
+  /* Summary table */
+  h2 { font-size: 1rem; font-weight: 600; color: var(--primary); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .summary-section { margin-bottom: 36px; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  thead { background: var(--primary); color: white; }
+  th { padding: 10px 13px; text-align: left; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+  td { padding: 9px 13px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.8rem; vertical-align: middle; }
+  td:first-child { font-family: var(--sans); font-weight: 500; }
+  td a { color: var(--accent); text-decoration: none; }
+  td a:hover { text-decoration: underline; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  /* Paper cards */
+  .details-section h2 { margin-top: 0; }
+  .paper-card { background: white; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
+  .paper-header { background: var(--primary); color: white; padding: 18px 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .paper-title { font-size: 1.05rem; font-weight: 600; }
+  .paper-meta { font-size: 0.72rem; color: #93c5fd; margin-top: 4px; font-family: var(--mono); }
+  .paper-score { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: var(--star); line-height: 1; text-align: right; flex-shrink: 0; }
+  .paper-denom { font-size: 1rem; color: #93c5fd; }
+  .paper-stars { font-size: 0.85rem; color: var(--star); letter-spacing: -1px; margin-top: 2px; }
+  .paper-desc { padding: 14px 24px; background: #f1f5f9; border-bottom: 1px solid var(--border); font-size: 0.84rem; color: var(--text2); line-height: 1.7; }
+  .sections-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+  .section-block { padding: 16px 20px; border-right: 1px solid var(--border); }
+  .section-block:last-child { border-right: none; }
+  .sec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); }
+  .sec-name { font-weight: 700; font-size: 0.8rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
+  .sec-score { font-family: var(--mono); font-size: 0.75rem; background: #dbeafe; color: var(--accent); padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .item { margin-bottom: 10px; padding: 8px 10px; border-radius: 7px; background: #f8fafc; border-left: 3px solid var(--border); }
+  .item-star { border-left-color: var(--star); background: #fffbeb; }
+  .item-head { display: flex; align-items: flex-start; gap: 6px; }
+  .item-star-icon { font-size: 0.95rem; flex-shrink: 0; line-height: 1.4; }
+  .item-star .item-star-icon { color: var(--star); }
+  .item-empty .item-star-icon { color: var(--text3); }
+  .item-id { font-family: var(--mono); font-size: 0.68rem; background: var(--border); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; color: var(--text2); }
+  .item-label { font-size: 0.78rem; color: var(--text); line-height: 1.4; }
+  .item-just { margin-top: 5px; font-size: 0.76rem; color: var(--text2); line-height: 1.55; padding-left: 2px; }
+  @media print { body { background: white; } .page { padding: 20px; } .paper-card { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="report-header">
+    <div>
+      <h1>${escHtml(title)}</h1>
+      <div class="sub">Newcastle–Ottawa Scale Assessment Report</div>
+      <div class="sub" style="margin-top:6px;">Reviewer: ${escHtml(reviewer || "—")} &nbsp;|&nbsp; Exported: ${fmtDate(now())}</div>
+    </div>
+    <div class="stats">
+      <div class="big">${papers.length}</div>
+      <div class="lbl">Papers</div>
+      <div style="margin-top:8px;font-size:1.2rem;font-weight:600;color:#f59e0b;">${avgScore}</div>
+      <div class="lbl">Avg Score</div>
+    </div>
+  </div>
+
+  <div class="summary-section">
+    <h2>📊 Summary</h2>
+    <table>
+      <thead><tr>
+        <th>著者/年</th><th>種別</th>
+        <th>Selection</th><th>Comparability</th><th>Outcome/Exp</th>
+        <th>Total</th><th>Status</th>
+      </tr></thead>
+      <tbody>${summaryRows}</tbody>
+    </table>
+  </div>
+
+  <div class="details-section">
+    <h2>📄 詳細評価</h2>
+    ${details}
+  </div>
+</div>
+</body>
+</html>`;
+
+        const blob = new Blob([html], { type: "text/html" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `NOS_Report_${new Date().toISOString().slice(0, 10)}.html`;
+        a.click();
+        showToast("✓ HTMLレポートをダウンロードしました");
+      }
+
+      // ─────────────────────────────────────────────
+      //  DRAG & DROP
+      // ─────────────────────────────────────────────
+      const dz = document.getElementById("dropZone");
+      dz.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dz.classList.add("drag-over");
+      });
+      dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+      dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dz.classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.name.endsWith(".json")) {
+          showToast("JSONファイルをドロップしてください", "error");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const fakeEvent = {
+            target: { result: ev.target.result },
+            files: [file],
+          };
+          // Parse inline
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (Array.isArray(data)) {
+              papers = data.map(migrate);
+            } else if (data.papers) {
+              papers = data.papers.map(migrate);
+              if (data.globalTitle)
+                document.getElementById("globalTitle").value = data.globalTitle;
+              if (data.globalReviewer)
+                document.getElementById("globalReviewer").value =
+                  data.globalReviewer;
+            }
+            loadedFileName = file.name;
+            document.getElementById("loadedFileBadge").textContent =
+              "📄 " + file.name;
+            document.getElementById("loadedFileBadge").className =
+              "file-loaded-badge";
+            document.getElementById("loadedFileBadge").style.display =
+              "inline-block";
+            renderTable();
+            showToast(`✓ "${file.name}" をドロップで読み込みました`);
+          } catch {
+            showToast("JSONの解析に失敗しました", "error");
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // Close modal on backdrop click
+      document.getElementById("nosModal").addEventListener("click", (e) => {
+        if (e.target === document.getElementById("nosModal")) closeModal();
+      });
+
+      // ─────────────────────────────────────────────
+      //  INITIAL DATA — Example A (2000) pre-loaded
+      // ─────────────────────────────────────────────
+      const t0 = "2025-04-10T09:00:00.000Z";
+      const t1 = "2025-04-16T00:00:00.000Z";
+      const t2 = "2026-04-16T00:57:00.000Z";
+      const t3 = "2026-04-16T01:12:00.000Z";
+      papers = [
+        {
+          id: 1,
+          title: "Example A (2000)",
+          type: "cohort",
+          description: "Describe something.",
+          answers: {
+            s1: true,
+            s2: true,
+            s3: true,
+            s4: true,
+            c1: true,
+            c2: false,
+            o1: true,
+            o2: true,
+            o3: false,
+          },
+          justifications: {
+            s1: "reasonS1.",
+            s2: "reasonS2.",
+            s3: "reasonS3.",
+            s4: "reasonS4.",
+            c1: "reasonC1.",
+            c2: "reasonC2.",
+            o1: "reasonO1.",
+            o2: "reasonO2.",
+            o3: "reasonO3.",
+          },
+          status: "Completed",
+          complete: false,
+          createdAt: t0,
+          updatedAt: t1,
+        },
+        {
+          id: 2,
+          title: "Metropolitan P (2022)",
+          type: "cohort",
+          description: "Describe something.",
+          answers: {
+            s1: false,
+            s2: true,
+            s3: true,
+            s4: false,
+            c1: false,
+            c2: false,
+            o1: false,
+            o2: false,
+            o3: false,
+          },
+          justifications: {
+            s1: "reasonS1.",
+            s2: "reasonS2.",
+            s3: "reasonS3.",
+            s4: "reasonS4.",
+            c1: "reasonC1.",
+            c2: "reasonC2.",
+            o1: "reasonO1.",
+            o2: "reasonO2.",
+            o3: "reasonO3.",
+          },
+          status: "Pending",
+          complete: false,
+          createdAt: t2,
+          updatedAt: t3,
+        },
+      ];
+
       renderTable();
     </script>
   </body>
