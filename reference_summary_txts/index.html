@@ -1,1 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SR Data Viewer — C. auris Mortality Meta-analysis</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --border: #e2e6ec;
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --accent2: #059669;
+  --text: #111827;
+  --text-dim: #4b5563;
+  --text-muted: #9ca3af;
+  --radius: 10px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 2px 12px rgba(0,0,0,0.04);
+}
+
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── Layout ── */
+.page { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+
+/* ── Header ── */
+.site-header {
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 28px;
+  margin-bottom: 48px;
+}
+.badge {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 3px 9px;
+  border-radius: 3px;
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* ── CTA ── */
+.cta-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 36px 0;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 20px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1.5px solid transparent;
+  letter-spacing: 0.01em;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+}
+.btn-primary:hover { background: #1d4ed8; box-shadow: 0 4px 16px rgba(37,99,235,0.35); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+.btn-secondary:hover { background: var(--bg); color: var(--text); border-color: #c0c8d8; }
+
+/* ── Sections ── */
+section { margin-bottom: 48px; }
+h2 {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Step list ── */
+.steps { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.steps li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.step-num {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-body { flex: 1; }
+.step-title { font-weight: 600; font-size: 14px; font-family: 'Segoe UI', system-ui, sans-serif; margin-bottom: 2px; }
+.step-desc { font-size: 13px; color: var(--text-dim); }
+
+/* ── File cards ── */
+.file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.file-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.file-card:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(37,99,235,0.12); }
+.file-card .file-icon { font-size: 22px; }
+.file-card .file-name {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.file-card .file-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.file-card .file-tag {
+  font-size: 10px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-top: 2px;
+}
+
+/* ── Section 6 highlight ── */
+.highlight-box {
+  background: var(--accent-light);
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-top: 16px;
+}
+.highlight-box .hl-label {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  white-space: pre;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+/* ── Section table ── */
+.section-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.section-table thead tr { background: #f1f5fb; }
+.section-table th {
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.section-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.section-table tr:last-child td { border-bottom: none; }
+.section-table tr:hover td { background: #f9fafb; }
+.sec-num {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+}
+.sec-highlight td { background: var(--accent-light) !important; }
+
+/* ── Footer ── */
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+footer p + p { margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="badge">Systematic Review Toolkit</div>
+    <h1>SR Data Viewer</h1>
+    <p class="subtitle">
+      Browser-based viewer and data manager for systematic review extraction —<br>
+      <em>Candida auris</em> candidemia mortality meta-analysis
+    </p>
+  </header>
+
+  <!-- CTA -->
+  <div class="cta-row">
+    <a href="sr_viewer.html" class="btn btn-primary">▶ Launch SR Viewer</a>
+    <a href="template.txt" class="btn btn-secondary" download>⬇ template.txt</a>
+    <a href="sample.txt" class="btn btn-secondary" download>⬇ sample.txt</a>
+  </div>
+
+  <!-- HOW TO USE -->
+  <section>
+    <h2>How to Use</h2>
+    <ol class="steps">
+      <li>
+        <span class="step-num">1</span>
+        <div class="step-body">
+          <div class="step-title">Download template.txt</div>
+          <div class="step-desc">Copy the blank template for each new paper you extract.</div>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-body">
+          <div class="step-title">Fill in the 10 sections</div>
+          <div class="step-desc">Follow the structured format. Section 6 (Meta-analysis Raw Data) is the most critical — enter event.e, n.e, event.c, n.c for the 2×2 table.</div>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div class="step-body">
+          <div class="step-title">Load into SR Viewer</div>
+          <div class="step-desc">Open sr_viewer.html, then drag &amp; drop one or more .txt files. The viewer parses them automatically.</div>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <div class="step-body">
+          <div class="step-title">Export for R / metafor</div>
+          <div class="step-desc">Use the Export menu to download CSV or JSON. event.e / n.e / event.c / n.c columns map directly to <code>metabin()</code>.</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- FILES -->
+  <section>
+    <h2>Files</h2>
+    <div class="file-grid">
+      <a href="sr_viewer.html" class="file-card">
+        <span class="file-icon">🖥</span>
+        <span class="file-name">sr_viewer.html</span>
+        <span class="file-desc">Main viewer — table, detail view, dashboard, export</span>
+        <span class="file-tag">Launch in browser</span>
+      </a>
+      <a href="template.txt" class="file-card" download>
+        <span class="file-icon">📋</span>
+        <span class="file-name">template.txt</span>
+        <span class="file-desc">Blank 10-section extraction template</span>
+        <span class="file-tag">Download &amp; copy</span>
+      </a>
+      <a href="sample.txt" class="file-card" download>
+        <span class="file-icon">📄</span>
+        <span class="file-name">sample.txt</span>
+        <span class="file-desc">Completed example — Smith JA et al. 2021</span>
+        <span class="file-tag">Reference</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FORMAT -->
+  <section>
+    <h2>Extraction Format</h2>
+    <table class="section-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Section</th>
+          <th>Key fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="sec-num">1</span></td><td>Study Characteristics</td><td>Author, Year, Journal, Country, Design, Setting</td></tr>
+        <tr><td><span class="sec-num">2</span></td><td>Population</td><td>Sample size, Age, Sex, Inclusion / Exclusion</td></tr>
+        <tr><td><span class="sec-num">3</span></td><td>Exposure / Comparison</td><td>Exposure, Comparison group, Follow-up period</td></tr>
+        <tr><td><span class="sec-num">4</span></td><td>Outcomes</td><td>Primary outcome, Secondary outcomes, Definitions</td></tr>
+        <tr><td><span class="sec-num">5</span></td><td>Results</td><td>Effect size (OR/RR/HR), 95% CI, p-value, Model type</td></tr>
+        <tr class="sec-highlight"><td><span class="sec-num">6</span></td><td><strong>Meta-analysis Raw Data</strong></td><td><strong>2×2 table: event.e / n.e / event.c / n.c</strong></td></tr>
+        <tr><td><span class="sec-num">7</span></td><td>Risk of Bias (NOS)</td><td>Selection, Comparability, Outcome</td></tr>
+        <tr><td><span class="sec-num">8</span></td><td>Confounding</td><td>Key confounders, Methods</td></tr>
+        <tr><td><span class="sec-num">9</span></td><td>GRADE</td><td>Risk of bias, Inconsistency, Indirectness, Imprecision</td></tr>
+        <tr><td><span class="sec-num">10</span></td><td>Final Assessment</td><td>Suitable for meta-analysis, Notes</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <div class="hl-label">Section 6 — 2×2 table format (R-ready)</div>
+      <pre>  Outcome timepoint: 30-day mortality
+
+  C. auris group (experimental):
+    event.e (deaths): 38
+    n.e (total): 110
+
+  Comparison group 1 (non-C. auris; C. albicans + other combined):
+    event.c (deaths): 57
+    n.c (total): 210</pre>
+      <pre style="margin-top:12px; color:#2563eb;">metabin(event.e, n.e, event.c, n.c, data = df, sm = "OR")</pre>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      本ツールおよび同梱ファイルはAI（Claude, Anthropic）を用いて作成されました。データ抽出内容・コードには誤りが含まれる可能性があります。研究・論文執筆への使用は必ず原著論文および一次資料を参照のうえ、自己の責任において行ってください。二次利用・再配布は自己責任のもとで可能です。その際、本注記の保持を推奨します。
+    </p>
+    <p>
+      This tool and accompanying files were created with AI assistance (Claude, Anthropic). The content and code may contain errors. Always verify against original sources before use in research or publication. Redistribution is permitted at your own risk; retention of this notice is recommended.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
