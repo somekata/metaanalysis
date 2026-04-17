@@ -1,0 +1,105 @@
+1. Study Characteristics
+Author:
+Year:
+Journal:
+Volume / Issue / Pages:
+Country:
+Study design (e.g., RCT, retrospective cohort):
+Study setting (e.g., ICU, general ward, multicenter):
+Objective:
+
+2. Population
+Target condition / disease definition:
+Sample size (total):
+Sample size (per group):
+
+Group A:
+Group B:
+Group C:
+Age:
+Sex:
+Inclusion criteria:
+Exclusion criteria:
+
+3. Exposure / Intervention / Comparison
+Exposure / Intervention:
+Comparison group:
+Definition of groups:
+Follow-up period:
+
+4. Outcomes
+Primary outcome (with timepoint):
+Secondary outcomes:
+Outcome definitions:
+
+Death in hospital:
+Attribution review (mortality contribution):
+Measurement methods:
+
+5. Results
+A) In-hospital mortality (crude; by species)
+Effect size (RR / OR / HR):
+95% Confidence Interval:
+p-value:
+Adjusted variables (list all):
+Adjusted or unadjusted:
+Model type (e.g., Cox regression, logistic regression):
+
+B) Multivariate analysis
+Effect size (RR / OR / HR):
+p-value:
+Adjusted variables (list all):
+Adjusted or unadjusted:
+Model type (e.g., Cox regression, logistic regression):
+
+6. Meta-analysis Relevant Raw Data
+
+Primary outcome data (2×2 table format):
+
+  Outcome timepoint:
+
+  C. auris group (experimental):
+    event.e (deaths):
+    n.e (total):
+
+  Comparison group 1 (specify species):
+    event.c (deaths):
+    n.c (total):
+
+  Comparison group 2 (specify species, if applicable):
+    event.c2 (deaths):
+    n.c2 (total):
+
+Missing data / loss to follow-up:
+Subgroup analyses:
+
+7. Risk of Bias Related Information (NOS domains)
+Selection
+Representativeness of cohort:
+Exposure ascertainment method:
+
+Comparability
+Confounding adjustment (variables and method):
+
+Outcome
+Outcome assessment method:
+Adequacy of follow-up:
+
+8. Confounding (Important)
+Key confounders considered:
+Residual confounding discussed:
+Methods used (matching / multivariable / propensity score):
+
+9. GRADE-related Supporting Information
+Study design:
+Risk of bias (supporting details):
+
+Inconsistency (if discussed):
+Indirectness (population/intervention differences):
+Imprecision (CI width, event numbers):
+Publication bias (if mentioned):
+
+10. Final Assessment
+Suitable for meta-analysis:
+Reason if not suitable:
+Notes for inclusion (e.g., outcome definition differences, population issues):

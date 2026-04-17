@@ -1,0 +1,122 @@
+1. Study Characteristics
+Author: Smith JA et al. (Page 1)
+Year: 2021 (Page 1)
+Journal: Clinical Infectious Diseases (Page 1)
+Volume / Issue / Pages: 73 (2021) 456–463 (Page 1)
+Country: United States (Page 1)
+Study design (e.g., RCT, retrospective cohort): Cohort (Retrospective cohort study) (Page 2, "Methods")
+Study setting (e.g., ICU, general ward, multicenter): Multicenter (5 academic medical centers), total 1,200 beds (Page 2, "Methods—Study setting")
+Objective: "To evaluate risk factors and 30-day mortality associated with Candida auris candidemia compared to non-auris Candida species" (Abstract)
+
+2. Population
+Target condition / disease definition: Candidemia defined as "at least one blood culture positive for Candida species within a 14-day window" (Page 2, "Methods—Definitions")
+Sample size (total): 320 patients (Table 1; Page 3, "Results")
+Sample size (per group):
+
+C. auris: 110 (Table 1)
+C. albicans: 120 (Table 1)
+Other Candida spp.: 90 (Table 1)
+Age: Mean age years (SD): C. auris 62 (18); C. albicans 55 (22); other 59 (20) (Table 1)
+Sex: Male: C. auris 65 (59%); C. albicans 70 (58%); other 52 (58%) (Table 1)
+Inclusion criteria: Adults (>=18 years) admitted between January 2015 and December 2020 with at least one Candida-positive blood culture (Page 2, "Methods—Inclusion criteria")
+Exclusion criteria: Patients with polymicrobial candidemia or incomplete medical records (Page 2, "Methods—Exclusion criteria")
+
+3. Exposure / Intervention / Comparison
+Exposure / Intervention: Candida auris candidemia (Title; Abstract)
+Comparison group: C. albicans candidemia and other Candida species candidemia (Abstract; Table 1)
+Definition of groups: Species identified by MALDI-TOF MS; C. auris confirmed by ITS sequencing for all isolates initially flagged as C. haemulonii or C. duobushaemulonii (Page 2, "Methods—Microbiological identification")
+Follow-up period: 30-day all-cause mortality (Table 1; Page 3, "Results—Primary outcome")
+
+4. Outcomes
+Primary outcome (with timepoint): 30-day all-cause mortality (Table 1)
+Secondary outcomes: ICU length of stay; duration of antifungal therapy (Page 3, "Results—Secondary outcomes")
+Outcome definitions:
+
+30-day mortality: Death from any cause within 30 days of index blood culture (Page 2, "Methods—Definitions")
+Attribution review (mortality contribution): Adjudicated by two independent investigators; discordance resolved by a third reviewer (Page 2, "Methods—Outcome assessment")
+Measurement methods:
+
+Candidemia cases identified via hospital microbiology database and confirmed by chart review (Page 2, "Methods")
+Blood culture system: BacT/ALERT (bioMerieux) (Page 2, "Methods")
+Species identification: MALDI-TOF MS (Bruker); ITS sequencing for confirmation of C. auris (Page 2, "Methods")
+
+5. Results
+A) 30-day mortality (crude; by species)
+Effect size (RR / OR / HR): Not reported (unadjusted counts only)
+95% Confidence Interval: Not reported
+p-value: C. auris vs C. albicans p=0.032; C. auris vs other p=0.210 (Table 1)
+Adjusted variables (list all): Not reported
+Adjusted or unadjusted: Unadjusted (Table 1)
+Model type (e.g., Cox regression, logistic regression): Not reported
+
+B) Multivariate analysis of 30-day mortality
+Effect size (RR / OR / HR):
+
+C. auris (vs C. albicans): OR 2.34 (1.18-4.65) (Table 3)
+Prior antifungal exposure: OR 1.87 (1.10-3.18) (Table 3)
+ICU admission: OR 3.05 (1.54-6.04) (Table 3)
+Central venous catheter: OR 2.41 (1.25-4.65) (Table 3)
+p-value: 0.015; 0.021; 0.001; 0.009 respectively (Table 3)
+Adjusted variables (list all): Age, sex, ICU admission, central venous catheter, prior antifungal exposure, Charlson Comorbidity Index (Table 3)
+Adjusted or unadjusted: Adjusted (multivariate logistic regression) (Table 3)
+Model type (e.g., Cox regression, logistic regression): Multivariate logistic regression (Table 3)
+
+6. Meta-analysis Relevant Raw Data
+
+Primary outcome data (2×2 table format):
+
+  Outcome timepoint: 30-day all-cause mortality
+
+  C. auris group (experimental):
+    event.e (deaths): 38
+    n.e (total): 110
+
+  Comparison group 1 (non-C. auris; C. albicans + other Candida spp. combined):
+    event.c (deaths): 57
+    n.c (total): 210
+
+  [Note: Breakdown by species — C. albicans: 30 deaths / 120 total; Other: 27 deaths / 90 total (Table 1)]
+
+Missing data / loss to follow-up: 8 patients lost to follow-up before day 30 (2.5%); excluded from primary analysis (Page 3, "Results")
+Subgroup analyses: Stratified by ICU vs non-ICU admission (Table 4); immunocompromised vs immunocompetent (Table 4)
+
+7. Risk of Bias Related Information (NOS domains)
+Selection
+Representativeness of cohort: Multicenter academic hospitals; consecutive eligible patients included; may not represent community settings (Page 2, "Methods—Study setting")
+Exposure ascertainment method:
+
+Candidemia confirmed by positive blood culture with species-level identification (Page 2, "Methods")
+C. auris confirmed by ITS sequencing for all initially ambiguous isolates (Page 2, "Methods")
+
+Comparability
+Confounding adjustment (variables and method): Multivariate logistic regression adjusting for age, sex, ICU status, CVC, antifungal exposure, Charlson Comorbidity Index (Table 3)
+
+Outcome
+Outcome assessment method: 30-day all-cause mortality adjudicated by independent reviewers (Page 2, "Methods—Outcome assessment")
+Adequacy of follow-up: 97.5% follow-up completeness; 8 patients excluded due to loss to follow-up (Page 3, "Results")
+
+8. Confounding (Important)
+Key confounders considered: Age, sex, ICU admission, CVC presence, prior antifungal exposure, Charlson Comorbidity Index (Table 3)
+Residual confounding discussed: Authors note potential residual confounding by unmeasured severity of illness markers (Page 5, "Discussion—Limitations")
+Methods used (matching / multivariable / propensity score): Multivariable logistic regression; no matching or propensity score reported (Table 3)
+
+9. GRADE-related Supporting Information
+Study design: Retrospective multicenter cohort study (Page 2, "Methods")
+Risk of bias (supporting details):
+
+Retrospective design with reliance on medical record review (Page 2, "Methods")
+Species confirmation limited to isolates flagged by MALDI-TOF as ambiguous; all C. auris isolates confirmed by ITS sequencing (Page 2, "Methods")
+Antifungal susceptibility testing performed by broth microdilution per CLSI M27-Ed4 (Page 3, "Results—In vitro susceptibilities")
+Inconsistency (if discussed): Not reported
+Indirectness (population/intervention differences): Academic medical centers only; may limit generalizability to community hospitals (Page 5, "Discussion")
+Imprecision (CI width, event numbers): Adjusted OR for C. auris mortality 2.34 (1.18-4.65); wide CI reflecting moderate sample size (Table 3)
+Publication bias (if mentioned): Not reported
+
+10. Final Assessment
+Suitable for meta-analysis: Yes (Table 1 provides extractable 30-day mortality event counts by species group)
+Reason if not suitable: Not applicable
+Notes for inclusion (e.g., outcome definition differences, population issues):
+
+Mortality endpoint is 30-day, not in-hospital; may differ from studies using in-hospital mortality
+C. auris confirmed by ITS sequencing for all isolates; high confidence in species identification
+Multicenter design increases generalizability compared to single-center studies
