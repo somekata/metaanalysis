@@ -807,13 +807,14 @@ const state = {
 // COLUMN DEFINITIONS
 // =============================================
 const COLUMNS = [
-  { key: 'author',   label: 'Author',        cls: 'col-author', sortable: true,  visible: true },
-  { key: 'year',     label: 'Year',          cls: 'col-year',   sortable: true,  visible: true },
-  { key: 'country',  label: 'Country',       cls: 'col-country',sortable: true,  visible: true },
-  { key: 'design',   label: 'Study Design',  cls: 'col-design', sortable: true,  visible: true },
-  { key: 'n_total',  label: 'N (Total)',     cls: 'col-n',      sortable: true,  visible: true },
-  { key: 'outcome',  label: 'Outcome',       cls: 'col-outcome',sortable: false, visible: true },
-  { key: 'effect',   label: 'Effect Size',   cls: 'col-effect', sortable: false, visible: true },
+  { key: 'author',     label: 'Author',        cls: 'col-author',  sortable: true,  visible: true },
+  { key: 'year',       label: 'Year',          cls: 'col-year',    sortable: true,  visible: true },
+  { key: 'country',    label: 'Country',       cls: 'col-country', sortable: true,  visible: true },
+  { key: 'design',     label: 'Study Design',  cls: 'col-design',  sortable: true,  visible: true },
+  { key: 'n_total',    label: 'N (Total)',     cls: 'col-n',       sortable: true,  visible: true },
+  { key: 'outcome',    label: 'Outcome',       cls: 'col-outcome', sortable: false, visible: true },
+  { key: 'events_2x2', label: 'e/n (e vs c)', cls: 'col-effect',  sortable: false, visible: true },
+  { key: 'effect',     label: 'Effect Size',   cls: 'col-effect',  sortable: false, visible: false },
 ];
 COLUMNS.forEach(c => state.colVisibility[c.key] = c.visible);
 
@@ -887,9 +888,8 @@ function parseStudyText(text, filename) {
 
   const pvalue = get(['p-value:\\s*(.+)', 'p\\s*=\\s*([0-9.]+)']);
 
-  // Raw event counts
+  // Raw event counts (legacy fallback)
   const events = (() => {
-    // Try to extract auris events/total and non-auris events/total
     const aurisDeaths = text.match(/(?:C\.\s*auris|auris group)[^:]*:\s*(\d+)[^,\n]*(?:deaths?|died|death)/i)?.[1]
       || text.match(/(?:CA|auris)[^:]*deaths?[^:]*:\s*(\d+)/i)?.[1]
       || null;
@@ -898,6 +898,38 @@ function parseStudyText(text, filename) {
     if (aurisDeaths && aurisN) return `Auris deaths: ${aurisDeaths}/${aurisN}`;
     return null;
   })();
+
+  // 2x2 table: new structured format
+  const outcome_timepoint = get([
+    'Outcome timepoint:\\s*(.+)',
+  ]);
+  const event_e = get([
+    'event\\.e\\s*\\(deaths?\\):\\s*(\\d+)',
+    'event\\.e:\\s*(\\d+)',
+  ]);
+  const n_e = get([
+    'n\\.e\\s*\\(total\\):\\s*(\\d+)',
+    'n\\.e:\\s*(\\d+)',
+  ]);
+  const event_c = get([
+    'event\\.c\\s*\\(deaths?\\):\\s*(\\d+)',
+    'event\\.c:\\s*(\\d+)',
+  ]);
+  const n_c = get([
+    'n\\.c\\s*\\(total\\):\\s*(\\d+)',
+    'n\\.c:\\s*(\\d+)',
+  ]);
+
+  // Comparison group label for event.c
+  const comp_label = (() => {
+    const m = text.match(/Comparison group\s+1\s*\(([^)]+)\)/i);
+    return m ? m[1].trim() : null;
+  })();
+
+  // Formatted 2x2 summary
+  const events_2x2 = (event_e && n_e && event_c && n_c)
+    ? `e: ${event_e}/${n_e}  c: ${event_c}/${n_c}`
+    : null;
 
   // Mortality
   const mortality_block = getBlock('5\\. Results');
@@ -966,8 +998,16 @@ function parseStudyText(text, filename) {
     // Results
     effect:    effect_raw || null,
     pvalue:    pvalue    || null,
-    // Events
+    // Events (legacy)
     events:    events    || null,
+    // 2x2 meta-analysis data
+    outcome_timepoint: outcome_timepoint || null,
+    event_e:   event_e   || null,
+    n_e:       n_e       || null,
+    event_c:   event_c   || null,
+    n_c:       n_c       || null,
+    comp_label: comp_label || null,
+    events_2x2: events_2x2 || null,
     // Risk of bias
     rob_selection: rob_selection || null,
     rob_exposure:  rob_exposure  || null,
@@ -1349,7 +1389,16 @@ const SECTIONS = [
     ['Primary Outcome', 'primary_outcome'], ['Secondary Outcomes', 'secondary_outcome'],
   ]},
   { num: 5, title: 'Results', fields: [
-    ['Effect Size (95% CI)', 'effect'], ['p-value', 'pvalue'], ['Events', 'events'],
+    ['Effect Size (95% CI)', 'effect'], ['p-value', 'pvalue'],
+    ['Events (auris/comparator)', 'events_2x2'],
+  ]},
+  { num: 6, title: 'Meta-analysis Raw Data (2×2)', fields: [
+    ['Outcome Timepoint', 'outcome_timepoint'],
+    ['event.e (C. auris deaths)', 'event_e'],
+    ['n.e (C. auris total)', 'n_e'],
+    ['event.c (comparator deaths)', 'event_c'],
+    ['n.c (comparator total)', 'n_c'],
+    ['Comparator Group', 'comp_label'],
   ]},
   { num: 6, title: 'Risk of Bias', fields: [
     ['Selection (Representativeness)', 'rob_selection'],
@@ -1438,7 +1487,7 @@ function renderDashboard() {
       <div style="overflow-x:auto">
         <table style="width:100%;font-size:11px;border-collapse:collapse">
           <thead><tr style="background:var(--surface2)">
-            ${['Author','Year','Country','Design','N','Effect Size','Suitable'].map(h=>
+            ${['Author','Year','Country','Design','N','Outcome Timepoint','e/n (auris)','e/n (comp)','Suitable'].map(h=>
               `<th style="padding:8px 12px;font-weight:600;color:var(--text-dim);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap">${h}</th>`
             ).join('')}
           </tr></thead>
@@ -1450,7 +1499,9 @@ function renderDashboard() {
                 <td style="padding:7px 12px">${escHtml(s.country||'')}</td>
                 <td style="padding:7px 12px;font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.design||'')}</td>
                 <td style="padding:7px 12px;text-align:right">${escHtml(s.n_total||'')}</td>
-                <td style="padding:7px 12px;font-family:monospace;font-size:10px">${escHtml(s.effect||'—')}</td>
+                <td style="padding:7px 12px;font-size:11px;color:var(--text-dim)">${escHtml(s.outcome_timepoint||'—')}</td>
+                <td style="padding:7px 12px;font-family:monospace;font-size:11px;color:var(--accent)">${s.event_e&&s.n_e ? `${escHtml(s.event_e)}/${escHtml(s.n_e)}` : '—'}</td>
+                <td style="padding:7px 12px;font-family:monospace;font-size:11px;color:var(--accent2)">${s.event_c&&s.n_c ? `${escHtml(s.event_c)}/${escHtml(s.n_c)}` : '—'}</td>
                 <td style="padding:7px 12px">
                   <span class="tag ${s.suitable&&s.suitable.toLowerCase().startsWith('yes')?'tag-green':'tag-red'}">${escHtml(s.suitable||'?')}</span>
                 </td>
@@ -1497,6 +1548,7 @@ function exportData(format, scope, which) {
 function exportCSV(studies, scope) {
   const summaryKeys = ['author','year','journal','country','design','setting','n_total','n_groups',
     'age','sex','exposure','comparison','followup','primary_outcome','secondary_outcome',
+    'outcome_timepoint','event_e','n_e','event_c','n_c','comp_label',
     'effect','pvalue','suitable'];
   const keys = scope === 'summary' ? summaryKeys : summaryKeys;
   const header = keys.join(',');
