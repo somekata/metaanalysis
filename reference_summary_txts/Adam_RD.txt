@@ -1,0 +1,137 @@
+1. Study Characteristics
+Author: Adam RD et al. (Page 1)
+Year: 2019 (Page 1)
+Journal: International Journal of Infectious Diseases (Page 1)
+Volume / Issue / Pages: 85 (2019) 182–187 (Page 1)
+Country: Kenya (Page 1)
+Study design (e.g., RCT, retrospective cohort): Retrospective record review / observational analysis (Page 2, "Methods—Patient information")
+Study setting (e.g., ICU, general ward, multicenter): Single facility (Aga Khan University Hospital Nairobi), 280-bed referral center with 50 critical care beds (Page 2, "Methods—Patient information"; Title)
+Objective: "analyze risk factors and outcomes for C. auris candidemia" (Abstract)
+Article title: Analysis of Candida auris fungemia at a single facility in Kenya
+PMID: 31185293
+DOI: 10.1016/j.ijid.2019.06.001
+URL: https://www.sciencedirect.com/science/article/pii/S1201971219302450/pdfft?md5=09ad12604a63d0a134c374e89917772c&pid=1-s2.0-S1201971219302450-main.pdf
+
+2. Population
+Target condition / disease definition: Candidemia defined operationally as "at least one blood culture… that grew Candida species" (Page 2, "Methods—Patient information")
+Sample size (total): 201 patients (Table 1; Page 2, "Results—Appearance of C. auris")
+Sample size (per group):
+
+C. auris: 77 (Table 1)
+
+C. albicans: 50 (Table 1)
+
+Other Candida spp.: 74 (Table 1)
+Age: Mean age years (SD): C. auris 58 (20); C. albicans 48 (30); other 56 (25) (Table 1)
+Sex: Male: C. auris 43 (56%); C. albicans 26 (52%); other 44 (60%) (Table 1)
+Inclusion criteria: Patients treated at AKUHN with "at least one blood culture between September 2010 and December 2016 that grew Candida species" (Page 2, "Methods—Patient information")
+Exclusion criteria: Not reported
+
+3. Exposure / Intervention / Comparison
+Exposure / Intervention: Candida auris candidemia (Title; Abstract)
+Comparison group: C. albicans candidemia and "other Candida species" candidemia (Abstract; Table 1)
+Definition of groups (e.g., auris vs non-auris): Vitek2 identified isolates as Candida haemulonii; "species determinations for 21 of the isolates using published molecular and proteomic methods identified all as C. auris." (Abstract) and "Twenty-one of the isolates identified by Vitek2 as Candida haemulonii were subjected to… ITS sequencing… PFGE… MALDI-TOF… All 21 were identified as C. auris." (Page 2, "Methods—Patient information")
+Follow-up period: In-hospital mortality reported (Table 1). Additional early mortality assessment within "a week" after initial blood culture described (Page 2, "Methods—Patient information"; Page 4, "Outcome of patients with candidemia"). Exact follow-up duration for primary mortality analysis beyond "in hospital" not reported.
+
+4. Outcomes
+Primary outcome (with timepoint): Not reported
+Secondary outcomes: Not reported (explicitly labeled)
+Outcome definitions:
+
+Death in hospital: Reported as "Death in hospital" (Table 1)
+
+Attribution review (mortality contribution): Review for "clinical deterioration or death within the period of two days before to a week after the death and absence of a more likely cause" (Page 2, "Methods—Patient information")
+Measurement methods:
+
+Identification of candidemia cases via "electronic medical record (EMR)" and "written records were reviewed" (Page 2, "Methods—Patient information")
+
+Blood culture system: BD BACTEC (Page 2, "Methods—Patient information")
+
+Species identification: VITEK 2 Compact; subset confirmation by ITS sequencing/PFGE/MALDI-TOF (Page 2, "Methods—Patient information")
+
+5. Results
+A) In-hospital mortality (crude; by species)
+Effect size (RR / OR / HR): Not reported (no adjusted effect estimate for mortality provided)
+95% Confidence Interval: Not reported
+p-value: Bivariate p-values: C. auris vs C. albicans p=0.493; C. auris vs other p=0.183 (Table 1)
+Adjusted variables (list all): Not reported
+Adjusted or unadjusted: Unadjusted (Table 1)
+Model type (e.g., Cox regression, logistic regression): Not reported
+
+B) Multivariate analysis of C. auris vs C. albicans (risk factors; not outcomes)
+Effect size (RR / OR / HR):
+
+Carbapenem (Days): OR 1.19 (1.05–1.35) (Table 3)
+
+Carbapenem (Number): OR 2.67 (1.06–6.75) (Table 3)
+
+Critical Care Unit: OR 3.14 (1.02–9.72) (Table 3)
+
+Presence of CVC: OR 5.79 (2.12–15.80) (Table 3)
+p-value: 0.007; 0.038; 0.047; 0.001 respectively (Table 3)
+Adjusted variables (list all): "Based on the Univariate analysis: age, critical care unit and presence of CVC was significant when comparing C. auris and C. albicans. These variables were used as a forward selection in a logistic regression model." (Table 3)
+Adjusted or unadjusted: Adjusted (multivariate logistic regression) (Table 3)
+Model type (e.g., Cox regression, logistic regression): "forward selection in a logistic regression model" (Table 3)
+
+6. Meta-analysis Relevant Raw Data
+
+Primary outcome data (2×2 table format):
+
+  Outcome timepoint: In-hospital mortality
+
+  C. auris group (experimental):
+    event.e (deaths): 22
+    n.e (total): 77
+
+  Comparison group 1 (non-C. auris; C. albicans + other Candida spp. combined):
+    event.c (deaths): 47
+    n.c (total): 124
+
+  [Note: Breakdown by species — C. albicans: 18 deaths / 50 total; Other Candida spp.: 29 deaths / 74 total (Table 1)]
+
+Missing data / loss to follow-up: "records from 25 were available" among "28 patients with candidemia who died within a week" (Page 4, "Outcome of patients with candidemia"); otherwise not reported.
+Subgroup analyses: Not reported (beyond species-stratified comparisons shown in Table 1 and Table 2)
+
+7. Risk of Bias Related Information (NOS domains)
+Selection
+Representativeness of cohort: Single-facility referral center cohort; included patients with at least one Candida-positive blood culture during Sept 2010–Dec 2016 (Page 2, "Methods—Patient information")
+Exposure ascertainment method:
+
+Candidemia ascertained via EMR identification and review (Page 2, "Methods—Patient information")
+
+Species identification primarily by Vitek2; subset confirmation for 21 presumed C. haemulonii isolates via ITS sequencing/PFGE/MALDI-TOF (Page 2, "Methods—Patient information"; Abstract)
+
+Comparability
+Confounding adjustment (variables and method): Logistic regression with forward selection; variables stated as age, critical care unit, presence of CVC (Table 3). (Note: mortality not adjusted.)
+
+Outcome
+Outcome assessment method: In-hospital death (Table 1); mortality attribution assessed by medical record review (Page 2, "Methods—Patient information")
+Adequacy of follow-up: In-hospital mortality captured (Table 1); completeness of follow-up not otherwise reported.
+
+8. Confounding (Important)
+Key confounders considered: Age, critical care unit status, presence of CVC (Table 3)
+Residual confounding discussed: Not reported
+Methods used (matching / multivariable / propensity score): Multivariable logistic regression with forward selection (Table 3); no matching/propensity score reported
+
+9. GRADE-related Supporting Information
+Study design: Retrospective observational analysis (Page 2, "Methods—Patient information")
+Risk of bias (supporting details):
+
+Reliance on EMR and written record review (Page 2, "Methods—Patient information")
+
+Identification limitation: Vitek2 initially identified isolates as C. haemulonii; only 21 isolates underwent molecular/proteomic confirmation as C. auris (Abstract; Page 2, "Methods—Patient information")
+
+Susceptibility testing limitation explicitly noted: "Vitek2 system has not been shown to be reliable for testing C. auris" (Page 3–4, "In vitro susceptibilities…")
+Inconsistency (if discussed): Not reported
+Indirectness (population/intervention differences): Not reported
+Imprecision (CI width, event numbers): Not reported (mortality effect estimate with CI not provided; only crude event counts)
+Publication bias (if mentioned): Not reported
+
+10. Final Assessment
+Suitable for meta-analysis: Yes (Table 1 provides extractable in-hospital mortality event counts by species group)
+Reason if not suitable: Not applicable
+Notes for inclusion (e.g., outcome definition differences, population issues):
+
+Mortality endpoint is in-hospital, not 28- or 30-day (Table 1)
+
+C. auris identification was confirmed by advanced methods for 21 isolates originally called C. haemulonii by Vitek2; applicability of this confirmation to all C. auris cases in Table 1 is not explicitly stated (Abstract; Page 2, "Methods—Patient information")

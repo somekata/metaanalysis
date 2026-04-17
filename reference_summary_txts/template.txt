@@ -7,6 +7,10 @@ Country:
 Study design (e.g., RCT, retrospective cohort):
 Study setting (e.g., ICU, general ward, multicenter):
 Objective:
+Article title:
+PMID:
+DOI:
+URL:
 
 2. Population
 Target condition / disease definition:

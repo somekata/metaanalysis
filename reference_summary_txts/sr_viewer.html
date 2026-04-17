@@ -850,6 +850,10 @@ function parseStudyText(text, filename) {
   const design   = get(['Study design[^:]*:\\s*(.+)', 'Design:\\s*(.+)']);
   const setting  = get(['Study setting[^:]*:\\s*(.+)', 'Setting:\\s*(.+)']);
   const objective= get(['Objective:\\s*(.+)']);
+  const article_title = get(['Article title:\\s*(.+)']);
+  const pmid     = get(['PMID:\\s*(\\d+)']);
+  const doi      = get(['DOI:\\s*(10\\.\\S+)']);
+  const url      = get(['URL:\\s*(https?://\\S+)']);
 
   // Population
   const n_total  = get(['Sample size\\s*\\(total\\):\\s*(\\d+[^\\n]*)','Total\\s*N:\\s*(\\d+)','n\\s*=\\s*(\\d+)']);
@@ -979,6 +983,10 @@ function parseStudyText(text, filename) {
     design:    design    || null,
     setting:   setting   || null,
     objective: objective || null,
+    article_title: article_title || null,
+    pmid:      pmid      || null,
+    doi:       doi       || null,
+    url:       url       || null,
     // Population
     n_total:   n_total   || null,
     n_total_num: n_total_num,
@@ -1370,11 +1378,42 @@ function field(label, value) {
   </div>`;
 }
 
+function fieldLink(label, value) {
+  const isNR = !value || value === 'Not reported' || value === 'N/A';
+  if (isNR) return field(label, null);
+  return `<div class="detail-field">
+    <span class="field-label">${label}</span>
+    <span class="field-value"><a href="${escHtml(value)}" target="_blank" rel="noopener" style="color:var(--accent);word-break:break-all">${escHtml(value)}</a></span>
+  </div>`;
+}
+
+function fieldPmid(label, value) {
+  const isNR = !value || value === 'Not reported' || value === 'N/A';
+  if (isNR) return field(label, null);
+  return `<div class="detail-field">
+    <span class="field-label">${label}</span>
+    <span class="field-value"><a href="https://pubmed.ncbi.nlm.nih.gov/${escHtml(value)}/" target="_blank" rel="noopener" style="color:var(--accent)">${escHtml(value)}</a></span>
+  </div>`;
+}
+
+function fieldDoi(label, value) {
+  const isNR = !value || value === 'Not reported' || value === 'N/A';
+  if (isNR) return field(label, null);
+  return `<div class="detail-field">
+    <span class="field-label">${label}</span>
+    <span class="field-value"><a href="https://doi.org/${escHtml(value)}" target="_blank" rel="noopener" style="color:var(--accent)">${escHtml(value)}</a></span>
+  </div>`;
+}
+
 const SECTIONS = [
   { num: 1, title: 'Study Characteristics', fields: [
     ['Author', 'author'], ['Year', 'year'], ['Journal', 'journal'],
     ['Volume/Issue/Pages', 'volume'], ['Country', 'country'],
     ['Study Design', 'design'], ['Study Setting', 'setting'], ['Objective', 'objective'],
+    ['Article Title', 'article_title'],
+    ['PMID', 'pmid|pmid'],
+    ['DOI', 'doi|doi'],
+    ['URL', 'url|url'],
   ]},
   { num: 2, title: 'Population', fields: [
     ['Sample Size (Total)', 'n_total'], ['Sample Size (per Group)', 'n_groups'],
@@ -1425,7 +1464,13 @@ function buildDetailHTML(s, view) {
         ${sec.title}
       </div>
       <div class="detail-field-list">
-        ${sec.fields.map(([label, key]) => field(label, s[key])).join('')}
+        ${sec.fields.map(([label, keySpec]) => {
+          const [key, type] = keySpec.split('|');
+          if (type === 'pmid') return fieldPmid(label, s[key]);
+          if (type === 'doi')  return fieldDoi(label, s[key]);
+          if (type === 'url')  return fieldLink(label, s[key]);
+          return field(label, s[key]);
+        }).join('')}
       </div>
     </div>
   `).join('');
@@ -1549,7 +1594,8 @@ function exportCSV(studies, scope) {
   const summaryKeys = ['author','year','journal','country','design','setting','n_total','n_groups',
     'age','sex','exposure','comparison','followup','primary_outcome','secondary_outcome',
     'outcome_timepoint','event_e','n_e','event_c','n_c','comp_label',
-    'effect','pvalue','suitable'];
+    'effect','pvalue','suitable',
+    'article_title','pmid','doi','url'];
   const keys = scope === 'summary' ? summaryKeys : summaryKeys;
   const header = keys.join(',');
   const rows = studies.map(s =>

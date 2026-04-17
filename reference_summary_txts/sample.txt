@@ -7,6 +7,10 @@ Country: United States (Page 1)
 Study design (e.g., RCT, retrospective cohort): Cohort (Retrospective cohort study) (Page 2, "Methods")
 Study setting (e.g., ICU, general ward, multicenter): Multicenter (5 academic medical centers), total 1,200 beds (Page 2, "Methods—Study setting")
 Objective: "To evaluate risk factors and 30-day mortality associated with Candida auris candidemia compared to non-auris Candida species" (Abstract)
+Article title: Risk factors and 30-day mortality of Candida auris candidemia: a multicenter retrospective cohort study
+PMID: 00000000
+DOI: 10.1093/cid/ciab000
+URL: https://academic.oup.com/cid/article/73/3/456/0000000
 
 2. Population
 Target condition / disease definition: Candidemia defined as "at least one blood culture positive for Candida species within a 14-day window" (Page 2, "Methods—Definitions")

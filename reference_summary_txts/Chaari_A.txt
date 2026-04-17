@@ -1,0 +1,120 @@
+1. Study Characteristics
+Author: Chaari A et al. (Page 1)
+Year: 2025 (Page 1)
+Journal: Journal of Medical Mycology (Page 1)
+Volume / Issue / Pages: 35 (2025) 101588 (Page 1)
+Country: Bahrain (Page 1)
+Study design (e.g., RCT, retrospective cohort): Retrospective observational study (Page 2, "Study design")
+Study setting (e.g., ICU, general ward, multicenter): ICUs of two tertiary hospitals (King Hamad University Hospital and Bahrain Oncology Centre) (Abstract, Methods; Page 2, "Study design")
+Objective: Describe epidemiology of Candidozyma auris candidemia, identify predictive factors vs non-C. auris candidemia, and evaluate prognostic impact in critically ill patients (Abstract; Page 1–2, end of Introduction)
+Article title: Candidozyma auris candidemia in critically ill patients: epidemiology, predictive factors and prognostic impact
+PMID: 41202718
+DOI: 10.1016/j.mycmed.2025.101588
+URL: https://www.sciencedirect.com/science/article/pii/S1156523325000514/pdfft?md5=04098079626905a854d9d6e39aab12b5&pid=1-s2.0-S1156523325000514-main.pdf
+
+2. Population
+Target condition / disease definition: Candidemia defined as isolation of Candida species from ≥1 set of blood cultures collected ≥48 h after ICU admission (Page 2, "Definitions")
+Sample size (total): 51 (Table 1; Abstract)
+Sample size (per group):
+
+C. auris group: 27 (Table 1; Abstract)
+
+Non-C. auris group: 24 (Table 1; Abstract)
+Age: Median 66 [56–78] years overall; 63 [52–73] vs 67 [62.3–83] (CA vs NCA) (Table 1)
+Sex: Gender (M/F) overall 24/27; CA 11/16; NCA 13/11 (Table 1)
+Inclusion criteria: "All adult patients with candidemia admitted between 01.01.2022 and 31.03.2024" (Abstract); adult patients aged ≥18 years with candidemia screened for inclusion (Page 2, "Patients and data collection")
+Exclusion criteria: SARS-CoV-2 infection; moribund; life expectancy <1 month due to underlying malignancy (Page 2, "Patients and data collection")
+Handling of multiple episodes: Only first candidemia episode included; recurrence defined as new episode ≥1 month after resolution (Page 2, "Patients and data collection")
+
+3. Exposure / Intervention / Comparison
+Exposure / Intervention: Candidozyma auris candidemia (Abstract; Page 2–3 "Two groups were compared…")
+Comparison group: Non-Candidozyma auris candidemia (Abstract; Page 2–3 "Two groups were compared…")
+Definition of groups (e.g., auris vs non-auris): Species identification/confirmation using MALDI-TOF MS; "all isolated were confirmed using the Bruker Biotyper… updated FDA-approved… library (Versions 2019)" (Page 2, "Microbiology")
+Follow-up period: 28-day mortality assessed "following candidemia onset" (Page 2, end of "Patients and data collection")
+
+4. Outcomes
+Primary outcome (with timepoint): Not reported (no explicit primary outcome stated)
+Secondary outcomes: Duration of mechanical ventilation; ICU length of stay; ICU mortality; 28-day mortality following candidemia onset (Page 2, end of "Patients and data collection")
+Outcome definitions:
+
+28-day mortality: "28-day mortality following candidemia onset" (Page 2, end of "Patients and data collection")
+
+Septic shock definition: Sepsis-3 criteria (Page 2, "Definitions")
+Measurement methods: Electronic medical record review (Page 2, "Patients and data collection")
+
+5. Results
+A) Association of C. auris vs non-C. auris with 28-day mortality
+Effect size (RR / OR / HR): OR = 0.3 (Page 5, "Outcome and prognostic factors")
+95% Confidence Interval: 95% CI [0.1–1.1] (Page 5, "Outcome and prognostic factors")
+p-value: p = 0.08 (Page 5, "Outcome and prognostic factors")
+Adjusted variables (list all): SAPSII (Page 5, "Outcome and prognostic factors")
+Adjusted or unadjusted: Both reported
+
+Unadjusted: OR = 0.3, 95% CI [0.1–1.1], p = 0.08 (Page 5, "Outcome and prognostic factors")
+
+Adjusted for SAPSII: OR = 0.3, 95% CI [0.1–1.2], p = 0.087 (Page 5, "Outcome and prognostic factors")
+Model type (e.g., Cox regression, logistic regression): Not reported for mortality comparison (Page 5, "Outcome and prognostic factors")
+
+B) Predictors of C. auris candidemia (risk factor analysis)
+Effect size (RR / OR / HR): Prior exposure to antifungals: OR = 6.5 (Table 3)
+95% Confidence Interval: 95% CI [1.7–25.3] (Table 3)
+p-value: p = 0.007 (Table 3)
+Adjusted variables (list all): Variables included in multivariate model: duration of invasive venous lines; previous exposure to antifungals; previous exposure to ceftazidime-avibactam; previous exposure to tigecycline; colonization with CRE prior to candidemia (Table 3)
+Adjusted or unadjusted: Adjusted (multivariate) (Table 3; Page 2, "Statistical analysis")
+Model type (e.g., Cox regression, logistic regression): "Binary stepwise regression" (Page 2, "Statistical analysis")
+
+6. Meta-analysis Relevant Raw Data
+
+Primary outcome data (2×2 table format):
+
+  Outcome timepoint: 28-day mortality following candidemia onset
+
+  C. auris group (experimental):
+    event.e (deaths): 18
+    n.e (total): 27
+
+  Comparison group 1 (Non-C. auris):
+    event.c (deaths): 16
+    n.c (total): 24
+
+Missing data / loss to follow-up: Not reported
+Subgroup analyses: Not reported
+
+7. Risk of Bias Related Information (NOS domains)
+Selection
+Representativeness of cohort: ICU patients with candidemia from two tertiary hospitals; all adult candidemia cases during study period screened (Abstract; Page 2 "Study design"; Page 2 "Patients and data collection")
+Exposure ascertainment method: Species confirmation by MALDI-TOF MS using updated FDA-approved library; PCR used for screening colonization after implementation (Page 2, "Microbiology")
+
+Comparability
+Confounding adjustment (variables and method):
+
+Predictors of C. auris candidemia adjusted via "binary stepwise regression" including variables listed in Table 3 (Page 2 "Statistical analysis"; Table 3)
+
+Mortality comparison additionally adjusted for SAPSII (Page 5, "Outcome and prognostic factors")
+Outcome
+Outcome assessment method: Clinical outcomes assessed via electronic medical record review; mortality endpoints include ICU mortality and 28-day mortality (Page 2, "Patients and data collection")
+Adequacy of follow-up: 28-day mortality assessed after candidemia onset (Page 2, end of "Patients and data collection"); completeness not reported
+
+8. Confounding (Important)
+Key confounders considered: SAPSII; SOFA; Charlson Comorbidities Index recorded (Table 1; Page 2 "Patients and data collection"); SAPSII used for adjustment in mortality comparison (Page 5, "Outcome and prognostic factors")
+Residual confounding discussed: Small sample size limits robustness of multivariate analysis (Page 6, "limitations… small sample size (n=51) remains a limiting factor for robust multivariate analysis")
+Methods used (matching / multivariable / propensity score): Multivariable "binary stepwise regression" (Page 2 "Statistical analysis"); no matching/propensity score reported
+
+9. GRADE-related Supporting Information
+Study design: Retrospective observational study (Page 2, "Study design")
+Risk of bias (supporting details): Retrospective design using electronic records (Page 2, "Patients and data collection"); screening technique changed from culture to PCR (Page 6, limitations)
+Inconsistency (if discussed): Not reported
+Indirectness (population/intervention differences): Not reported
+Imprecision (CI width, event numbers): 28-day mortality adjusted OR CI spans 0.1–1.2 (Page 5, "Outcome and prognostic factors"); sample size n=51 stated as limitation (Page 6, limitations)
+Publication bias (if mentioned): Not reported
+
+10. Final Assessment
+Suitable for meta-analysis: Yes (28-day mortality provides extractable event counts by group; Table 1)
+Reason if not suitable: Not applicable
+Notes for inclusion (e.g., outcome definition differences, population issues):
+
+Outcome timepoint explicitly "28-day mortality following candidemia onset" (Page 2, end of "Patients and data collection")
+
+Exclusions include SARS-CoV-2 infection and patients with life expectancy <1 month due to malignancy (Page 2, "Patients and data collection")
+
+Mortality effect estimate reported as OR; model type for mortality OR not specified (Page 5, "Outcome and prognostic factors")
