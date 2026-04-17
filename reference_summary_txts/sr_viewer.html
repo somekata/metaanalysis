@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SR Data Viewer</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface2: #f0f2f5;
+  --border: #dde1e7;
+  --border2: #c8cdd6;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --accent2: #059669;
+  --accent2-light: #ecfdf5;
+  --accent3: #dc2626;
+  --accent3-light: #fef2f2;
+  --accent4: #7c3aed;
+  --accent4-light: #f5f3ff;
+  --text: #111827;
+  --text-dim: #6b7280;
+  --text-muted: #9ca3af;
+  --selected-bg: #eff6ff;
+  --selected-border: #93c5fd;
+  --header-h: 56px;
+  --sidebar-w: 220px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --radius: 8px;
+}
+
+[data-theme="dark"] {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --border: #2e3347;
+  --border2: #3d4460;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-light: rgba(59,130,246,0.12);
+  --accent2: #10b981;
+  --accent2-light: rgba(16,185,129,0.12);
+  --accent3: #f87171;
+  --accent3-light: rgba(248,113,113,0.12);
+  --accent4: #a78bfa;
+  --accent4-light: rgba(167,139,250,0.12);
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+  --selected-bg: rgba(59,130,246,0.12);
+  --selected-border: #3b82f6;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ===== LAYOUT ===== */
+#app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ===== TOPBAR ===== */
+#topbar {
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
+  z-index: 200;
+}
+.logo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+.logo span { color: var(--text-dim); font-weight: 400; }
+.topbar-sep { flex: 1; }
+
+.icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+}
+.icon-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--surface2); border-color: var(--border2); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-success { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+.btn-success:hover { opacity: 0.9; }
+.btn-purple { background: var(--accent4); color: #fff; border-color: var(--accent4); }
+.btn-purple:hover { opacity: 0.9; }
+.btn-danger { background: var(--accent3); color: #fff; border-color: var(--accent3); }
+.btn-danger:hover { opacity: 0.9; }
+.btn-sm { padding: 4px 9px; font-size: 11px; }
+
+/* ===== CONTENT AREA ===== */
+#content { display: flex; flex: 1; overflow: hidden; }
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sidebar-header {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.file-list { flex: 1; overflow-y: auto; padding: 6px; }
+.file-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+  margin-bottom: 2px;
+}
+.file-item:hover { background: var(--surface2); }
+.file-item.active { background: var(--accent-light); color: var(--accent); }
+.file-icon { font-size: 13px; flex-shrink: 0; }
+.file-name { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.file-year { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+
+.sidebar-footer { padding: 10px; border-top: 1px solid var(--border); }
+
+/* ===== MAIN PANEL ===== */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ===== TABS ===== */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+.tab {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-badge {
+  font-size: 10px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.tab.active .tab-badge { background: var(--accent-light); color: var(--accent); }
+
+/* ===== PANEL CONTENT ===== */
+.panel { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.panel.active { display: flex; }
+
+/* ===== TOOLBAR ===== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+.search-box input {
+  width: 100%;
+  padding: 6px 10px 6px 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-box input:focus { border-color: var(--accent); background: var(--surface); }
+.search-box .search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+select.filter-select {
+  padding: 6px 28px 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  cursor: pointer;
+}
+select.filter-select:focus { border-color: var(--accent); }
+
+.selected-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.selected-count strong { color: var(--accent); }
+
+/* ===== TABLE ===== */
+.table-wrapper {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed;
+}
+thead { position: sticky; top: 0; z-index: 10; }
+thead tr { background: var(--surface2); }
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+th:hover { color: var(--text); }
+th.sorted-asc::after { content: ' ↑'; color: var(--accent); }
+th.sorted-desc::after { content: ' ↓'; color: var(--accent); }
+th.no-sort { cursor: default; }
+th.col-check { width: 36px; }
+th.col-move { width: 50px; }
+th.col-author { width: 160px; }
+th.col-year { width: 64px; }
+th.col-country { width: 100px; }
+th.col-design { width: 160px; }
+th.col-n { width: 80px; }
+th.col-outcome { min-width: 160px; }
+th.col-effect { width: 120px; }
+
+tbody tr {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  cursor: pointer;
+}
+tbody tr:hover { background: var(--surface2); }
+tbody tr.selected { background: var(--selected-bg); }
+tbody tr.selected td { border-left: 2px solid var(--selected-border); }
+tbody tr.selected td:first-child { border-left: 2px solid var(--selected-border); }
+
+td {
+  padding: 9px 12px;
+  color: var(--text);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+td.wrap { white-space: normal; word-break: break-word; line-height: 1.4; }
+
+.checkbox-cell { display: flex; align-items: center; justify-content: center; }
+input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+
+.move-btns { display: flex; gap: 3px; }
+.move-btn {
+  width: 22px; height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.move-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.tag-blue { background: var(--accent-light); color: var(--accent); }
+.tag-green { background: var(--accent2-light); color: var(--accent2); }
+.tag-red { background: var(--accent3-light); color: var(--accent3); }
+.tag-purple { background: var(--accent4-light); color: var(--accent4); }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  text-align: center;
+  gap: 12px;
+}
+.empty-state .icon { font-size: 48px; opacity: 0.5; }
+.empty-state h3 { font-size: 15px; color: var(--text-dim); }
+.empty-state p { font-size: 12px; max-width: 320px; line-height: 1.6; }
+
+/* ===== DASHBOARD ===== */
+.dashboard { flex: 1; overflow-y: auto; padding: 20px; gap: 16px; display: flex; flex-direction: column; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.stat-label { font-size: 11px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+.dash-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.dash-section-header { padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); background: var(--surface2); }
+.dash-list { padding: 8px 0; }
+.dash-list-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; }
+.dash-list-item:hover { background: var(--surface2); }
+.dash-list-key { flex: 1; font-size: 12px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+.dash-bar { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.5s ease; }
+.dash-count { font-size: 12px; font-weight: 600; color: var(--text); min-width: 20px; text-align: right; }
+
+/* ===== DETAIL VIEW ===== */
+.detail-panel { flex: 1; overflow-y: auto; padding: 20px; }
+.detail-placeholder { display: flex; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text-muted); }
+
+.detail-view-toggle { display: flex; gap: 6px; margin-bottom: 16px; }
+.detail-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.detail-section-header {
+  padding: 10px 14px;
+  background: var(--surface2);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.section-num {
+  background: var(--accent);
+  color: #fff;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.detail-field-list { padding: 8px 0; }
+.detail-field { display: flex; padding: 6px 14px; gap: 12px; }
+.detail-field:hover { background: var(--surface2); }
+.field-label { font-size: 11px; font-weight: 600; color: var(--text-muted); min-width: 140px; flex-shrink: 0; line-height: 1.5; }
+.field-value { font-size: 12px; color: var(--text); flex: 1; line-height: 1.5; word-break: break-word; }
+.field-value.not-reported { color: var(--text-muted); font-style: italic; }
+
+.raw-text {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: var(--text-dim);
+  overflow-x: auto;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 760px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  transform: translateY(12px);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.modal-title { flex: 1; }
+.modal-title h2 { font-size: 15px; font-weight: 600; color: var(--text); }
+.modal-title p { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.modal-nav { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.modal-pos { font-size: 11px; color: var(--text-muted); }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.close-btn {
+  background: none; border: none; font-size: 18px;
+  cursor: pointer; color: var(--text-muted);
+  padding: 4px; border-radius: 4px;
+  transition: all 0.15s; line-height: 1;
+}
+.close-btn:hover { background: var(--surface2); color: var(--text); }
+
+/* ===== COLUMN TOGGLE ===== */
+.col-toggle-dropdown {
+  position: relative;
+}
+.col-toggle-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 300;
+  min-width: 180px;
+  padding: 8px 0;
+  display: none;
+}
+.col-toggle-menu.open { display: block; }
+.col-toggle-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+  transition: background 0.1s;
+}
+.col-toggle-item:hover { background: var(--surface2); }
+.col-toggle-item input { accent-color: var(--accent); }
+
+/* ===== EXPORT MENU ===== */
+.dropdown { position: relative; }
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 300;
+  min-width: 200px;
+  padding: 8px 0;
+  display: none;
+}
+.dropdown-menu.open { display: block; }
+.dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+  transition: background 0.1s;
+}
+.dropdown-item:hover { background: var(--surface2); }
+.dropdown-sep { height: 1px; background: var(--border); margin: 4px 0; }
+.dropdown-label { padding: 6px 14px 2px; font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+  margin: 20px;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.upload-zone .icon { font-size: 40px; margin-bottom: 12px; }
+.upload-zone h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.upload-zone p { font-size: 12px; color: var(--text-dim); }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--text);
+  color: var(--surface);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 9999;
+  transform: translateY(60px);
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  max-width: 300px;
+  box-shadow: var(--shadow-md);
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  #sidebar { display: none; }
+  .col-author { width: 120px; }
+  .col-design { width: 120px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="logo">SR<span>Viewer</span></div>
+    <button class="btn btn-primary btn-sm" id="uploadBtn" onclick="document.getElementById('fileInput').click()">
+      ＋ ファイル読込
+    </button>
+    <input type="file" id="fileInput" accept=".txt" multiple style="display:none">
+    <div class="topbar-sep"></div>
+    <div class="dropdown">
+      <button class="btn btn-sm" id="exportTopBtn" onclick="toggleDropdown('exportTopMenu')">⬇ エクスポート ▾</button>
+      <div class="dropdown-menu" id="exportTopMenu">
+        <div class="dropdown-label">サマリー表</div>
+        <div class="dropdown-item" onclick="exportData('csv','summary','all');closeDropdowns()">📄 CSV（全件）</div>
+        <div class="dropdown-item" onclick="exportData('csv','summary','selected');closeDropdowns()">📄 CSV（選択行）</div>
+        <div class="dropdown-item" onclick="exportData('json','summary','all');closeDropdowns()">🔷 JSON（全件）</div>
+        <div class="dropdown-item" onclick="exportData('json','summary','selected');closeDropdowns()">🔷 JSON（選択行）</div>
+        <div class="dropdown-sep"></div>
+        <div class="dropdown-label">全データ</div>
+        <div class="dropdown-item" onclick="exportData('json','full','all');closeDropdowns()">🔷 JSON（全研究）</div>
+        <div class="dropdown-item" onclick="exportData('html','full','all');closeDropdowns()">🌐 HTML（全研究）</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="ダークモード切替">🌙</button>
+  </div>
+
+  <div id="content">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="sidebar-header">読込済み研究</div>
+      <div class="file-list" id="fileList">
+        <div style="padding:12px 8px; color:var(--text-muted); font-size:11px; text-align:center;">
+          ファイルを読み込むと<br>ここに一覧表示されます
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <button class="btn btn-sm" style="width:100%" onclick="document.getElementById('fileInput').click()">＋ 追加</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div id="main">
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('table')" id="tab-table">
+          📋 一覧表 <span class="tab-badge" id="badge-table">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('detail')" id="tab-detail">
+          🔍 詳細表示
+        </div>
+        <div class="tab" onclick="switchTab('dashboard')" id="tab-dashboard">
+          📊 ダッシュボード
+        </div>
+      </div>
+
+      <!-- PANEL: TABLE -->
+      <div class="panel active" id="panel-table">
+        <div class="toolbar" id="toolbar-table">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="全フィールド検索..." oninput="applyFilters()">
+          </div>
+          <select class="filter-select" id="filterDesign" onchange="applyFilters()">
+            <option value="">全 Study Design</option>
+          </select>
+          <select class="filter-select" id="filterCountry" onchange="applyFilters()">
+            <option value="">全 Country</option>
+          </select>
+          <div class="col-toggle-dropdown">
+            <button class="btn btn-sm" onclick="toggleDropdown('colMenu')">🗂 列表示 ▾</button>
+            <div class="col-toggle-menu" id="colMenu"></div>
+          </div>
+          <span class="selected-count" id="selectedCount"></span>
+        </div>
+        <div class="table-wrapper" id="tableWrapper">
+          <div class="empty-state" id="emptyState">
+            <div class="icon">📂</div>
+            <h3>データなし</h3>
+            <p>上部の「ファイル読込」ボタンまたはサイドバーの「追加」ボタンから .txt ファイルをアップロードしてください。</p>
+          </div>
+          <table id="mainTable" style="display:none">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANEL: DETAIL -->
+      <div class="panel" id="panel-detail">
+        <div class="toolbar">
+          <select class="filter-select" id="detailSelector" onchange="showDetail(this.value)" style="min-width:240px; flex:1">
+            <option value="">研究を選択してください...</option>
+          </select>
+          <div style="display:flex;gap:6px" id="detailViewToggle">
+            <button class="btn btn-sm" id="btnStructured" onclick="setDetailView('structured')">📋 構造化</button>
+            <button class="btn btn-sm" id="btnRaw" onclick="setDetailView('raw')">📄 Raw</button>
+          </div>
+          <button class="btn btn-sm btn-success" id="detailDownloadBtn" onclick="downloadCurrentDetail()" style="display:none">⬇ ダウンロード</button>
+        </div>
+        <div class="detail-panel" id="detailContent">
+          <div class="detail-placeholder">
+            <div style="font-size:40px">🔍</div>
+            <p style="color:var(--text-dim)">左のセレクタで研究を選択するか、<br>一覧表の行をクリックしてください</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: DASHBOARD -->
+      <div class="panel" id="panel-dashboard">
+        <div class="dashboard" id="dashboardContent">
+          <div class="empty-state">
+            <div class="icon">📊</div>
+            <h3>データなし</h3>
+            <p>ファイルを読み込むとダッシュボードが表示されます。</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <h2 id="modalTitle">Study Detail</h2>
+        <p id="modalSubtitle"></p>
+      </div>
+      <div class="modal-nav">
+        <span class="modal-pos" id="modalPos"></span>
+        <button class="btn btn-sm" id="modalPrev" onclick="navigateModal(-1)">← 前へ</button>
+        <button class="btn btn-sm" id="modalNext" onclick="navigateModal(1)">次へ →</button>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" id="modalBtnStructured" onclick="setModalView('structured')">📋 構造化</button>
+        <button class="btn btn-sm" id="modalBtnRaw" onclick="setModalView('raw')">📄 Raw</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn btn-sm btn-success" onclick="downloadModalDetail()">⬇ ダウンロード</button>
+      <button class="btn btn-sm" onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+const state = {
+  studies: [],           // parsed study objects
+  filtered: [],          // currently filtered/sorted
+  selected: new Set(),   // selected indices (in filtered)
+  sortCol: null,
+  sortDir: 'asc',
+  detailIdx: null,
+  detailView: 'structured',
+  modalIdx: null,
+  modalView: 'structured',
+  colVisibility: {},
+  darkMode: false,
+};
+
+// =============================================
+// COLUMN DEFINITIONS
+// =============================================
+const COLUMNS = [
+  { key: 'author',   label: 'Author',        cls: 'col-author', sortable: true,  visible: true },
+  { key: 'year',     label: 'Year',          cls: 'col-year',   sortable: true,  visible: true },
+  { key: 'country',  label: 'Country',       cls: 'col-country',sortable: true,  visible: true },
+  { key: 'design',   label: 'Study Design',  cls: 'col-design', sortable: true,  visible: true },
+  { key: 'n_total',  label: 'N (Total)',     cls: 'col-n',      sortable: true,  visible: true },
+  { key: 'outcome',  label: 'Outcome',       cls: 'col-outcome',sortable: false, visible: true },
+  { key: 'effect',   label: 'Effect Size',   cls: 'col-effect', sortable: false, visible: true },
+];
+COLUMNS.forEach(c => state.colVisibility[c.key] = c.visible);
+
+// =============================================
+// PARSE LOGIC
+// =============================================
+function parseStudyText(text, filename) {
+  const get = (patterns) => {
+    for (const pat of patterns) {
+      const re = new RegExp(pat, 'im');
+      const m = text.match(re);
+      if (m) {
+        let v = m[1].trim();
+        v = v.replace(/\s*\(Page[^)]*\)/gi, '').trim();
+        if (v && v !== 'Not reported' && v !== 'N/A' && v.length > 0) return v;
+      }
+    }
+    return null;
+  };
+
+  const getBlock = (sectionTitle) => {
+    const re = new RegExp(`(?:^|\\n)${sectionTitle}[\\s\\S]*?(?=\\n\\d+\\.|$)`, 'i');
+    const m = text.match(re);
+    return m ? m[0] : '';
+  };
+
+  // ---- Core fields ----
+  const author   = get(['Author:\\s*(.+)', 'Authors:\\s*(.+)']);
+  const year     = get(['Year:\\s*(\\d{4})']);
+  const journal  = get(['Journal:\\s*(.+)']);
+  const volume   = get(['Volume\\s*\\/[^:]*:\\s*(.+)', 'Volume:\\s*(.+)']);
+  const country  = get(['Country:\\s*(.+)']);
+  const design   = get(['Study design[^:]*:\\s*(.+)', 'Design:\\s*(.+)']);
+  const setting  = get(['Study setting[^:]*:\\s*(.+)', 'Setting:\\s*(.+)']);
+  const objective= get(['Objective:\\s*(.+)']);
+
+  // Population
+  const n_total  = get(['Sample size\\s*\\(total\\):\\s*(\\d+[^\\n]*)','Total\\s*N:\\s*(\\d+)','n\\s*=\\s*(\\d+)']);
+  const n_total_num = n_total ? parseInt(n_total.match(/\d+/)?.[0]) : null;
+  const age      = get(['Age:\\s*(.+)']);
+  const sex      = get(['Sex:\\s*(.+)', 'Gender:\\s*(.+)']);
+  const inclusion= get(['Inclusion criteria:\\s*(.+)']);
+  const exclusion= get(['Exclusion criteria:\\s*(.+)']);
+
+  // Groups
+  const exposure = get(['Exposure\\s*\\/\\s*Intervention:\\s*(.+)', 'Exposure:\\s*(.+)', 'Intervention:\\s*(.+)']);
+  const comparison= get(['Comparison group:\\s*(.+)', 'Comparison:\\s*(.+)']);
+  const followup = get(['Follow-up period:\\s*(.+)', 'Follow.up:\\s*(.+)']);
+
+  // Outcomes
+  const primary_outcome = get(['Primary outcome[^:]*:\\s*(.+)']);
+  const secondary_outcome = get(['Secondary outcomes:\\s*(.+)']);
+
+  // Results - effect sizes
+  const effect_raw = (() => {
+    const efBlock = getBlock('5\\. Results');
+    const patterns = [
+      /OR\s*=\s*([\d.]+)\s*(?:\(Page[^)]*\))?\s*(?:,|\s+)?\s*95%\s*CI\s*[\[(\s]?([\d.–\-]+)\s*[–\-]\s*([\d.]+)[\])\s]?/i,
+      /RR\s*=\s*([\d.]+)\s*(?:\(Page[^)]*\))?\s*(?:,|\s+)?\s*95%\s*CI\s*[\[(\s]?([\d.–\-]+)\s*[–\-]\s*([\d.]+)[\])\s]?/i,
+      /HR\s*=\s*([\d.]+)\s*(?:\(Page[^)]*\))?\s*(?:,|\s+)?\s*95%\s*CI\s*[\[(\s]?([\d.–\-]+)\s*[–\-]\s*([\d.]+)[\])\s]?/i,
+    ];
+    for (const re of patterns) {
+      const m = efBlock.match(re) || text.match(re);
+      if (m) {
+        const type = m[0].match(/^(OR|RR|HR)/i)?.[1].toUpperCase() || 'OR';
+        return `${type} = ${m[1]} (95% CI ${m[2]}–${m[3]})`;
+      }
+    }
+    return null;
+  })();
+
+  const pvalue = get(['p-value:\\s*(.+)', 'p\\s*=\\s*([0-9.]+)']);
+
+  // Raw event counts
+  const events = (() => {
+    // Try to extract auris events/total and non-auris events/total
+    const aurisDeaths = text.match(/(?:C\.\s*auris|auris group)[^:]*:\s*(\d+)[^,\n]*(?:deaths?|died|death)/i)?.[1]
+      || text.match(/(?:CA|auris)[^:]*deaths?[^:]*:\s*(\d+)/i)?.[1]
+      || null;
+    const aurisN = text.match(/(?:C\.\s*auris|CA)[^:]*:\s*(\d+)\s*\(Table/i)?.[1]
+      || null;
+    if (aurisDeaths && aurisN) return `Auris deaths: ${aurisDeaths}/${aurisN}`;
+    return null;
+  })();
+
+  // Mortality
+  const mortality_block = getBlock('5\\. Results');
+  const mortality_28d = mortality_block.match(/28.day[^:]*:[^O]*OR\s*=\s*([\d.]+)/i)?.[1]
+    ? `OR = ${mortality_block.match(/28.day[^:]*:[^O]*OR\s*=\s*([\d.]+)/i)[1]}`
+    : null;
+
+  // Meta-analysis data
+  const meta_auris_events = text.match(/(?:C\.\s*auris|CA)[^:]*:\s*(\d+)\s*(?:\(\d+%\))?\s*(?:\(Table|;)/i)?.[1] || null;
+
+  // Risk of bias
+  const rob_selection = get(['Representativeness[^:]*:\\s*(.+)']);
+  const rob_exposure  = get(['Exposure ascertainment[^:]*:\\s*(.+)']);
+  const rob_outcome   = get(['Outcome assessment[^:]*:\\s*(.+)']);
+
+  // GRADE
+  const confounders   = get(['Key confounders considered:\\s*(.+)']);
+  const residual_conf = get(['Residual confounding[^:]*:\\s*(.+)']);
+
+  // Suitable
+  const suitable = text.match(/Suitable for meta-analysis:\s*(Yes|No)/i)?.[1] || null;
+  const suitable_note = get(['Notes for inclusion[^:]*:\\s*(.+)', 'Reason if not suitable:\\s*(.+)']);
+
+  // Per-group sample sizes (try to extract)
+  const groupSizes = (() => {
+    const matches = [];
+    const re = /([A-Za-z][^:]{2,40}):\s*(\d+)\s*\(Table\s*\d/gi;
+    let m;
+    while ((m = re.exec(text)) !== null && matches.length < 4) {
+      matches.push(`${m[1].trim()}: ${m[2]}`);
+    }
+    return matches.length ? matches.join('; ') : null;
+  })();
+
+  // Outcome label for table
+  const outcome_label = primary_outcome || secondary_outcome || get(['Secondary outcomes:\\s*(.+)']) || null;
+
+  return {
+    _filename: filename,
+    _raw: text,
+    // Summary fields
+    author:    author    || 'Unknown',
+    year:      year      || null,
+    journal:   journal   || null,
+    volume:    volume    || null,
+    country:   country   || null,
+    design:    design    || null,
+    setting:   setting   || null,
+    objective: objective || null,
+    // Population
+    n_total:   n_total   || null,
+    n_total_num: n_total_num,
+    n_groups:  groupSizes || null,
+    age:       age       || null,
+    sex:       sex       || null,
+    inclusion: inclusion || null,
+    exclusion: exclusion || null,
+    // Exposure
+    exposure:  exposure  || null,
+    comparison:comparison || null,
+    followup:  followup  || null,
+    // Outcomes
+    primary_outcome: primary_outcome || null,
+    secondary_outcome: secondary_outcome || null,
+    outcome: outcome_label || null,
+    // Results
+    effect:    effect_raw || null,
+    pvalue:    pvalue    || null,
+    // Events
+    events:    events    || null,
+    // Risk of bias
+    rob_selection: rob_selection || null,
+    rob_exposure:  rob_exposure  || null,
+    rob_outcome:   rob_outcome   || null,
+    // Confounding
+    confounders:   confounders   || null,
+    residual_conf: residual_conf || null,
+    // Final
+    suitable:      suitable      || null,
+    suitable_note: suitable_note || null,
+  };
+}
+
+// =============================================
+// FILE LOADING
+// =============================================
+document.getElementById('fileInput').addEventListener('change', e => {
+  loadFiles(Array.from(e.target.files));
+  e.target.value = '';
+});
+
+// Drag & Drop on empty state
+document.addEventListener('dragover', e => { e.preventDefault(); });
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.txt'));
+  if (files.length) loadFiles(files);
+});
+
+function loadFiles(files) {
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result;
+      const study = parseStudyText(text, file.name);
+      // Avoid duplicates
+      if (!state.studies.find(s => s._filename === file.name)) {
+        state.studies.push(study);
+      } else {
+        // Update existing
+        const idx = state.studies.findIndex(s => s._filename === file.name);
+        state.studies[idx] = study;
+      }
+      loaded++;
+      if (loaded === files.length) {
+        afterLoad();
+        showToast(`${loaded}件のファイルを読み込みました`);
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+function afterLoad() {
+  applyFilters();
+  renderSidebar();
+  renderFilters();
+  renderColMenu();
+  renderDashboard();
+  renderDetailSelector();
+  document.getElementById('badge-table').textContent = state.studies.length;
+}
+
+// =============================================
+// SIDEBAR
+// =============================================
+function renderSidebar() {
+  const el = document.getElementById('fileList');
+  if (!state.studies.length) {
+    el.innerHTML = '<div style="padding:12px 8px;color:var(--text-muted);font-size:11px;text-align:center">ファイルを読み込むと<br>ここに一覧表示されます</div>';
+    return;
+  }
+  el.innerHTML = state.studies.map((s, i) => `
+    <div class="file-item ${state.detailIdx === i ? 'active' : ''}" onclick="openDetailFromSidebar(${i})">
+      <span class="file-icon">📄</span>
+      <span class="file-name" title="${s._filename}">${s.author}</span>
+      <span class="file-year">${s.year || ''}</span>
+    </div>
+  `).join('');
+}
+
+function openDetailFromSidebar(i) {
+  state.detailIdx = i;
+  const s = state.studies[i];
+  document.getElementById('detailSelector').value = i;
+  renderDetailContent(s, 'detail');
+  switchTab('detail');
+  renderSidebar();
+}
+
+// =============================================
+// FILTERS & RENDER
+// =============================================
+function renderFilters() {
+  const designs = [...new Set(state.studies.map(s => s.design).filter(Boolean))];
+  const countries = [...new Set(state.studies.map(s => s.country).filter(Boolean))];
+  const ds = document.getElementById('filterDesign');
+  const dc = document.getElementById('filterCountry');
+  const sel_d = ds.value, sel_c = dc.value;
+  ds.innerHTML = '<option value="">全 Study Design</option>' + designs.map(d => `<option value="${d}" ${d===sel_d?'selected':''}>${d}</option>`).join('');
+  dc.innerHTML = '<option value="">全 Country</option>' + countries.map(c => `<option value="${c}" ${c===sel_c?'selected':''}>${c}</option>`).join('');
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const fd = document.getElementById('filterDesign')?.value || '';
+  const fc = document.getElementById('filterCountry')?.value || '';
+
+  state.filtered = state.studies.filter(s => {
+    if (fd && s.design !== fd) return false;
+    if (fc && s.country !== fc) return false;
+    if (q) {
+      const all = Object.values(s).filter(v => typeof v === 'string').join(' ').toLowerCase();
+      if (!all.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (state.sortCol) {
+    state.filtered.sort((a, b) => {
+      let av = a[state.sortCol] || '';
+      let bv = b[state.sortCol] || '';
+      if (state.sortCol === 'n_total') { av = a.n_total_num || 0; bv = b.n_total_num || 0; }
+      if (typeof av === 'number') return state.sortDir === 'asc' ? av - bv : bv - av;
+      return state.sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+    });
+  }
+
+  renderTable();
+  updateSelectedCount();
+}
+
+function sortBy(col) {
+  if (state.sortCol === col) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+  else { state.sortCol = col; state.sortDir = 'asc'; }
+  applyFilters();
+}
+
+// =============================================
+// TABLE RENDER
+// =============================================
+function renderColMenu() {
+  const menu = document.getElementById('colMenu');
+  menu.innerHTML = COLUMNS.map(c => `
+    <label class="col-toggle-item">
+      <input type="checkbox" ${state.colVisibility[c.key] ? 'checked' : ''} onchange="toggleCol('${c.key}', this.checked)">
+      ${c.label}
+    </label>
+  `).join('');
+}
+
+function toggleCol(key, visible) {
+  state.colVisibility[key] = visible;
+  renderTable();
+}
+
+function renderTable() {
+  const empty = document.getElementById('emptyState');
+  const table = document.getElementById('mainTable');
+
+  if (!state.studies.length) {
+    empty.style.display = '';
+    table.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  table.style.display = '';
+
+  const visCols = COLUMNS.filter(c => state.colVisibility[c.key]);
+
+  // Head
+  const head = document.getElementById('tableHead');
+  head.innerHTML = `<tr>
+    <th class="col-check no-sort"><input type="checkbox" id="checkAll" onchange="toggleSelectAll(this.checked)" title="全選択"></th>
+    <th class="col-move no-sort">並替</th>
+    ${visCols.map(c => `
+      <th class="${c.cls} ${c.sortable?'':'no-sort'} ${state.sortCol===c.key?(state.sortDir==='asc'?'sorted-asc':'sorted-desc'):''}"
+          ${c.sortable ? `onclick="sortBy('${c.key}')"` : ''}>
+        ${c.label}
+      </th>
+    `).join('')}
+  </tr>`;
+
+  // Body
+  const tbody = document.getElementById('tableBody');
+  if (!state.filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="${visCols.length + 2}" style="text-align:center;color:var(--text-muted);padding:32px">検索条件に一致する研究がありません</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.filtered.map((s, fi) => {
+    const si = state.studies.indexOf(s);
+    const isSelected = state.selected.has(si);
+    return `<tr class="${isSelected ? 'selected' : ''}" onclick="handleRowClick(event, ${fi}, ${si})" data-fi="${fi}" data-si="${si}">
+      <td class="checkbox-cell" onclick="event.stopPropagation()">
+        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelect(${si}, this.checked)">
+      </td>
+      <td onclick="event.stopPropagation()">
+        <div class="move-btns">
+          <button class="move-btn" onclick="moveStudy(${si}, -1)" ${si===0?'disabled':''} title="上へ">▲</button>
+          <button class="move-btn" onclick="moveStudy(${si}, 1)" ${si===state.studies.length-1?'disabled':''} title="下へ">▼</button>
+        </div>
+      </td>
+      ${visCols.map(c => {
+        let v = s[c.key];
+        if (!v || v === 'Not reported') return `<td class="field-value not-reported" style="color:var(--text-muted);font-style:italic">—</td>`;
+        if (c.key === 'design') return `<td><span class="tag tag-blue" title="${v}">${v.length > 30 ? v.slice(0,28)+'…' : v}</span></td>`;
+        if (c.key === 'year') return `<td><span class="tag tag-green">${v}</span></td>`;
+        if (c.key === 'effect') return `<td style="font-family:monospace;font-size:11px">${v}</td>`;
+        if (c.key === 'outcome') return `<td class="wrap" style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px" title="${v}">${v.length>60?v.slice(0,58)+'…':v}</td>`;
+        return `<td title="${v}">${typeof v==='string'&&v.length>40?v.slice(0,38)+'…':v}</td>`;
+      }).join('')}
+    </tr>`;
+  }).join('');
+}
+
+function handleRowClick(e, fi, si) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+  openModal(fi);
+}
+
+function moveStudy(si, dir) {
+  const ni = si + dir;
+  if (ni < 0 || ni >= state.studies.length) return;
+  [state.studies[si], state.studies[ni]] = [state.studies[ni], state.studies[si]];
+  applyFilters();
+  renderSidebar();
+}
+
+// =============================================
+// SELECTION
+// =============================================
+function toggleSelect(si, checked) {
+  if (checked) state.selected.add(si);
+  else state.selected.delete(si);
+  updateSelectedCount();
+  renderTable();
+}
+
+function toggleSelectAll(checked) {
+  state.filtered.forEach(s => {
+    const si = state.studies.indexOf(s);
+    if (checked) state.selected.add(si);
+    else state.selected.delete(si);
+  });
+  updateSelectedCount();
+  renderTable();
+}
+
+function updateSelectedCount() {
+  const el = document.getElementById('selectedCount');
+  if (state.selected.size > 0) {
+    el.innerHTML = `<strong>${state.selected.size}</strong> 件選択中`;
+  } else {
+    el.innerHTML = `${state.filtered.length} 件表示中 / ${state.studies.length} 件`;
+  }
+}
+
+// =============================================
+// MODAL
+// =============================================
+function openModal(fi) {
+  state.modalIdx = fi;
+  state.modalView = 'structured';
+  renderModal();
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function navigateModal(dir) {
+  const ni = state.modalIdx + dir;
+  if (ni < 0 || ni >= state.filtered.length) return;
+  state.modalIdx = ni;
+  renderModal();
+}
+
+function setModalView(v) { state.modalView = v; renderModal(); }
+
+function renderModal() {
+  const s = state.filtered[state.modalIdx];
+  if (!s) return;
+  document.getElementById('modalTitle').textContent = s.author || 'Unknown Author';
+  document.getElementById('modalSubtitle').textContent = [s.year, s.journal, s.country].filter(Boolean).join(' · ');
+  document.getElementById('modalPos').textContent = `${state.modalIdx + 1} / ${state.filtered.length}`;
+  document.getElementById('modalPrev').disabled = state.modalIdx === 0;
+  document.getElementById('modalNext').disabled = state.modalIdx === state.filtered.length - 1;
+
+  document.getElementById('modalBtnStructured').className = `btn btn-sm ${state.modalView==='structured' ? 'btn-primary' : ''}`;
+  document.getElementById('modalBtnRaw').className = `btn btn-sm ${state.modalView==='raw' ? 'btn-primary' : ''}`;
+
+  document.getElementById('modalBody').innerHTML = buildDetailHTML(s, state.modalView);
+}
+
+function downloadModalDetail() {
+  const s = state.filtered[state.modalIdx];
+  if (!s) return;
+  downloadText(s._raw, `${s.author}_${s.year || 'unknown'}.txt`);
+}
+
+// =============================================
+// DETAIL PANEL
+// =============================================
+function renderDetailSelector() {
+  const sel = document.getElementById('detailSelector');
+  sel.innerHTML = '<option value="">研究を選択してください...</option>' +
+    state.studies.map((s, i) => `<option value="${i}">${s.author} (${s.year || '?'}) — ${s.country || '?'}</option>`).join('');
+}
+
+function showDetail(idx) {
+  if (idx === '') {
+    document.getElementById('detailContent').innerHTML = '<div class="detail-placeholder"><div style="font-size:40px">🔍</div><p style="color:var(--text-dim)">研究を選択してください</p></div>';
+    document.getElementById('detailDownloadBtn').style.display = 'none';
+    state.detailIdx = null;
+    renderSidebar();
+    return;
+  }
+  state.detailIdx = parseInt(idx);
+  const s = state.studies[state.detailIdx];
+  renderDetailContent(s, 'detail');
+  document.getElementById('detailDownloadBtn').style.display = '';
+  renderSidebar();
+}
+
+function setDetailView(v) {
+  state.detailView = v;
+  document.getElementById('btnStructured').className = `btn btn-sm ${v==='structured' ? 'btn-primary' : ''}`;
+  document.getElementById('btnRaw').className = `btn btn-sm ${v==='raw' ? 'btn-primary' : ''}`;
+  if (state.detailIdx !== null) {
+    renderDetailContent(state.studies[state.detailIdx], 'detail');
+  }
+}
+
+function renderDetailContent(s, target) {
+  const el = document.getElementById(target === 'detail' ? 'detailContent' : 'modalBody');
+  el.innerHTML = buildDetailHTML(s, target === 'detail' ? state.detailView : state.modalView);
+}
+
+function downloadCurrentDetail() {
+  if (state.detailIdx === null) return;
+  const s = state.studies[state.detailIdx];
+  downloadText(s._raw, `${s.author}_${s.year || 'unknown'}.txt`);
+}
+
+// =============================================
+// DETAIL HTML BUILDER
+// =============================================
+function field(label, value) {
+  const isNR = !value || value === 'Not reported' || value === 'N/A';
+  return `<div class="detail-field">
+    <span class="field-label">${label}</span>
+    <span class="field-value ${isNR ? 'not-reported' : ''}">${isNR ? 'Not reported' : escHtml(String(value))}</span>
+  </div>`;
+}
+
+const SECTIONS = [
+  { num: 1, title: 'Study Characteristics', fields: [
+    ['Author', 'author'], ['Year', 'year'], ['Journal', 'journal'],
+    ['Volume/Issue/Pages', 'volume'], ['Country', 'country'],
+    ['Study Design', 'design'], ['Study Setting', 'setting'], ['Objective', 'objective'],
+  ]},
+  { num: 2, title: 'Population', fields: [
+    ['Sample Size (Total)', 'n_total'], ['Sample Size (per Group)', 'n_groups'],
+    ['Age', 'age'], ['Sex', 'sex'],
+    ['Inclusion Criteria', 'inclusion'], ['Exclusion Criteria', 'exclusion'],
+  ]},
+  { num: 3, title: 'Exposure / Comparison', fields: [
+    ['Exposure / Intervention', 'exposure'], ['Comparison Group', 'comparison'],
+    ['Follow-up Period', 'followup'],
+  ]},
+  { num: 4, title: 'Outcomes', fields: [
+    ['Primary Outcome', 'primary_outcome'], ['Secondary Outcomes', 'secondary_outcome'],
+  ]},
+  { num: 5, title: 'Results', fields: [
+    ['Effect Size (95% CI)', 'effect'], ['p-value', 'pvalue'], ['Events', 'events'],
+  ]},
+  { num: 6, title: 'Risk of Bias', fields: [
+    ['Selection (Representativeness)', 'rob_selection'],
+    ['Exposure Ascertainment', 'rob_exposure'],
+    ['Outcome Assessment', 'rob_outcome'],
+  ]},
+  { num: 7, title: 'Confounding', fields: [
+    ['Key Confounders', 'confounders'], ['Residual Confounding', 'residual_conf'],
+  ]},
+  { num: 8, title: 'Final Assessment', fields: [
+    ['Suitable for Meta-analysis', 'suitable'],
+    ['Notes', 'suitable_note'],
+  ]},
+];
+
+function buildDetailHTML(s, view) {
+  if (view === 'raw') {
+    return `<div class="raw-text">${escHtml(s._raw)}</div>`;
+  }
+  return SECTIONS.map(sec => `
+    <div class="detail-section">
+      <div class="detail-section-header">
+        <span class="section-num">${sec.num}</span>
+        ${sec.title}
+      </div>
+      <div class="detail-field-list">
+        ${sec.fields.map(([label, key]) => field(label, s[key])).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// =============================================
+// DASHBOARD
+// =============================================
+function renderDashboard() {
+  const el = document.getElementById('dashboardContent');
+  if (!state.studies.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📊</div><h3>データなし</h3><p>ファイルを読み込むとダッシュボードが表示されます。</p></div>';
+    return;
+  }
+
+  const total_n = state.studies.reduce((a, s) => a + (s.n_total_num || 0), 0);
+  const designs = countBy(state.studies, 'design');
+  const countries = countBy(state.studies, 'country');
+  const suitable = state.studies.filter(s => s.suitable && s.suitable.toLowerCase().startsWith('yes')).length;
+
+  const maxD = Math.max(...Object.values(designs), 1);
+  const maxC = Math.max(...Object.values(countries), 1);
+
+  el.innerHTML = `
+    <div class="stat-grid">
+      ${statCard('総研究数', state.studies.length, '件の研究を読込中')}
+      ${statCard('総サンプルサイズ', total_n > 0 ? total_n.toLocaleString() : '—', '人（抽出可能なもののみ）')}
+      ${statCard('メタ解析適合', suitable, '件（"Yes"と記載）')}
+      ${statCard('国数', Object.keys(countries).length, 'ヶ国')}
+    </div>
+    <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+      <div class="dash-section">
+        <div class="dash-section-header">Study Design 別件数</div>
+        <div class="dash-list">
+          ${Object.entries(designs).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
+            <div class="dash-list-item">
+              <span class="dash-list-key" title="${k}">${k || 'Unknown'}</span>
+              <div class="dash-bar-wrap"><div class="dash-bar" style="width:${Math.round(v/maxD*100)}%"></div></div>
+              <span class="dash-count">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="dash-section">
+        <div class="dash-section-header">国別件数</div>
+        <div class="dash-list">
+          ${Object.entries(countries).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
+            <div class="dash-list-item">
+              <span class="dash-list-key" title="${k}">${k || 'Unknown'}</span>
+              <div class="dash-bar-wrap"><div class="dash-bar" style="width:${Math.round(v/maxC*100)}%;background:var(--accent2)"></div></div>
+              <span class="dash-count">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-header">研究一覧（メタ解析関連データ）</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;font-size:11px;border-collapse:collapse">
+          <thead><tr style="background:var(--surface2)">
+            ${['Author','Year','Country','Design','N','Effect Size','Suitable'].map(h=>
+              `<th style="padding:8px 12px;font-weight:600;color:var(--text-dim);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap">${h}</th>`
+            ).join('')}
+          </tr></thead>
+          <tbody>
+            ${state.studies.map(s => `
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:7px 12px">${escHtml(s.author||'')}</td>
+                <td style="padding:7px 12px">${escHtml(s.year||'')}</td>
+                <td style="padding:7px 12px">${escHtml(s.country||'')}</td>
+                <td style="padding:7px 12px;font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.design||'')}</td>
+                <td style="padding:7px 12px;text-align:right">${escHtml(s.n_total||'')}</td>
+                <td style="padding:7px 12px;font-family:monospace;font-size:10px">${escHtml(s.effect||'—')}</td>
+                <td style="padding:7px 12px">
+                  <span class="tag ${s.suitable&&s.suitable.toLowerCase().startsWith('yes')?'tag-green':'tag-red'}">${escHtml(s.suitable||'?')}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function statCard(label, value, sub) {
+  return `<div class="stat-card">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value">${value}</div>
+    <div class="stat-sub">${sub}</div>
+  </div>`;
+}
+
+function countBy(arr, key) {
+  return arr.reduce((acc, s) => {
+    const v = s[key] || 'Unknown';
+    acc[v] = (acc[v] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+// =============================================
+// EXPORT
+// =============================================
+function exportData(format, scope, which) {
+  const studies = which === 'selected'
+    ? state.studies.filter((_, i) => state.selected.has(i))
+    : (scope === 'summary' ? state.filtered : state.studies);
+
+  if (!studies.length) { showToast('エクスポート対象がありません'); return; }
+
+  if (format === 'csv') exportCSV(studies, scope);
+  else if (format === 'json') exportJSON(studies, scope);
+  else if (format === 'html') exportHTML(studies);
+}
+
+function exportCSV(studies, scope) {
+  const summaryKeys = ['author','year','journal','country','design','setting','n_total','n_groups',
+    'age','sex','exposure','comparison','followup','primary_outcome','secondary_outcome',
+    'effect','pvalue','suitable'];
+  const keys = scope === 'summary' ? summaryKeys : summaryKeys;
+  const header = keys.join(',');
+  const rows = studies.map(s =>
+    keys.map(k => {
+      const v = s[k] || '';
+      const vs = String(v).replace(/"/g, '""');
+      return /[,"\n\r]/.test(vs) ? `"${vs}"` : vs;
+    }).join(',')
+  );
+  downloadText([header, ...rows].join('\n'), `sr_export_${timestamp()}.csv`);
+  showToast('CSVをダウンロードしました');
+}
+
+function exportJSON(studies, scope) {
+  const data = scope === 'full'
+    ? studies.map(s => { const {_raw, ...rest} = s; return rest; })
+    : studies.map(s => ({
+        author: s.author, year: s.year, journal: s.journal,
+        country: s.country, design: s.design, n_total: s.n_total,
+        outcome: s.outcome, effect: s.effect, pvalue: s.pvalue, suitable: s.suitable,
+      }));
+  downloadText(JSON.stringify(data, null, 2), `sr_export_${timestamp()}.json`);
+  showToast('JSONをダウンロードしました');
+}
+
+function exportHTML(studies) {
+  const rows = studies.map(s => SECTIONS.map(sec =>
+    `<section><h3>${sec.num}. ${sec.title}</h3><dl>` +
+    sec.fields.map(([label, key]) =>
+      `<dt>${escHtml(label)}</dt><dd>${escHtml(s[key] || 'Not reported')}</dd>`
+    ).join('') + '</dl></section>'
+  ).join('')).join('<hr>');
+
+  const html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>SR Export</title>
+<style>body{font-family:sans-serif;font-size:13px;max-width:900px;margin:40px auto;padding:0 20px;color:#222}
+h2{color:#2563eb}h3{font-size:12px;text-transform:uppercase;color:#6b7280;margin:16px 0 6px}
+dl{display:grid;grid-template-columns:160px 1fr;gap:4px 12px;margin:0}
+dt{font-weight:600;font-size:11px;color:#9ca3af;padding:4px 0}
+dd{margin:0;padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:12px}hr{margin:32px 0;border:none;border-top:2px solid #e5e7eb}</style></head>
+<body><h1>Systematic Review Export</h1>${rows}</body></html>`;
+  downloadText(html, `sr_export_${timestamp()}.html`);
+  showToast('HTMLをダウンロードしました');
+}
+
+// =============================================
+// TABS
+// =============================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+}
+
+// =============================================
+// THEME
+// =============================================
+function toggleTheme() {
+  state.darkMode = !state.darkMode;
+  document.documentElement.setAttribute('data-theme', state.darkMode ? 'dark' : '');
+  document.getElementById('themeBtn').textContent = state.darkMode ? '☀️' : '🌙';
+}
+
+// =============================================
+// DROPDOWN
+// =============================================
+function toggleDropdown(id) {
+  const menu = document.getElementById(id);
+  const wasOpen = menu.classList.contains('open');
+  closeDropdowns();
+  if (!wasOpen) menu.classList.add('open');
+}
+function closeDropdowns() {
+  document.querySelectorAll('.dropdown-menu, .col-toggle-menu').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown') && !e.target.closest('.col-toggle-dropdown')) closeDropdowns();
+});
+
+// =============================================
+// UTILS
+// =============================================
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timestamp() { return new Date().toISOString().slice(0,10); }
+function downloadText(text, filename) {
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = filename;
+  a.click();
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeDropdowns(); }
+  if (document.getElementById('modalOverlay').classList.contains('open')) {
+    if (e.key === 'ArrowLeft') navigateModal(-1);
+    if (e.key === 'ArrowRight') navigateModal(1);
+  }
+});
+
+// ===== INIT =====
+applyFilters();
+updateSelectedCount();
+setDetailView('structured');
+</script>
+</body>
+</html>
