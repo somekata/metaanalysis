@@ -32,7 +32,7 @@ Each study is stored as a plain `.txt` file following a structured 10-section fo
 
 | # | Section | Key fields |
 |---|---------|-----------|
-| 1 | Study Characteristics | Author, Year, Journal, Country, Design, Setting |
+| 1 | Study Characteristics | Author, Year, Journal, Country, Design, Setting, Article title, PMID, DOI, URL |
 | 2 | Population | Sample size, Age, Sex, Inclusion/Exclusion criteria |
 | 3 | Exposure / Comparison | Exposure, Comparison group, Follow-up period |
 | 4 | Outcomes | Primary outcome, Secondary outcomes, Definitions |
@@ -72,7 +72,7 @@ metabin(event.e, n.e, event.c, n.c, data = df, sm = "OR")
 ## Viewer Features
 
 - **一覧表** — sortable table with key fields including `e/n (e vs c)` column
-- **詳細表示** — structured field-by-field view or raw text view
+- **詳細表示** — structured field-by-field view or raw text view; PMID/DOI/URL are displayed as clickable links
 - **ダッシュボード** — summary stats (N, countries, designs) and per-study 2×2 data table
 - **エクスポート** — CSV / JSON / HTML export (all studies or selected rows)
 - **ダーク/ライトモード** — toggle in top-right
