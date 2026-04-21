@@ -849,6 +849,12 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- Footer -->
+    <footer style="margin-top:48px;padding:20px 32px;border-top:1px solid var(--border);background:var(--surface2);font-size:0.75rem;color:var(--text3);line-height:1.7;text-align:center;">
+      本ツールは AI（Claude, Anthropic）を用いて作成されました。内容には誤りが含まれる可能性があります。医療上の判断には必ず公式の教科書・文献・専門家の指導を参照してください。<br>
+      二次利用・再配布は自己責任のもとで可能です。その際、本注記の保持を推奨します。
+    </footer>
+
     <script>
       // ─────────────────────────────────────────────
       //  DATA
@@ -1270,6 +1276,9 @@
         // c2 dependency enforcement
         if (!paper.answers["c1"]) paper.answers["c2"] = false;
 
+        // Normalize key order
+        paper.answers = normalizeAnswers(paper.answers, paper.type);
+
         paper.updatedAt = now();
         paper.status = "Completed";
 
@@ -1403,15 +1412,31 @@
         event.target.value = "";
       }
 
+      // Canonical key order for answers (NOS standard sequence)
+      const COHORT_KEY_ORDER    = ["s1","s2","s3","s4","c1","c2","o1","o2","o3"];
+      const CASE_CTRL_KEY_ORDER = ["s1","s2","s3","s4","c1","c2","e1","e2","e3"];
+
+      function normalizeAnswers(answers, type) {
+        if (!answers) return {};
+        const order = type === "case-control" ? CASE_CTRL_KEY_ORDER : COHORT_KEY_ORDER;
+        const normalized = {};
+        // First: insert in canonical order (only keys present in the order array)
+        order.forEach(k => { if (k in answers) normalized[k] = answers[k]; });
+        // Then: append any extra keys not in the canonical list (future-proofing)
+        Object.keys(answers).forEach(k => { if (!(k in normalized)) normalized[k] = answers[k]; });
+        return normalized;
+      }
+
       function migrate(p) {
         // Ensure new fields exist for backwards compatibility
         const t = p.createdAt || now();
+        const type = p.type || "cohort";
         return {
           id: p.id || Date.now() + Math.random(),
           title: p.title || "Untitled",
-          type: p.type || "cohort",
+          type: type,
           description: p.description || "",
-          answers: p.answers || {},
+          answers: normalizeAnswers(p.answers, type),
           justifications: p.justifications || {},
           status: p.status || "Pending",
           complete: !!p.complete,
@@ -1623,6 +1648,10 @@
     <h2>📄 詳細評価</h2>
     ${details}
   </div>
+  <footer style="margin-top:48px;padding:20px 0;border-top:1px solid var(--border);font-size:0.75rem;color:#94a3b8;line-height:1.7;text-align:center;">
+    本レポートは AI（Claude, Anthropic）を用いて作成されました。内容には誤りが含まれる可能性があります。医療上の判断には必ず公式の教科書・文献・専門家の指導を参照してください。<br>
+    二次利用・再配布は自己責任のもとで可能です。その際、本注記の保持を推奨します。
+  </footer>
 </div>
 </body>
 </html>`;
